@@ -19,7 +19,20 @@ module.exports = {
     },
     module: {
         rules: [
-            { test: /\.tsx?$/, loader: "awesome-typescript-loader" },
+            { 
+                test: /\.tsx?$/, loader: "awesome-typescript-loader" 
+            },
+            {
+                test: /\.s[ac]ss$/i,
+                use: [
+                    // Creates `style` nodes from JS strings
+                    'style-loader',
+                    // Translates CSS into CommonJS
+                    'css-loader',
+                    // Compiles Sass to CSS
+                    'sass-loader',
+                ],
+            },
         
         ]
     },
@@ -38,13 +51,13 @@ module.exports = {
     ],
     watch:true,
     devServer: {
-      contentBase: path.join(__dirname, 'public'),
+      contentBase: path.join(__dirname, 'dist'),
       port: 3000,
       hot:true,
       host:"localhost",
       historyApiFallback: true,
       compress: true,
       open:"Chrome",
-      openPage:''
+      openPage:'index.html'
     },
 };
