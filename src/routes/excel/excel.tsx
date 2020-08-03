@@ -19,19 +19,19 @@ class Excel extends React.Component<any, any>  {
     },{
         x:300,
         y:140,
-        v:'测试sensfkjfsf圳2'
+        v:'234 '
     },{
         x:300,
         y:210,
-        v:'测试sensfkjfsf圳2'
+        v:'24'
     },{
         x:300,
         y:280,
-        v:'测试sensfkjfsf圳2'
+        v:'234'
     },{
         x:300,
         y:350,
-        v:'测试sensfkjfsf圳2'
+        v:'234'
     },{
         x:300,
         y:420,
@@ -54,7 +54,7 @@ class Excel extends React.Component<any, any>  {
         const ctx = this.context;
         ctx.lineWidth = 1;
         let width = ctx.lineWidth % 2 /2;
-        ctx.strokeStyle = '#aaaaaa';
+        ctx.strokeStyle = '#000';
         ctx.beginPath();
         for(let i=0;i<30;i++) {
           let item = i * 70+width;
@@ -67,19 +67,12 @@ class Excel extends React.Component<any, any>  {
           ctx.lineTo(item, 1000);
         }
         ctx.stroke();
-        ctx.font = "normal normal 600 20pt Microsoft YaHei";
-        let txt = "测试sensfkjfsf圳";
-
-        
         ctx.font = "normal normal 20pt Microsoft YaHei";
-        ctx.fillStyle  = '#333';
         ctx.weight = 100;
-        ctx.textAlign = "start";
-        ctx.textBaseline = "bottom";
         let data = this.data;
         for(let i=0;i<data.length;i++) {
             let obj = data[i];
-            ctx.fillText(obj && obj.v, obj.x + 10, obj.y - 10);
+            ctx.fillText(obj && obj.v, obj.x + 10, obj.y - 10, 290);
         }
 
     }
@@ -95,8 +88,25 @@ class Excel extends React.Component<any, any>  {
     }
     updateEditorDOM(top:number, left:number) {
         let dom =  this.editorDOMRef.current;
+        this.upateTxtByEdited(dom);
         dom.style.left = left;
         dom.style.top = top;
+    }
+    upateTxtByEdited(dom:any) {
+        let style = dom.style;
+        let text = dom.innerText;
+        let left = parseFloat(style.left);
+        let top = parseFloat(style.top);
+        const ctx = this.context;
+        ctx.font = "normal normal 20pt Microsoft YaHei";
+        ctx.fillStyle  = '#333';
+        ctx.weight = 100;
+        ctx.textAlign = "start";
+        ctx.textBaseline = "bottom";
+        let _x =  left * 2 + 10;
+        let _y = top * 2 + 70 -10;
+        ctx.fillText(text, _x, _y);
+        dom.innerText = "";
     }
     style = {
         width: '1000px',
