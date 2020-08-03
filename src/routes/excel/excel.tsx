@@ -17,10 +17,10 @@ class Excel extends React.Component<{}, object>  {
           ctx.lineTo(2000.5, item);
         }
         for(let i=0;i<30;i++) {
-            let item = i * 200+0.5;
-            ctx.moveTo(item, 0);
-            ctx.lineTo(item, 1000);
-          }
+          let item = i * 200+0.5;
+          ctx.moveTo(item, 0);
+          ctx.lineTo(item, 1000);
+        }
         ctx.stroke();
     }
     render() {
