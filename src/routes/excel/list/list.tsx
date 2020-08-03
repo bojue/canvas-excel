@@ -66,6 +66,8 @@ class Excel extends React.Component<{}, object>  {
     }
     updateEditorDOM(top:number, left:number) {
         let dom =  this.editorDOMRef.current;
+        console.log(top, left,dom)
+        console.log(dom)
         dom.style.left = left;
         dom.style.top = top;
     }
