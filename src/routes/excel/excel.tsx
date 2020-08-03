@@ -2,10 +2,41 @@ import * as React from 'react';
 import { Props } from 'react';
 import "./excel.scss";
 
-class Excel extends React.Component<{}, object>  {
+export interface Txt {
+    v:string;
+    x:number;
+    y:number;
+}
+
+class Excel extends React.Component<any, any>  {
     excelRef:any;
     editorDOMRef:any;
     clientRect:DOMRect;
+    data:Txt[] = [{
+        x:300,
+        y:70,
+        v:'测试sensfkjfsf圳1'
+    },{
+        x:300,
+        y:140,
+        v:'测试sensfkjfsf圳2'
+    },{
+        x:300,
+        y:210,
+        v:'测试sensfkjfsf圳2'
+    },{
+        x:300,
+        y:280,
+        v:'测试sensfkjfsf圳2'
+    },{
+        x:300,
+        y:350,
+        v:'测试sensfkjfsf圳2'
+    },{
+        x:300,
+        y:420,
+        v:'测试sensfkjfsf圳2'
+    }];
     constructor(props:any) {
     super(props);
         this.excelRef = React.createRef();
@@ -45,14 +76,12 @@ class Excel extends React.Component<{}, object>  {
         ctx.weight = 100;
         ctx.textAlign = "start";
         ctx.textBaseline = "bottom";
-        ctx.fillText(txt, 310, 60, 300);
+        let data = this.data;
+        for(let i=0;i<data.length;i++) {
+            let obj = data[i];
+            ctx.fillText(obj && obj.v, obj.x + 10, obj.y - 10);
+        }
 
-        ctx.font = "normal normal 20pt Microsoft YaHei";
-        ctx.fillStyle  = '#333';
-        ctx.weight = 100;
-        ctx.textAlign = "start";
-        ctx.textBaseline = "bottom";
-        ctx.fillText(txt, 310, 130, 300);
     }
     addLister() {
         const ctx = this.excelRef;
@@ -76,7 +105,7 @@ class Excel extends React.Component<{}, object>  {
     render() {
         return  <div className='excel_body'>
             <div ref={this.editorDOMRef} className="editor_excel" contentEditable='true'>
-                <span className="content">3342</span>
+                <span className="content"></span>
             </div>
             <canvas id="canvas_excle" ref={(c) => {this.excelRef = c;this.context = c && c.getContext('2d')}} style={this.style}  width="2000" height="1000" />
         </div>
