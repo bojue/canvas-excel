@@ -54,7 +54,7 @@ class Excel extends React.Component<any, any>  {
         const ctx = this.context;
         ctx.lineWidth = 1;
         let width = ctx.lineWidth % 2 /2;
-        ctx.strokeStyle = '#000';
+        ctx.strokeStyle = '#bbb';
         ctx.beginPath();
         for(let i=0;i<30;i++) {
           let item = i * 70+width;
@@ -84,13 +84,14 @@ class Excel extends React.Component<any, any>  {
             let _l = Math.floor(_eX / 150) * 150;
             let _t = Math.floor(_eY / 35) * 35;
             this.updateEditorDOM(_t, _l)
-        })
+        }); 
     }
     updateEditorDOM(top:number, left:number) {
         let dom =  this.editorDOMRef.current;
         this.upateTxtByEdited(dom);
         dom.style.left = left;
-        dom.style.top = top;
+        dom.style.top = top ;
+        dom.innerText = "ajskdsa";
     }
     upateTxtByEdited(dom:any) {
         let style = dom.style;
