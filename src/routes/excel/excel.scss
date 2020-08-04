@@ -9,6 +9,13 @@
         top:0px;
         left: 0px;
     }
+    button {
+        position: absolute;
+        top:600px;
+        width:100px;
+        height:40px;
+        background: red;
+    }
     .editor_excel {
         z-index: 11;
         position: absolute;
@@ -19,14 +26,14 @@
         word-break: break-word;
         overflow-wrap: break-word;
         min-width: 151px;
-        background: #ffffff;
+        background: #fff;
         height: 36px;
         min-height: 24px;
         max-height: 445px;
         box-sizing: border-box;
         white-space: nowrap;
         overflow: hidden;
-        outline:none;
+        outline: none;
         .content {
             font-family: "Microsoft YaHei", '微软雅黑';
             font-size: 10pt;

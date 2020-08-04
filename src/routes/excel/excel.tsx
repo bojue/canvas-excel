@@ -12,68 +12,61 @@ class Excel extends React.Component<any, any>  {
     excelRef:any;
     editorDOMRef:any;
     clientRect:DOMRect;
-    data:Txt[] = [{
-        x:300,
-        y:70,
-        v:'测试sensfkjfsf圳1'
-    },{
-        x:300,
-        y:140,
-        v:'234 '
-    },{
-        x:300,
-        y:210,
-        v:'24'
-    },{
-        x:300,
-        y:280,
-        v:'234'
-    },{
-        x:300,
-        y:350,
-        v:'234'
-    },{
-        x:300,
-        y:420,
-        v:'测试sensfkjfsf圳2'
-    }];
+    excelObject:any;
+   
     constructor(props:any) {
-    super(props);
+        super(props);
         this.excelRef = React.createRef();
         this.editorDOMRef = React.createRef();
+        this.excelObject = {
+            info:{
+                title:"Excel"
+            },
+            setting_def:{
+                width:150,
+                height:35,
+                rowLen:15,
+                columnLen:5
+            },
+            setting_custome: {
+                row:[35,35,35,35],
+                column:[300,300,300,300]
+            }
+        };
     }
     componentDidMount() {
         this.getExcelCanvas();
-        this.updateCanvas();
+        this.initExcel();
         this.addLister();
     }
     getExcelCanvas() {
         this.clientRect = this.excelRef.getBoundingClientRect();
     }
-    updateCanvas() {
+    initExcel() {
+        console.log(this.excelObject)
         const ctx = this.context;
-        ctx.lineWidth = 1;
-        let width = ctx.lineWidth % 2 /2;
-        ctx.strokeStyle = '#aaa';
         ctx.beginPath();
-        for(let i=0;i<30;i++) {
-          let item = i * 70+width;
-          ctx.moveTo(width, item);
-          ctx.lineTo(2000 + width, item);
-        }
-        for(let i=0;i<30;i++) {
-          let item = i * 300+width;
-          ctx.moveTo(item, 0);
-          ctx.lineTo(item, 1000);
+        let def = this.excelObject.setting_def;
+        let width  = def.width;
+        let height = def.height;
+        let rLen = def.rowLen;
+        let cLen = def.columnLen;
+        for(let row = 0;row <=rLen;row++) {
+            let rowTop = row * height + 0.5;
+            for(let col=0;col<= cLen;col++) {
+                let colLeft = col * width + 0.5;
+                ctx.lineWidth = 1;
+                ctx.strokeStyle = "#ccc";
+                ctx.rect(colLeft, rowTop, 150, 35);
+                ctx.fillStyle = "#fff";
+                ctx.fillRect(colLeft, rowTop, 150, 35);
+                ctx.fillStyle = '#000';
+                ctx.font = "13pt serif";
+                ctx.textAlign = "left";
+                ctx.fillText(col + "-" + row,colLeft + 5, rowTop + 35 -5)
+            }
         }
         ctx.stroke();
-        ctx.font = "normal normal 100 20pt Microsoft YaHei";
-        let data = this.data;
-        for(let i=0;i<data.length;i++) {
-            let obj = data[i];
-            ctx.fillText(obj && obj.v, obj.x + 10, obj.y - 10, 290);
-        }
-
     }
     addLister() {
         const ctx = this.excelRef;
@@ -83,13 +76,14 @@ class Excel extends React.Component<any, any>  {
             let _l = Math.floor(_eX / 150) * 150;
             let _t = Math.floor(_eY / 35) * 35;
             this.updateEditorDOM(_t, _l)
-        })
+        }); 
     }
     updateEditorDOM(top:number, left:number) {
         let dom =  this.editorDOMRef.current;
         this.upateTxtByEdited(dom);
         dom.style.left = left;
-        dom.style.top = top;
+        dom.style.top = top ;
+        dom.innerText = "";
     }
     upateTxtByEdited(dom:any) {
         let style = dom.style;
@@ -97,14 +91,37 @@ class Excel extends React.Component<any, any>  {
         let left = parseFloat(style.left);
         let top = parseFloat(style.top);
         const ctx = this.context;
-        ctx.font = "normal normal 100 20pt Microsoft YaHei";
+        ctx.fontWeight = '10pt';
         ctx.fillStyle  = '#333';
         ctx.textAlign = "start";
         ctx.textBaseline = "bottom";
-        let _x =  left * 2 + 10;
-        let _y = top * 2 + 70 -10;
+        let _x =  left + 5;
+        let _y = top + 35 -5;
         ctx.fillText(text, _x, _y);
         dom.innerText = "";
+    }
+    merge() {
+        const ctx = this.context;
+        ctx.beginPath();
+        for(let row = 0;row <=5;row++) {
+            let rowTop = row * 35 + 0.5;
+            for(let col=0;col<= 5;col++) {
+                let colLeft = col * 150 + 0.5;
+                if(col === 3 && row === 2) {
+                    ctx.clearRect(colLeft, rowTop, 150 * 3, 100);
+                    ctx.lineWidth = 1;
+                    ctx.strokeStyle = "#ccc";
+                    ctx.rect(colLeft, rowTop,  150 * 3, 35 * 3);
+                    ctx.fillStyle = "#fff";
+                    ctx.fillRect(colLeft, rowTop,  150 * 3, 35 * 3);
+                    ctx.fillStyle = '#000';
+                    ctx.font = "13pt serif";
+                    ctx.textAlign = "left";
+                    ctx.fillText(col + "-" + row,colLeft + 5, rowTop + 35 -5)
+                }
+            }
+        }
+       ctx.stroke();
     }
     style = {
         width: '1000px',
@@ -115,7 +132,10 @@ class Excel extends React.Component<any, any>  {
             <div ref={this.editorDOMRef} className="editor_excel" contentEditable='true'>
                 <span className="content"></span>
             </div>
-            <canvas id="canvas_excle" ref={(c) => {this.excelRef = c;this.context = c && c.getContext('2d')}} style={this.style}  width="2000" height="1000" />
+            <canvas id="canvas_excle" 
+                ref={(c) => {this.excelRef = c;this.context = c && c.getContext('2d')}} 
+                style={this.style}  width="1000" height="500" />
+            <button onClick={this.merge.bind(this)}>删除</button>
         </div>
     }
 }
