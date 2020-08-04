@@ -54,7 +54,7 @@ class Excel extends React.Component<any, any>  {
         const ctx = this.context;
         ctx.lineWidth = 1;
         let width = ctx.lineWidth % 2 /2;
-        ctx.strokeStyle = '#000';
+        ctx.strokeStyle = '#aaa';
         ctx.beginPath();
         for(let i=0;i<30;i++) {
           let item = i * 70+width;
@@ -67,8 +67,7 @@ class Excel extends React.Component<any, any>  {
           ctx.lineTo(item, 1000);
         }
         ctx.stroke();
-        ctx.font = "normal normal 20pt Microsoft YaHei";
-        ctx.weight = 100;
+        ctx.font = "normal normal 100 20pt Microsoft YaHei";
         let data = this.data;
         for(let i=0;i<data.length;i++) {
             let obj = data[i];
@@ -98,9 +97,8 @@ class Excel extends React.Component<any, any>  {
         let left = parseFloat(style.left);
         let top = parseFloat(style.top);
         const ctx = this.context;
-        ctx.font = "normal normal 20pt Microsoft YaHei";
+        ctx.font = "normal normal 100 20pt Microsoft YaHei";
         ctx.fillStyle  = '#333';
-        ctx.weight = 100;
         ctx.textAlign = "start";
         ctx.textBaseline = "bottom";
         let _x =  left * 2 + 10;
