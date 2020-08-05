@@ -23,8 +23,8 @@ class Excel extends React.Component<any, any>  {
                 title:"Excel"
             },
             setting_def:{
-                width:300,
-                height:70,
+                width:110,
+                height:23,
                 rowLen:15,
                 columnLen:5
             },
@@ -43,27 +43,24 @@ class Excel extends React.Component<any, any>  {
         this.clientRect = this.excelRef.getBoundingClientRect();
     }
     initExcel() {
-        console.log(this.excelObject)
         const ctx = this.context;
         ctx.beginPath();
         let def = this.excelObject.setting_def;
-        let width  = def.width;
-        let height = def.height;
         let rLen = def.rowLen;
         let cLen = def.columnLen;
         for(let row = 0;row <=rLen;row++) {
-            let rowTop = row * height + 0.5;
+            let rowTop = row * this.excelObject.setting_def.height + 0.5;
             for(let col=0;col<= cLen;col++) {
-                let colLeft = col * width + 0.5;
+                let colLeft = col * this.excelObject.setting_def.width + 0.5;
                 ctx.lineWidth = 1;
                 ctx.strokeStyle = "#ccc";
-                ctx.rect(colLeft, rowTop, 300, 70);
+                ctx.rect(colLeft, rowTop, this.excelObject.setting_def.width, this.excelObject.setting_def.height);
                 ctx.fillStyle = "#fff";
-                ctx.fillRect(colLeft, rowTop, 300, 70);
+                ctx.fillRect(colLeft, rowTop, this.excelObject.setting_def.width, this.excelObject.setting_def.height);
                 ctx.fillStyle = '#000';
-                ctx.font = "lighter 20pt  微软雅黑";
+                ctx.font = "lighter 10pt  微软雅黑";
                 ctx.textAlign = "left";
-                ctx.fillText(col + "-" + row,colLeft + 5, rowTop + 70 -5)
+                ctx.fillText(col + "-" + row,colLeft + 5, rowTop + this.excelObject.setting_def.height -5)
             }
         }
         ctx.stroke();
@@ -73,8 +70,8 @@ class Excel extends React.Component<any, any>  {
         ctx.addEventListener('click', (e:MouseEvent)=> {
             let _eX = e.clientX - this.clientRect.x;
             let _eY = e.clientY - this.clientRect.y;
-            let _l = Math.floor(_eX / 150) * 150;
-            let _t = Math.floor(_eY / 35) * 35;
+            let _l = Math.floor(_eX / this.excelObject.setting_def.width) *  this.excelObject.setting_def.width;
+            let _t = Math.floor(_eY / this.excelObject.setting_def.height) *  this.excelObject.setting_def.height;
             this.updateEditorDOM(_t, _l)
         }); 
     }
@@ -95,37 +92,45 @@ class Excel extends React.Component<any, any>  {
         ctx.fillStyle  = '#333';
         ctx.textAlign = "start";
         ctx.textBaseline = "bottom";
+        ctx.beginPath();
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = "#ccc";
+        ctx.rect(left+ 0.5, top+ 0.5,   this.excelObject.setting_def.width, this.excelObject.setting_def.height);
+        ctx.fillStyle = "#fff";
+        ctx.fillRect(left, top, this.excelObject.setting_def.width, this.excelObject.setting_def.height);
         let _x =  left + 5;
-        let _y = top + 35 -5;
+        let _y = top +  this.excelObject.setting_def.height -5;
         ctx.fillText(text, _x, _y);
+        ctx.stroke();
         dom.innerText = "";
+        
     }
     merge() {
         const ctx = this.context;
         ctx.beginPath();
         for(let row = 0;row <=5;row++) {
-            let rowTop = row * 35 + 0.5;
+            let rowTop = row * this.excelObject.setting_def.height + 0.5;
             for(let col=0;col<= 5;col++) {
-                let colLeft = col * 150 + 0.5;
+                let colLeft = col *  this.excelObject.setting_def.width + 0.5;
                 if(col === 3 && row === 2) {
-                    ctx.clearRect(colLeft, rowTop, 150 * 3, 100);
+                    ctx.clearRect(colLeft, rowTop, this.excelObject.setting_def.width * 3, this.excelObject.setting_def.height);
                     ctx.lineWidth = 1;
                     ctx.strokeStyle = "#ccc";
-                    ctx.rect(colLeft, rowTop,  150 * 3, 35 * 3);
+                    ctx.rect(colLeft, rowTop,   this.excelObject.setting_def.width * 3, this.excelObject.setting_def.height * 3);
                     ctx.fillStyle = "#fff";
-                    ctx.fillRect(colLeft, rowTop,  150 * 3, 35 * 3);
+                    ctx.fillRect(colLeft, rowTop,  this.excelObject.setting_def.width * 3, this.excelObject.setting_def.height * 3);
                     ctx.fillStyle = '#000';
-                    ctx.font = "13pt serif";
+                    ctx.font = "10pt serif";
                     ctx.textAlign = "left";
-                    ctx.fillText(col + "-" + row,colLeft + 5, rowTop + 35 -5)
+                    ctx.fillText(col + "-" + row,colLeft + 5, rowTop + this.excelObject.setting_def.height -5)
                 }
             }
         }
        ctx.stroke();
     }
     style = {
-        width: '1000px',
-        height: '500px'
+        width: '2000px',
+        height: '1000px'
     }
     render() {
         return  <div className='excel_body'>

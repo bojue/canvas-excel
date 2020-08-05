@@ -25,11 +25,8 @@ module.exports = {
             {
                 test: /\.s[ac]ss$/i,
                 use: [
-                    // Creates `style` nodes from JS strings
                     'style-loader',
-                    // Translates CSS into CommonJS
                     'css-loader',
-                    // Compiles Sass to CSS
                     'sass-loader',
                 ],
             },
@@ -51,13 +48,13 @@ module.exports = {
     ],
     watch:true,
     devServer: {
-      contentBase: path.join(__dirname, 'dist'),
+      contentBase: path.join(__dirname, 'public'),
       port: 3000,
       hot:true,
-      host:"localhost",
+      host:"10.169.42.145",
       historyApiFallback: true,
       compress: true,
       open:"Chrome",
-      openPage:'index.html'
+      openPage:''
     },
 };
