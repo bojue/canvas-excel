@@ -23,8 +23,8 @@ class Excel extends React.Component<any, any>  {
                 title:"Excel"
             },
             setting_def:{
-                width:150,
-                height:35,
+                width:300,
+                height:70,
                 rowLen:15,
                 columnLen:5
             },
@@ -57,13 +57,13 @@ class Excel extends React.Component<any, any>  {
                 let colLeft = col * width + 0.5;
                 ctx.lineWidth = 1;
                 ctx.strokeStyle = "#ccc";
-                ctx.rect(colLeft, rowTop, 150, 35);
+                ctx.rect(colLeft, rowTop, 300, 70);
                 ctx.fillStyle = "#fff";
-                ctx.fillRect(colLeft, rowTop, 150, 35);
+                ctx.fillRect(colLeft, rowTop, 300, 70);
                 ctx.fillStyle = '#000';
-                ctx.font = "13pt serif";
+                ctx.font = "lighter 20pt  微软雅黑";
                 ctx.textAlign = "left";
-                ctx.fillText(col + "-" + row,colLeft + 5, rowTop + 35 -5)
+                ctx.fillText(col + "-" + row,colLeft + 5, rowTop + 70 -5)
             }
         }
         ctx.stroke();
@@ -134,7 +134,7 @@ class Excel extends React.Component<any, any>  {
             </div>
             <canvas id="canvas_excle" 
                 ref={(c) => {this.excelRef = c;this.context = c && c.getContext('2d')}} 
-                style={this.style}  width="1000" height="500" />
+                style={this.style}  width="2000" height="1000" />
             <button onClick={this.merge.bind(this)}>删除</button>
         </div>
     }
