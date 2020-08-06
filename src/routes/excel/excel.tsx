@@ -22,6 +22,7 @@ class Excel extends React.Component<any, any>  {
         this.excelObject = {
             info:{
                 title:"Excel",
+                scalingRatio:2,
                 width:0,
                 height:0,
                 left:60,
@@ -45,15 +46,15 @@ class Excel extends React.Component<any, any>  {
             },
             setting_custome: {
                 row:[23,23,223,30,49,40,23,23,23,23],
-                column:[30,110,110,110,110,110,110,110]
+                column:[110,110,110,110,110,110,110,110]
             }
         };
     }
     componentDidMount() {
         this.getExcelCanvas();
         this.drawBorder();
-        this.initExcel();
         this.addLister();
+        this.initExcel();
     }
     getExcelCanvas() {
         this.clientRect = this.excelRef.getBoundingClientRect();
@@ -62,60 +63,64 @@ class Excel extends React.Component<any, any>  {
         let def = this.excelObject.setting_def;
         let setting = this.excelObject.setting_custome;
         let startLeft = def.columTitleDefWidth;
+        let ratio = this.excelObject.info.scalingRatio;
         const ctx = this.context;
         ctx.beginPath();
         ctx.strokeStyle = "#e0e0e0";
-        ctx.rect(0.5, 0.5, def.columTitleDefWidth, def.rowTitleHeight);
+        ctx.rect(0.5, 0.5, def.columTitleDefWidth * ratio, def.rowTitleHeight * ratio);
         ctx.fillStyle = "#f9fafb";
-        ctx.fillRect(0.5, 0.5, def.columTitleDefWidth, def.rowTitleHeight);
+        ctx.fillRect(0.5, 0.5, def.columTitleDefWidth * ratio, def.rowTitleHeight * ratio);
         ctx.fillStyle = '#000';
-        ctx.font = "lighter 10pt  微软雅黑";
+        let size = 10 * ratio;
+        ctx.font = 'lighter '+size+'pt  微软雅黑';
         ctx.textAlign = "center";
         ctx.textBaseline = 'middle';
-        ctx.fillText("Excel",  def.columTitleDefWidth/2, def.rowTitleHeight /2 +0.5 );
+        ctx.fillText("Excel",  def.columTitleDefWidth/2 * ratio, def.rowTitleHeight /2  * ratio+0.5 );
         for(let i=0;i<setting.column.length;i++) {
-            let colLeft = startLeft + 0.5;
+            let colLeft = startLeft * ratio+ 0.5;
             let rowTop = 0.5;
             ctx.lineWidth = 1;
             ctx.strokeStyle = "#e0e0e0";
-            ctx.rect(colLeft, rowTop, setting.column[i], def.rowTitleHeight);
+            ctx.rect(colLeft, rowTop, setting.column[i] * ratio, def.rowTitleHeight * ratio);
             ctx.fillStyle = "#f9fafb";
-            ctx.fillRect(colLeft, rowTop, setting.column[i],  def.rowTitleHeight);
+            ctx.fillRect(colLeft, rowTop, setting.column[i] * ratio,  def.rowTitleHeight * ratio) ;
             ctx.fillStyle = '#000';
-            ctx.font = "lighter 10pt  微软雅黑";
+            let size = 10 * ratio;
+            ctx.font = 'lighter '+size+'pt  微软雅黑';
             ctx.textAlign = "center";
             ctx.textBaseline = 'middle';
-            ctx.fillText(String.fromCharCode((65 + i)),  startLeft + setting.column[i] /2, def.rowTitleHeight /2 + 0.5 );
+            ctx.fillText(String.fromCharCode((65 + i)),  startLeft * ratio + setting.column[i] /2 * ratio, def.rowTitleHeight /2 * ratio+ 0.5 );
             startLeft += setting.column[i];
             if( i === setting.column.length -1) {
-                this.excelObject.info.width = startLeft;
+                this.excelObject.info.width = startLeft* ratio;
             }
         }
 
         let startHeight = def.rowTitleHeight;
         for(let i=0;i<setting.row.length;i++) {
             let colLeft = 0.5;
-            let rowTop = startHeight + 0.5;
+            let rowTop = startHeight * ratio + 0.5;
             ctx.lineWidth = 1;
             ctx.strokeStyle = "#e0e0e0";
-            ctx.rect(colLeft, rowTop, def.columTitleDefWidth, setting.row[i]);
+            ctx.rect(colLeft, rowTop, def.columTitleDefWidth* ratio,  setting.row[i]* ratio);
             ctx.fillStyle = "#f9fafb";
-            ctx.fillRect(colLeft, rowTop,  def.columTitleDefWidth, setting.row[i]);
+            ctx.fillRect(colLeft, rowTop,  def.columTitleDefWidth* ratio, setting.row[i]* ratio);
             ctx.fillStyle = '#000';
-            ctx.font = "lighter 10pt  微软雅黑";
+            let size = 10 * ratio;
+            ctx.font = 'lighter '+size+'pt  微软雅黑';
             ctx.textAlign = "center";
             let val = i;
             ctx.textBaseline = 'middle';
-            ctx.fillText(val++, def.columTitleDefWidth /2, rowTop + setting.row[i] /2 + 0.5);
+            ctx.fillText(val++, def.columTitleDefWidth /2* ratio, rowTop + setting.row[i] /2* ratio + 0.5);
             startHeight += setting.row[i];
-            this.excelObject.info.height = startHeight;
             if( i === setting.column.length -1) {
-                this.excelObject.info.height = rowTop;
+                this.excelObject.info.height = rowTop* ratio;
             }
         }
         ctx.stroke();
     }
     initExcel() {
+        let ratio = this.excelObject.info.scalingRatio;
         const ctx = this.context;
         ctx.beginPath();
         let def = this.excelObject.setting_def;
@@ -125,7 +130,7 @@ class Excel extends React.Component<any, any>  {
         let rLen = rows.length;
         let cLen = colums.length;
         let currentTop = def.rowTitleHeight + 0.5;
-        let currentLeft = def.columTitleDefWidth + 0.5;
+        let currentLeft = def.columTitleDefWidth+ 0.5;
         for(let row = 0;row <rLen;row++) {
             let height = rows[row];
             currentLeft = def.columTitleDefWidth + 0.5;
@@ -133,14 +138,15 @@ class Excel extends React.Component<any, any>  {
                 let width = colums[col];
                 ctx.lineWidth = 1;
                 ctx.strokeStyle = "#e0e0e0";
-                ctx.rect(currentLeft, currentTop, width, height);
+                ctx.rect(currentLeft* ratio, currentTop* ratio, width* ratio, height* ratio);
                 ctx.fillStyle = "#fff";
-                ctx.fillRect(currentLeft, currentTop, width, height);
+                ctx.fillRect(currentLeft* ratio, currentTop* ratio, width* ratio, height* ratio);
                 ctx.fillStyle = '#000';
-                ctx.font = "lighter 10pt  微软雅黑";
+                let size = 10 * ratio;
+                ctx.font = 'lighter '+size+'pt  微软雅黑';
                 ctx.textAlign = "center";
                 ctx.textBaseline = 'middle';
-                ctx.fillText(col + "-" + row,currentLeft + width /2, currentTop + height /2 + 0.5);
+                ctx.fillText(col + "-" + row,currentLeft * ratio+ width /2* ratio, currentTop * ratio+ height /2* ratio + 0.5);
                 currentLeft += width;
             }
             currentTop += height;
@@ -224,6 +230,7 @@ class Excel extends React.Component<any, any>  {
     }
     merge() {
         const ctx = this.context;
+        let ratio = this.excelObject.info.scalingRatio;
         ctx.beginPath();
         let def = this.excelObject.setting_def;
         let setting = this.excelObject.setting_custome;
@@ -234,22 +241,22 @@ class Excel extends React.Component<any, any>  {
         let currentLeft = def.columTitleDefWidth + 0.5;
         let currentTop = def.rowTitleHeight + 0.5;
         for(let row = 0;row < rLen;row++) {
-            currentTop = def.rowTitleHeight + 0.5;
+            currentTop = def.rowTitleHeight+ 0.5;
             let width = colums[row];
             for(let col=0;col< cLen;col++) {
                 let height = rows[col];
                 if(col === 1 && row === 1) {
                     ctx.lineWidth = 1;
                     ctx.strokeStyle = "#e0e0e0";
-                    let _w = colums[col] + colums[col+1] + colums[col+2];
-                    let _h = rows[row] + rows[row+1] + + rows[row+2];
-                    ctx.rect(currentLeft, currentTop,  _w, _h );
+                    let _w = (colums[col] + colums[col+1] + colums[col+2]) * ratio;
+                    let _h = (rows[row] + rows[row+1] + + rows[row+2]) * ratio;
+                    ctx.rect(currentLeft * ratio, currentTop * ratio,  _w, _h );
                     ctx.fillStyle = "#fff";
-                    ctx.fillRect(currentLeft, currentTop, _w,_h);
+                    ctx.fillRect(currentLeft * ratio, currentTop * ratio, _w,_h);
                     ctx.fillStyle = '#000';
                     ctx.font = "10pt serif";
                     ctx.textAlign = "center";
-                    ctx.fillText(col + "-" + row + new Date().getTime(),currentLeft + _w /2 , currentTop + _h/2 )
+                    ctx.fillText(col + "-" + row + new Date().getTime(),currentLeft * ratio + _w /2 , currentTop * ratio+ _h/2 )
                 }
                 currentTop += height;
             }
@@ -283,7 +290,7 @@ class Excel extends React.Component<any, any>  {
             </div>
             <canvas id="canvas_excle" 
                 ref={(c) => {this.excelRef = c;this.context = c && c.getContext('2d')}} 
-                style={this.style}  width="2000" height="1000" />
+                style={this.style}  width="4000" height="2000" />
             <button onClick={this.merge.bind(this)}>删除</button>
             <button className='repaint' onClick={this.repaint.bind(this)}>repaint</button>
         </div>
