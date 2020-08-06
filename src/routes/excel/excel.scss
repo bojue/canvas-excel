@@ -16,6 +16,9 @@
         height:40px;
         background: red;
     }
+    .repaint {
+        left: 150px;
+    }
     .editor_excel {
         z-index: 11;
         position: absolute;
@@ -25,15 +28,18 @@
         display: table-cell;
         word-break: break-word;
         overflow-wrap: break-word;
-        width:110px;
-        min-width: 110px;
+        width:0;
+        height: 0;
         background: #fff;
-        height: 23px;
-        min-height: 23px;
         box-sizing: border-box;
         white-space: nowrap;
         overflow: hidden;
         outline: none;
+        display: table-cell;
+        white-space: pre-wrap;
+        word-break: break-word;
+        overflow-wrap: break-word;
+        display: none;
         .content {
             font-family: "Microsoft YaHei", '微软雅黑';
             font-size: 10pt;
