@@ -55,4 +55,41 @@
             white-space: pre-wrap;
         }
     }
+    .change_size {
+        position: absolute;
+        background: #4b8cff;
+        z-index: 12;
+        display: none
+    }
+    .change_size_w {
+        top: 1px;
+        left: 100px;
+        width: 4px;
+        height: 25px;
+        cursor: ew-resize;
+        .content {
+            position: absolute;
+            width: 1px;
+            height: 500px;
+            background: #4b8cff;
+            left: 1.5px;
+            top: 25px;
+        };
+    }
+
+    .change_size_h {
+        top: 1px;
+        left: 1px;
+        width: 60px;
+        height: 4px;
+        cursor: ns-resize;
+        .content {
+            position: absolute;
+            width: 1000px;
+            height: 1px;
+            background: #4b8cff;
+            left: 60px;
+            top: 2px;
+        };
+    }
 }
