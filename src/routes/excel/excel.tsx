@@ -163,7 +163,8 @@ class Excel extends React.Component<any, any>  {
             currentTop += height;
         }
         ctx.stroke();
-
+        let editorDOM =  this.editorDOMRef.current;
+        editorDOM.style.display = 'none';
     }
     addLister() {
         const ctx = this.excelRef;
@@ -181,8 +182,6 @@ class Excel extends React.Component<any, any>  {
     initDomState() {
         let changeSizeDOM =  this.changeSizeDOMRef.current;
         changeSizeDOM.style.display = 'none';
-        let editorDOM =  this.editorDOMRef.current;
-        editorDOM.style.display = 'none';
     }
     updateChangeSizeButton(left:number, top:number, event:MouseEvent) {
         let info = this.excelObject.info;
