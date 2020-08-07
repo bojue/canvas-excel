@@ -178,10 +178,19 @@ class Excel extends React.Component<any, any>  {
             this.updateChangeSizeButton(_eX, _eY, e)
         }); 
     }
+    initDomState() {
+        let changeSizeDOM =  this.changeSizeDOMRef.current;
+        changeSizeDOM.style.display = 'none';
+        let editorDOM =  this.editorDOMRef.current;
+        editorDOM.style.display = 'none';
+    }
     updateChangeSizeButton(left:number, top:number, event:MouseEvent) {
         let info = this.excelObject.info;
         let dom =  this.changeSizeDOMRef.current;
-        if(!(left > info.left && top <= info.top ||  top > info.top && left <= info.left)) return;
+        if(!(left > info.left && top <= info.top ||  top > info.top && left <= info.left)) {
+            this.initDomState();
+            return;
+        };
         if(top > info.top && left <= info.left){
             if(event.buttons === 1 && this.state.change_size_current_index > -1) {
                 dom.style.left = 1;
@@ -190,7 +199,7 @@ class Excel extends React.Component<any, any>  {
                 this.setState({
                     changeSizeState:'change_size_h',
                     change_size_h: 1,
-                    change_size_w:this.excelObject.info.width - this.excelObject.info.left,
+                    change_size_w:this.excelObject.info.width 
                 })
             }else {
                 let index = this.excelObject.setting_custome.rowTops.indexOf(top) 
@@ -202,7 +211,7 @@ class Excel extends React.Component<any, any>  {
                         change_size_current_index:index,
                         changeSizeState:'change_size_h',
                         change_size_h: 1,
-                        change_size_w:this.excelObject.info.width - this.excelObject.info.left,
+                        change_size_w:this.excelObject.info.width 
                     })
                 }else {
    
@@ -212,7 +221,7 @@ class Excel extends React.Component<any, any>  {
             if(event.buttons === 1 && this.state.change_size_current_index > -1) {
                 this.setState({
                     changeSizeState:'change_size_w',
-                    change_size_h:this.excelObject.info.height - this.excelObject.info.top,
+                    change_size_h:this.excelObject.info.height,
                     change_size_w:1,
                 })
                 dom.style.display = 'block';
@@ -223,7 +232,7 @@ class Excel extends React.Component<any, any>  {
                 if(index > -1) {
                     this.setState({
                         changeSizeState:'change_size_w',
-                        change_size_h:this.excelObject.info.height - this.excelObject.info.top,
+                        change_size_h:this.excelObject.info.height,
                         change_size_w:1,
                         change_size_current_index:index
                     })
@@ -248,7 +257,7 @@ class Excel extends React.Component<any, any>  {
             if(index > -1) {
                 if(this.state.changeSizeState === 'change_size_w') {
                     this.setState({
-                        change_size_h:this.excelObject.info.height - this.excelObject.info.top,
+                        change_size_h:this.excelObject.info.height,
                         change_size_w:1,
                         change_size_current_index:index,
                     })
@@ -258,7 +267,7 @@ class Excel extends React.Component<any, any>  {
                 }else {
                     this.setState({
                         change_size_h: 1,
-                        change_size_w:this.excelObject.info.width - this.excelObject.info.left,
+                        change_size_w:this.excelObject.info.width,
                         change_size_current_index:index,
                     })
                     dom.style.left = 1;
