@@ -15,17 +15,23 @@ class Excel extends React.Component<any, any>  {
     changeSizeDOMRef:any;
     clientRect:DOMRect;
     excelObject:any;
+    currentLabelDOMRef:any;
    
     constructor(props:any) {
         super(props);
         this.excelRef = React.createRef();
         this.changeSizeDOMRef = React.createRef();
         this.editorDOMRef = React.createRef();
+        this.currentLabelDOMRef = React.createRef();
         this.state = {
             changeSizeState: 'change_size_h',
             change_size_w:0,
             change_size_h:0,
-            change_size_current_index:-1
+            change_size_current_index:-1,
+            currentLabel_left:400,
+            currentLabel_top:-22,
+            currentLabel_val:22,
+            currentLabel_state:'w'
         }
         this.excelObject = {
             info:{
@@ -50,7 +56,7 @@ class Excel extends React.Component<any, any>  {
                 rowLen:15,
                 columnLen:5,
                 rowTitleHeight:25,
-                columTitleDefWidth:60,
+                columTitleDefWidth:30,
             },
             setting_custome: {
                 row:[23,123,53,130,49,40,23,23,23,23],
@@ -75,31 +81,66 @@ class Excel extends React.Component<any, any>  {
         let startLeft = def.columTitleDefWidth;
         let ratio = this.excelObject.info.scalingRatio;
         const ctx = this.context;
+
+        // 绘制矩形
         ctx.beginPath();
-        ctx.strokeStyle = "#e0e0e0";
+        ctx.strokeStyle = "#E6e6e6";
         ctx.rect(0.5, 0.5, def.columTitleDefWidth * ratio, def.rowTitleHeight * ratio);
-        ctx.fillStyle = "#f9fafb";
+
+        // 绘制矩形
+        ctx.fillStyle = "#E6e6e6";
         ctx.fillRect(0.5, 0.5, def.columTitleDefWidth * ratio, def.rowTitleHeight * ratio);
-        ctx.fillStyle = '#000';
-        let size = 10 * ratio;
-        ctx.font = 'lighter '+size+'pt  微软雅黑';
-        ctx.textAlign = "center";
-        ctx.textBaseline = 'middle';
-        ctx.fillText("Excel",  def.columTitleDefWidth/2 * ratio, def.rowTitleHeight /2  * ratio+0.5 );
+        
+        // 绘制三角形
+        ctx.strokeStyle = "#b2b2b2";
+        ctx.beginPath();
+        ctx.moveTo(11,23);
+        ctx.lineTo(27, 23)
+        ctx.lineTo(27, 7);
+        ctx.lineTo(11, 23);
+        ctx.fillStyle = "#b4b4b4";
+        ctx.fill();
+   
+        // 绘制边框
+        ctx.beginPath();
+        ctx.moveTo(def.columTitleDefWidth * ratio + 0.5, 0  );
+        ctx.lineTo(def.columTitleDefWidth * ratio + 0.5, def.rowTitleHeight * ratio );
+        ctx.beginPath();
+        ctx.moveTo(def.columTitleDefWidth * ratio + 0.5, 0  );
+        ctx.lineTo(def.columTitleDefWidth * ratio + 0.5, def.rowTitleHeight * ratio );
+        ctx.strokeStyle = '#bcbcbc';
+
+        ctx.stroke();
+
         for(let i=0;i<setting.column.length;i++) {
             let colLeft = startLeft * ratio+ 0.5;
             let rowTop = 0.5;
+
+            //绘制边框
             ctx.lineWidth = 1;
-            ctx.strokeStyle = "#e0e0e0";
+            ctx.strokeStyle = "#b2b2b2";
             ctx.rect(colLeft, rowTop, setting.column[i] * ratio, def.rowTitleHeight * ratio);
-            ctx.fillStyle = "#f9fafb";
+            
+            //绘制矩形
+            ctx.fillStyle = "#E6e6e6";
             ctx.fillRect(colLeft, rowTop, setting.column[i] * ratio,  def.rowTitleHeight * ratio) ;
+            
+            //绘制文本
             ctx.fillStyle = '#000';
             let size = 10 * ratio;
             ctx.font = 'lighter '+size+'pt  微软雅黑';
             ctx.textAlign = "center";
-            ctx.textBaseline = 'middle';
-            ctx.fillText(String.fromCharCode((65 + i)),  startLeft * ratio + setting.column[i] /2 * ratio, def.rowTitleHeight /2 * ratio+ 0.5 );
+            ctx.textBaseline = 'bottom';
+            ctx.fillText(String.fromCharCode((65 + i)),  startLeft * ratio + setting.column[i] /2 * ratio, def.rowTitleHeight * ratio - 3.5 );
+
+            //绘制右边框
+            ctx.beginPath();
+            ctx.moveTo(colLeft +setting.column[i] * ratio, 0  );
+            ctx.lineTo(colLeft +setting.column[i] * ratio,  def.rowTitleHeight * ratio);
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = '#b9b9b9';
+            ctx.stroke();
+
             startLeft += setting.column[i];
             this.excelObject.setting_custome.columnLefts[i] =startLeft;
             if( i === setting.column.length -1) {
@@ -110,18 +151,29 @@ class Excel extends React.Component<any, any>  {
         for(let i=0;i<setting.row.length;i++) {
             let colLeft = 0.5;
             let rowTop = startHeight * ratio + 0.5;
-            ctx.lineWidth = 1;
-            ctx.strokeStyle = "#e0e0e0";
-            ctx.rect(colLeft, rowTop, def.columTitleDefWidth* ratio,  setting.row[i]* ratio);
-            ctx.fillStyle = "#f9fafb";
+
+            // 绘制矩形
+            ctx.fillStyle = "#E6e6e6";
             ctx.fillRect(colLeft, rowTop,  def.columTitleDefWidth* ratio, setting.row[i]* ratio);
-            ctx.fillStyle = '#000';
+         
+
+            // 绘制文字
             let size = 10 * ratio;
+            ctx.fillStyle = '#000';
             ctx.font = 'lighter '+size+'pt  微软雅黑';
             ctx.textAlign = "center";
             let val = i;
-            ctx.textBaseline = 'middle';
-            ctx.fillText(val++, def.columTitleDefWidth /2* ratio, rowTop + setting.row[i] /2* ratio + 0.5);
+            ctx.textBaseline = 'bottom';
+
+            // 绘制底部边框
+            ctx.beginPath();
+            ctx.moveTo(0, rowTop  );
+            ctx.lineTo( def.columTitleDefWidth* ratio, rowTop);
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = '#bcbcbc';
+            ctx.stroke();
+
+            ctx.fillText(val++, def.columTitleDefWidth /2* ratio, rowTop + setting.row[i] * ratio - 3.5);
             startHeight += setting.row[i];
             this.excelObject.setting_custome.rowTops[i] = startHeight;
             if( i === setting.column.length -1) {
@@ -148,7 +200,7 @@ class Excel extends React.Component<any, any>  {
             for(let col=0;col< cLen;col++) {
                 let width = colums[col];
                 ctx.lineWidth = 1;
-                ctx.strokeStyle = "#e0e0e0";
+                ctx.strokeStyle = "#d4d4d4";
                 ctx.rect(currentLeft* ratio, currentTop* ratio, width* ratio, height* ratio);
                 ctx.fillStyle = "#fff";
                 ctx.fillRect(currentLeft* ratio, currentTop* ratio, width* ratio, height* ratio);
@@ -190,54 +242,65 @@ class Excel extends React.Component<any, any>  {
             this.initDomState();
             return;
         };
+        // 设置纵向
         if(top > info.top && left <= info.left){
             if(event.buttons === 1 && this.state.change_size_current_index > -1) {
-                dom.style.left = 1;
-                dom.style.top = top -2;
+                dom.style.left = 0;
+                dom.style.top = top;
                 dom.style.display = 'block';
+                let _top = this.excelObject.setting_custome.rowTops[this.state.change_size_current_index -1] || this.excelObject.setting_def.rowTitleHeight * this.excelObject.info.scalingRatio
+                let _height  = (top - _top) < 2 ?2: (top - _top);
                 this.setState({
                     changeSizeState:'change_size_h',
                     change_size_h: 1,
-                    change_size_w:this.excelObject.info.width 
+                    change_size_w: Math.min(this.excelObject.info.width / this.excelObject.info.scalingRatio,  1000),
+                    currentLabel_val:_height,
+                    // currentLabel_top: _top,
+                    // currentLabel_left: this.excelObject.setting_def.columTitleDefWidth / this.excelObject.info.scalingRatio + 'px'
                 })
             }else {
                 let index = this.excelObject.setting_custome.rowTops.indexOf(top) 
                 if(index > -1) {
-                    dom.style.left = 1;
-                    dom.style.top = top -2;
+                    dom.style.left = 0;
+                    dom.style.top = top ;
                     dom.style.display = 'block';
                     this.setState({
                         change_size_current_index:index,
                         changeSizeState:'change_size_h',
                         change_size_h: 1,
-                        change_size_w:this.excelObject.info.width 
+                        change_size_w:Math.min(this.excelObject.setting_def.rowTitleHeight / this.excelObject.info.scalingRatio,  1000)
                     })
                 }else {
-   
+                    dom.style.display = 'none';
                 }
             } 
         }else  {
+            // 设置横线
             if(event.buttons === 1 && this.state.change_size_current_index > -1) {
+                let _left = this.excelObject.setting_custome.columnLefts[this.state.change_size_current_index -1] || this.excelObject.setting_def.columTitleDefWidth  * this.excelObject.info.scalingRatio;
+                let _width = (left- _left) < 2 ?2: (left - _left);
                 this.setState({
                     changeSizeState:'change_size_w',
-                    change_size_h:this.excelObject.info.height,
+                    change_size_h:Math.min(this.excelObject.info.height / this.excelObject.info.scalingRatio, 500),
                     change_size_w:1,
+                    currentLabel_val:_width,
+                    // currentLabel_top:  (-22 /this.excelObject.info.scalingRatio) + 'px'
                 })
                 dom.style.display = 'block';
-                dom.style.left = left -2;
-                dom.style.top = 1;
+                dom.style.left = left;
+                dom.style.top = 0;
             }else {
                 let index = this.excelObject.setting_custome.columnLefts.indexOf(left) 
                 if(index > -1) {
                     this.setState({
                         changeSizeState:'change_size_w',
-                        change_size_h:this.excelObject.info.height,
+                        change_size_h: Math.min(this.excelObject.info.height / this.excelObject.info.scalingRatio, 500),
                         change_size_w:1,
                         change_size_current_index:index
                     })
                     dom.style.display = 'block';
-                    dom.style.left = left -2;
-                    dom.style.top = 1;
+                    dom.style.left = left;
+                    dom.style.top = 0;
                 }else {
                     dom.style.display = 'none';
                 }
@@ -255,21 +318,31 @@ class Excel extends React.Component<any, any>  {
                         this.excelObject.setting_custome.rowTops.indexOf(_eY);
             if(index > -1) {
                 if(this.state.changeSizeState === 'change_size_w') {
+                    let _left = this.excelObject.setting_custome.columnLefts[this.state.change_size_current_index -1] || this.excelObject.setting_def.columTitleDefWidth  * this.excelObject.info.scalingRatio;
+                    let _width = (_eX - _left) < 2 ?2: (_eX - _left);
                     this.setState({
-                        change_size_h:this.excelObject.info.height,
+                        change_size_h:Math.min(this.excelObject.info.height / this.excelObject.info.scalingRatio, 500),
                         change_size_w:1,
                         change_size_current_index:index,
+                        currentLabel_val:_width,
+                        currentLabel_top:  (-22 /this.excelObject.info.scalingRatio) + 'px',
+                        currentLabel_left:_eX
                     })
                     dom.style.display = 'block';
                     dom.style.left = _eX -2;
-                    dom.style.top = 1;
+                    dom.style.top = 0;
                 }else {
+                    let _top = this.excelObject.setting_custome.rowTops[this.state.change_size_current_index -1] || this.excelObject.setting_def.rowTitleHeight * this.excelObject.info.scalingRatio
+                    let _height  = (_eY - _top) < 2 ?2: (_eY - _top);
                     this.setState({
                         change_size_h: 1,
-                        change_size_w:this.excelObject.info.width,
+                        change_size_w:Math.min(this.excelObject.info.width / this.excelObject.info.scalingRatio, 1000),
                         change_size_current_index:index,
+                        currentLabel_val:_height,
+                        currentLabel_top:_top,
+                        currentLabel_left: this.excelObject.setting_def.columTitleDefWidth / this.excelObject.info.scalingRatio + 'px'
                     })
-                    dom.style.left = 1;
+                    dom.style.left = 0;
                     dom.style.top = _eY-2;
                     dom.style.display = 'block';
                 }
@@ -278,19 +351,19 @@ class Excel extends React.Component<any, any>  {
         }else if(e.type === 'mouseup') {
             if(this.state.change_size_current_index > -1) {
                 if(this.state.changeSizeState === 'change_size_w') { 
-                    let _left = this.excelObject.setting_custome.columnLefts[this.state.change_size_current_index -1] || this.excelObject.info.left;
-                    this.excelObject.setting_custome.column[this.state.change_size_current_index]  = (_eX - _left) < 1 ?1: (_eX - _left);
+                    let _left = this.excelObject.setting_custome.columnLefts[this.state.change_size_current_index -1] || this.excelObject.setting_def.columTitleDefWidth  * this.excelObject.info.scalingRatio;
+                    this.excelObject.setting_custome.column[this.state.change_size_current_index]  = (_eX - _left) < 2 ?2: (_eX - _left);
                 }else {
-                    let _top = this.excelObject.setting_custome.rowTops[this.state.change_size_current_index -1] || this.excelObject.info.top;
-                    this.excelObject.setting_custome.row[this.state.change_size_current_index]  = (_eY - _top) < 1 ?1: (_eY - _top);
+                    let _top = this.excelObject.setting_custome.rowTops[this.state.change_size_current_index -1] || this.excelObject.setting_def.rowTitleHeight * this.excelObject.info.scalingRatio
+                    this.excelObject.setting_custome.row[this.state.change_size_current_index]  = (_eY - _top) < 2 ?2: (_eY - _top);
                 }
                 this.clearFullRect();
                 this.drawBorder();
                 this.initExcel();
             }
-
         }
     }
+
     updateEditorDOM(left:number,top:number) {
         let info = this.excelObject.info;
         if( left < info.left ||
@@ -417,6 +490,16 @@ class Excel extends React.Component<any, any>  {
                 onMouseUp={this.changeSizeByDrag.bind(this)}
                 onMouseDown={this.changeSizeByDrag.bind(this)}>
                 <span className="content" style={{width:this.state.change_size_w, height:this.state.change_size_h}}></span>
+            </div>
+            <div 
+                ref={this.currentLabelDOMRef} 
+                style={{
+                    left:this.state.currentLabel_left,
+                    top:this.state.currentLabel_top
+                }}
+                className="currentLabel">
+                    <label className="lab">宽度:</label>
+                    <span className="val">{this.state.currentLabel_val} </span>
             </div>
             <canvas id="canvas_excle" 
                 ref={(c) => {this.excelRef = c;this.context = c && c.getContext('2d')}} 

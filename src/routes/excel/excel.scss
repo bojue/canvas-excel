@@ -1,8 +1,9 @@
 .excel_body {
+    $border-color:#006600;
     position: relative;
     margin: 40px;
     [contenteditable=true] {
-        caret-color: #1e6fff;
+        caret-color:  $border-color;
     }
     canvas {
         position: absolute;
@@ -24,7 +25,7 @@
         position: absolute;
         top: 0;
         left: 0;
-        border: 2px solid #4b8cff;
+        border: 2px solid  $border-color;
         display: table-cell;
         word-break: break-word;
         overflow-wrap: break-word;
@@ -57,23 +58,23 @@
     }
     .change_size {
         position: absolute;
-        background: #4b8cff;
+        background:  $border-color;
         z-index: 12;
         display: none
     }
     .change_size_w {
         top: 1px;
         left: 100px;
-        width: 4px;
+        width: 1px;
         height: 25px;
         cursor: ew-resize;
         .content {
             position: absolute;
             width: 1px;
             height: 500px;
-            background: #4b8cff;
-            left: 1.5px;
-            top: 0;
+            background:  $border-color;
+            left: 0px;
+            top: 1;
         };
     }
 
@@ -81,15 +82,34 @@
         top: 1px;
         left: 1px;
         width: 60px;
-        height: 4px;
+        height: 0px;
         cursor: ns-resize;
         .content {
             position: absolute;
             width: 1000px;
             height: 1px;
-            background: #4b8cff;
-            left: 0;
-            top: 2px;
+            background:  $border-color;
+            left: 1;
+            top: 0px;
         };
+    }
+    .currentLabel {
+        user-select: none;
+        position: absolute;
+        top: -22px;
+        left: 100px;
+        font-size: 12px;
+        color: #888;
+        border: 1px solid #ddd;
+        border-radius: 0px;
+        padding: 0px 4px;
+        background: #fff;
+        z-index: 12;
+        .lab {
+            padding-right: 8px;
+        }
+        .val, .unit {
+            color:forestgreen;
+        }
     }
 }
