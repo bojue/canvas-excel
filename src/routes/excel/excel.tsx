@@ -288,8 +288,6 @@ class Excel extends React.Component<any, any>  {
                         currentLabel_top:  _top + 'px',
                         currentLabel_left: this.excelObject.setting_def.columTitleDefWidth+ 'px'
                     })
-                }else {
-                    dom.style.display = 'none';
                 }
             } 
         }else  {
@@ -322,8 +320,6 @@ class Excel extends React.Component<any, any>  {
                     dom.style.display = 'block';
                     dom.style.left = left;
                     dom.style.top = 0;
-                }else {
-                    dom.style.display = 'none';
                 }
             } 
         }
