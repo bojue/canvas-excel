@@ -239,10 +239,12 @@ class Excel extends React.Component<any, any>  {
         changeSizeDOM.style.display = 'none';
     }
     updateChangeSizeButton(left:number, top:number, event:MouseEvent) {
-        // 拖拽改变大小的DOM
+        //拖拽改变大小的DOM
         let dom =  this.changeSizeDOMRef.current;
         //当前选中下标
         let currentIndex = this.state.change_size_current_index;
+        if(currentIndex > -1 ) return;
+
         // 初始化计算数据
         let info = this.excelObject.info;
         let ratio =  this.excelObject.info.scalingRatio; // canvas画板缩放比例
