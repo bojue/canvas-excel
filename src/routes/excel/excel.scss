@@ -1,7 +1,7 @@
 .excel_body {
     $border-color:#006600;
     position: relative;
-    margin: 40px;
+    margin-top: 40px;
     [contenteditable=true] {
         caret-color:  $border-color;
     }
@@ -21,6 +21,7 @@
         left: 150px;
     }
     .editor_excel {
+        font-size: 12px;
         z-index: 11;
         position: absolute;
         top: 0;

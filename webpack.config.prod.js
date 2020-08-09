@@ -9,16 +9,24 @@ module.exports = {
         vendor: ['react', 'react-dom']
     },
     output: {
-        path: __dirname + "/dist",
+        path: path.resolve(__dirname, 'dist'),
+        publicPath:'/dist/',
         filename: 'js/[name].bundle.js'
     },
-    devtool: "source-map",
     resolve: {
         extensions: [".ts", ".tsx", ".js", ".json"]
     },
     module: {
         rules: [
             { test: /\.tsx?$/, loader: "awesome-typescript-loader" },
+            {
+                test: /\.s[ac]ss$/i,
+                use: [
+                    'style-loader',
+                    'css-loader',
+                    'sass-loader',
+                ],
+            },
         ]
     },
     performance : {

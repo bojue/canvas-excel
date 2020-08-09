@@ -16,7 +16,7 @@
   "scripts": {
     "start": "npm run dev",
     "dev": "webpack-dev-server --config ./webpack.config.js",
-    "build": "webpack-dev-server --config ./webpack.config.prod.js",
+    "build":"webpack --config ./webpack.config.prod.js",
     "test": "react-scripts-ts test --env=jsdom",
     "eject": "react-scripts-ts eject"
   },
