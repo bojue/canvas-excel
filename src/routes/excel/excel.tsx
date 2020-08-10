@@ -11,7 +11,6 @@ export interface Txt {
 
 class Excel extends React.Component<any, any>  {
     excelRef:any;
-    editorDOMRef:any;
     changeSizeDOMRef:any;
     clientRect:DOMRect;
     excelObject:any;
@@ -21,17 +20,29 @@ class Excel extends React.Component<any, any>  {
         super(props);
         this.excelRef = React.createRef();
         this.changeSizeDOMRef = React.createRef();
-        this.editorDOMRef = React.createRef();
         this.currentLabelDOMRef = React.createRef();
         this.state = {
+            // Excel下标工具栏参数
             changeSizeState: 'change_size_h',
             change_size_w:0,
             change_size_h:0,
             change_size_current_index:-1,
+                         
+            // Excel下标工具栏操作状态坐标参数
             currentLabel_left:400,
             currentLabel_top:-22,
             currentLabel_val:22,
-            currentLabel_state:'w'
+            currentLabel_state:'w',
+              
+            // 可输入状态DOM参数
+            editor_width:0,
+            editor_height:0,
+            editor_top:0,
+            editor_left:0,
+            editor_text:"",
+            editor_display:'none',
+            editor_coordinate_x:0,
+            editor_coordinate_y:0
         }
         this.excelObject = {
             info:{
@@ -236,14 +247,13 @@ class Excel extends React.Component<any, any>  {
     }
     initDomState() {
         let changeSizeDOM =  this.changeSizeDOMRef.current;
-        changeSizeDOM.style.display = 'none';
+        // changeSizeDOM.style.display = 'none';
     }
     updateChangeSizeButton(left:number, top:number, event:MouseEvent) {
         //拖拽改变大小的DOM
         let dom =  this.changeSizeDOMRef.current;
         //当前选中下标
         let currentIndex = this.state.change_size_current_index;
-        if(currentIndex > -1 ) return;
 
         // 初始化计算数据
         let info = this.excelObject.info;
@@ -268,12 +278,15 @@ class Excel extends React.Component<any, any>  {
                 dom.style.top = top;
                 dom.style.display = 'block';
                 this.setState({
+     
                     changeSizeState:'change_size_h',
                     change_size_h: 1,
                     change_size_w: Math.min(this.excelObject.info.width /ratio ,  1000),
+
                     currentLabel_val:_height,
                     currentLabel_top:  _top + 'px',
-                    currentLabel_left: this.excelObject.setting_def.columTitleDefWidth+ 'px'
+                    currentLabel_left: this.excelObject.setting_def.columTitleDefWidth+ 'px',
+            
                 })
             }else {
                 let index = this.excelObject.setting_custome.rowTops.indexOf(top) 
@@ -285,7 +298,7 @@ class Excel extends React.Component<any, any>  {
                         change_size_current_index:index,
                         changeSizeState:'change_size_h',
                         change_size_h: 1,
-                        change_size_w:Math.min(this.excelObject.info.left /ratio,  1000),
+                        change_size_w:Math.min(this.excelObject.setting_def.columTitleDefWidth/ratio,  1000),
                         currentLabel_val:_height,
                         currentLabel_top:  _top + 'px',
                         currentLabel_left: this.excelObject.setting_def.columTitleDefWidth+ 'px'
@@ -295,7 +308,6 @@ class Excel extends React.Component<any, any>  {
         }else  {
             // 设置纵向
             if(event.buttons === 1 && currentIndex > -1) {
-                console.log(this.excelObject.info.height )
                 this.setState({
                     changeSizeState:'change_size_w',
                     change_size_h: Math.min(this.excelObject.info.height /  ratio, 500),
@@ -326,6 +338,7 @@ class Excel extends React.Component<any, any>  {
             } 
         }
     }
+    
     changeSizeByDrag(e:MouseEvent){
         e.stopPropagation();
         let dom =  this.changeSizeDOMRef.current;
@@ -378,16 +391,19 @@ class Excel extends React.Component<any, any>  {
                 this.clearFullRect();
                 this.drawBorder();
                 this.initExcel();
+                this.updateEditorDOM(0, 0,'changeSize');
             }
         }
     }
 
-    updateEditorDOM(left:number,top:number) {
-        let info = this.excelObject.info;
-        if(!(left > info.left && left < info.width || 
-            0 <= top && top < info.top )){
-            console.info("请点击Excel区域");
-            return;
+    updateEditorDOM(left:number,top:number, state ?:string) {
+        if(state !== 'changeSize') {
+            let info = this.excelObject.info;
+            if(!(left > info.left && left < info.width || 
+                0 <= top && top < info.top )){
+                console.info("请点击Excel区域");
+                return;
+            }
         }
         let def = this.excelObject.setting_def;
         let setting = this.excelObject.setting_custome;
@@ -397,31 +413,45 @@ class Excel extends React.Component<any, any>  {
         let _t = def.rowTitleHeight;
         let _w = 0;
         let _h = 0;
+        let _c_x = 0;
+        let _c_y = 0;
         for(let i=0; i<cols.length;i++) {
             let col = cols[i];
-            if(_l<= left &&  left < _l+ col){
+            if(state === 'changeSize' && i === this.state.editor_coordinate_x) {
                 _w = col;
+                _c_x = i;
+                break;
+            }else if(_l<= left &&  left < _l+ col){
+                _w = col;
+                _c_x = i;
                 break;
             } 
             _l += col;
         }
         for(let i=0; i<rows.length;i++) {
             let row = rows[i];
-            if(_t <= top && top < _t+ row){
+            if(state === 'changeSize' && i === this.state.editor_coordinate_y) {
                 _h = row;
+                _c_y = i;
+                break;
+            }else if(_t <= top && top < _t+ row){
+                _h = row;
+                _c_y = i;
                 break;
             }
             _t += row;
         }
         
-        let dom =  this.editorDOMRef.current;
-        dom.style.left = _l;
-        dom.style.display = 'block';
-        dom.style.top = _t;
-        dom.style.height = _h;
-        dom.style.width = _w;
-        dom.innerText = "";
-        // this.upateTxtByEdited(dom);
+        this.setState({
+            editor_text:"",
+            editor_display:'block',
+            editor_width:_w,
+            editor_height:_h,
+            editor_top:_t,
+            editor_left:_l,
+            editor_coordinate_x:_c_x, 
+            editor_coordinate_y:_c_y
+        })
     }
     upateTxtByEdited(dom:any) {
         let style = dom.style;
@@ -481,12 +511,6 @@ class Excel extends React.Component<any, any>  {
         }
        ctx.stroke();
     }
-    repaint(){
-        this.clearFullRect();
-        this.excelObject.setting_custome.row = [23,23,53,130,49,40,23,23,23,23];
-        this.drawBorder();
-        this.initExcel();
-    }
     clearFullRect() {
         this.context.clearRect(0, 0,this.excelObject.info.scalingRatio * 1000, this.excelObject.info.scalingRatio * 500 );
     }
@@ -496,9 +520,30 @@ class Excel extends React.Component<any, any>  {
     }
     render() {
         return  <div className='excel_body'>
-            <div ref={this.editorDOMRef} className={`editor_excel`} contentEditable='true'>
-                <span className="content"></span>
+            <span className="current_coordinate"> {(String.fromCharCode(65 +this.state.editor_coordinate_x ))}{this.state.editor_coordinate_y}</span>
+            {/* 输入编辑组件 */}
+            <div className="editor_content">
+                <div  
+                    className={`editor_excel`} 
+                    contentEditable='true'
+                    style={{ 
+                        height:this.state.editor_height,
+                        width:this.state.editor_width,
+                        top:this.state.editor_top,
+                        left:this.state.editor_left, display:this.state.editor_display}}
+                    suppressContentEditableWarning = {true}>
+                    <span className="content"></span>
+                </div>
+                <span  
+                    className="editor_coordinate c-t" 
+                    style={{
+                        width:this.state.editor_width,
+                        left:this.state.editor_left,
+                        top:0}}></span>
+                <span className="editor_coordinate c-l" style={{height:this.state.editor_height,top:this.state.editor_top,left:0}}></span>
             </div>
+
+            {/* Excel下标工具栏拖拽组件*/}
             <div 
                 ref={this.changeSizeDOMRef} 
                 className={`change_size  ${this.state.changeSizeState}`} 
@@ -507,21 +552,18 @@ class Excel extends React.Component<any, any>  {
                 onMouseDown={this.changeSizeByDrag.bind(this)}>
                 <span className="content" style={{width:this.state.change_size_w, height:this.state.change_size_h}}></span>
             </div>
-            <div 
-                ref={this.currentLabelDOMRef} 
-                style={{
-                    left:this.state.currentLabel_left,
-                    top:this.state.currentLabel_top
-                }}
-                className="currentLabel">
+
+            {/* Excle下标工具栏拖拽坐标组件 */}
+            <div ref={this.currentLabelDOMRef} 
+                style={{left:this.state.currentLabel_left,top:this.state.currentLabel_top }} className="currentLabel">
                     <label className="lab">{this.state.changeSizeState === 'change_size_w' ? '宽度': '高度'}:</label>
                     <span className="val">{this.state.currentLabel_val} </span>
             </div>
-            <canvas id="canvas_excle" 
-                ref={(c) => {this.excelRef = c;this.context = c && c.getContext('2d')}} 
+
+            {/* Excel画布 */}
+            <canvas id="canvas_excle" ref={(c) => {this.excelRef = c;this.context = c && c.getContext('2d')}} 
                 style={this.style}  width={this.excelObject.info.scalingRatio * 1000} height={this.excelObject.info.scalingRatio * 500} />
-            <button onClick={this.merge.bind(this)}>删除</button>
-            <button className='repaint' onClick={this.repaint.bind(this)}>repaint</button>
+            <button onClick={this.merge.bind(this)}>合并</button>
         </div>
     }
 }
