@@ -419,7 +419,6 @@ class Excel extends React.Component<any, any>  {
             let col = cols[i];
             if(state === 'changeSize' && i === this.state.editor_coordinate_x) {
                 _w = col;
-                _c_x = i;
                 break;
             }else if(_l<= left &&  left < _l+ col){
                 _w = col;
@@ -432,7 +431,6 @@ class Excel extends React.Component<any, any>  {
             let row = rows[i];
             if(state === 'changeSize' && i === this.state.editor_coordinate_y) {
                 _h = row;
-                _c_y = i;
                 break;
             }else if(_t <= top && top < _t+ row){
                 _h = row;
@@ -442,16 +440,28 @@ class Excel extends React.Component<any, any>  {
             _t += row;
         }
         
-        this.setState({
-            editor_text:"",
-            editor_display:'block',
-            editor_width:_w,
-            editor_height:_h,
-            editor_top:_t,
-            editor_left:_l,
-            editor_coordinate_x:_c_x, 
-            editor_coordinate_y:_c_y
-        })
+        if(state === 'changeSize') {
+            this.setState({
+                editor_text:"",
+                editor_display:'block',
+                editor_width:_w,
+                editor_height:_h,
+                editor_top:_t,
+                editor_left:_l
+            })
+        }else {
+            this.setState({
+                editor_text:"",
+                editor_display:'block',
+                editor_width:_w,
+                editor_height:_h,
+                editor_top:_t,
+                editor_left:_l,
+                editor_coordinate_x:_c_x, 
+                editor_coordinate_y:_c_y
+            })
+        }
+    
     }
     upateTxtByEdited(dom:any) {
         let style = dom.style;
@@ -544,8 +554,7 @@ class Excel extends React.Component<any, any>  {
             </div>
 
             {/* Excel下标工具栏拖拽组件*/}
-            <div 
-                ref={this.changeSizeDOMRef} 
+            <div ref={this.changeSizeDOMRef} 
                 className={`change_size  ${this.state.changeSizeState}`} 
                 draggable='true'
                 onMouseUp={this.changeSizeByDrag.bind(this)}
