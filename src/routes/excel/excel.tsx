@@ -42,7 +42,12 @@ class Excel extends React.Component<any, any>  {
             editor_text:"",
             editor_display:'none',
             editor_coordinate_x:0,
-            editor_coordinate_y:0
+            editor_coordinate_y:0,
+
+            // 工具栏下标拖拽参数
+            change_size_top:0,
+            change_size_left:0,
+            change_size_display:0
         }
         this.excelObject = {
             info:{
@@ -246,12 +251,9 @@ class Excel extends React.Component<any, any>  {
         }); 
     }
     initDomState() {
-        let changeSizeDOM =  this.changeSizeDOMRef.current;
-        // changeSizeDOM.style.display = 'none';
+
     }
     updateChangeSizeButton(left:number, top:number, event:MouseEvent) {
-        //拖拽改变大小的DOM
-        let dom =  this.changeSizeDOMRef.current;
         //当前选中下标
         let currentIndex = this.state.change_size_current_index;
 
@@ -263,9 +265,12 @@ class Excel extends React.Component<any, any>  {
 
         if(!(left > infoLeft && top <= infoTop ||  top > infoTop && left <= infoLeft)) {
             this.initDomState();
+            console.log("err")
             return;
-        };
-        let _left = this.excelObject.setting_custome.columnLefts[ -1] || 
+        }else {
+            console.log("succ")
+        }
+        let _left = this.excelObject.setting_custome.columnLefts[currentIndex-1] || 
                     this.excelObject.setting_def.columTitleDefWidth ;
         let _width = Math.max(left- _left, 2);
         let _top = this.excelObject.setting_custome.rowTops[ currentIndex -1] || 
@@ -274,26 +279,21 @@ class Excel extends React.Component<any, any>  {
         if(top > info.top && left <= info.left){
             // 设置横向
             if(event.buttons === 1 && currentIndex > -1) {
-                dom.style.left = 0;
-                dom.style.top = top;
-                dom.style.display = 'block';
                 this.setState({
-     
                     changeSizeState:'change_size_h',
                     change_size_h: 1,
                     change_size_w: Math.min(this.excelObject.info.width /ratio ,  1000),
-
                     currentLabel_val:_height,
                     currentLabel_top:  _top + 'px',
                     currentLabel_left: this.excelObject.setting_def.columTitleDefWidth+ 'px',
+                    change_size_top:top + 'px',
+                    change_size_left:0,
+                    change_size_display:'block'
             
                 })
             }else {
                 let index = this.excelObject.setting_custome.rowTops.indexOf(top) 
                 if(index > -1) {
-                    dom.style.left = 0;
-                    dom.style.top = top ;
-                    dom.style.display = 'block';
                     this.setState({
                         change_size_current_index:index,
                         changeSizeState:'change_size_h',
@@ -301,7 +301,10 @@ class Excel extends React.Component<any, any>  {
                         change_size_w:Math.min(this.excelObject.setting_def.columTitleDefWidth/ratio,  1000),
                         currentLabel_val:_height,
                         currentLabel_top:  _top + 'px',
-                        currentLabel_left: this.excelObject.setting_def.columTitleDefWidth+ 'px'
+                        currentLabel_left: this.excelObject.setting_def.columTitleDefWidth+ 'px',
+                        change_size_top:top + 'px',
+                        change_size_left:0,
+                        change_size_display:'block'
                     })
                 }
             } 
@@ -314,11 +317,11 @@ class Excel extends React.Component<any, any>  {
                     change_size_w:1,
                     currentLabel_val:_width,
                     currentLabel_top:  (-22) + 'px',
-                    currentLabel_left: left + 'px'
+                    currentLabel_left: left + 'px',
+                    change_size_top:0,
+                    change_size_left:left +'px',
+                    change_size_display:'block'
                 })
-                dom.style.display = 'block';
-                dom.style.left = left;
-                dom.style.top = 0;
             }else {
                 let index = this.excelObject.setting_custome.columnLefts.indexOf(left) 
                 if(index > -1) {
@@ -329,11 +332,11 @@ class Excel extends React.Component<any, any>  {
                         change_size_current_index:index,
                         currentLabel_val:_width,
                         currentLabel_top:  (-22) + 'px',
-                        currentLabel_left: left+ 'px'
+                        currentLabel_left: left+ 'px',
+                        change_size_top:0,
+                        change_size_left:left +'px',
+                        change_size_display:'block'
                     })
-                    dom.style.display = 'block';
-                    dom.style.left = left;
-                    dom.style.top = 0;
                 }
             } 
         }
@@ -341,7 +344,6 @@ class Excel extends React.Component<any, any>  {
     
     changeSizeByDrag(e:MouseEvent){
         e.stopPropagation();
-        let dom =  this.changeSizeDOMRef.current;
         let _eX = e.clientX - this.clientRect.x;
         let _eY = e.clientY - this.clientRect.y;
         if(e.type === 'mousedown') {
@@ -358,11 +360,11 @@ class Excel extends React.Component<any, any>  {
                         change_size_current_index:index,
                         currentLabel_val:_width,
                         currentLabel_top:  (-22 ) + 'px',
-                        currentLabel_left: _eX 
+                        currentLabel_left: _eX + 'px',
+                        change_size_top: 0,
+                        change_size_left:_eX,
+                        change_size_display:'block'
                     })
-                    dom.style.display = 'block';
-                    dom.style.left = _eX -2;
-                    dom.style.top = 0;
                 }else {
                     let _top = this.excelObject.setting_custome.rowTops[this.state.change_size_current_index -1] || this.excelObject.setting_def.rowTitleHeight ;
                     let _height  = Math.max(_eY - _top, 2);
@@ -371,12 +373,12 @@ class Excel extends React.Component<any, any>  {
                         change_size_w:Math.min(this.excelObject.info.width / this.excelObject.info.scalingRatio, 1000),
                         change_size_current_index:index,
                         currentLabel_val:_height,
-                        currentLabel_top:_top,
-                        currentLabel_left: this.excelObject.setting_def.columTitleDefWidth+ 'px'
+                        currentLabel_top:_top + 'px',
+                        currentLabel_left: this.excelObject.setting_def.columTitleDefWidth+ 'px',
+                        change_size_top: 0,
+                        change_size_left:_eY-1 + 'px',
+                        change_size_display:'block'
                     })
-                    dom.style.left = 0;
-                    dom.style.top = _eY-2;
-                    dom.style.display = 'block';
                 }
             }
         }else if(e.type === 'mouseup') {
@@ -391,14 +393,14 @@ class Excel extends React.Component<any, any>  {
                 this.clearFullRect();
                 this.drawBorder();
                 this.initExcel();
-                this.updateEditorDOM(0, 0,'changeSize');
+                this.updateEditorDOM(-1, -1,'changeSize');
             }
         }
     }
 
     updateEditorDOM(left:number,top:number, state ?:string) {
+        let info = this.excelObject.info;
         if(state !== 'changeSize') {
-            let info = this.excelObject.info;
             if(!(left > info.left && left < info.width || 
                 0 <= top && top < info.top )){
                 console.info("请点击Excel区域");
@@ -439,28 +441,16 @@ class Excel extends React.Component<any, any>  {
             }
             _t += row;
         }
-        
-        if(state === 'changeSize') {
-            this.setState({
-                editor_text:"",
-                editor_display:'block',
-                editor_width:_w,
-                editor_height:_h,
-                editor_top:_t,
-                editor_left:_l
-            })
-        }else {
-            this.setState({
-                editor_text:"",
-                editor_display:'block',
-                editor_width:_w,
-                editor_height:_h,
-                editor_top:_t,
-                editor_left:_l,
-                editor_coordinate_x:_c_x, 
-                editor_coordinate_y:_c_y
-            })
-        }
+        this.setState({
+            editor_text:"",
+            editor_display:'block',
+            editor_width:_w,
+            editor_height:_h ,
+            editor_top:_t ,
+            editor_left:_l,
+            editor_coordinate_x: state === 'changeSize' ? this.state.editor_coordinate_x: _c_x, 
+            editor_coordinate_y:state === 'changeSize' ? this.state.editor_coordinate_y:_c_y
+        })
     
     }
     upateTxtByEdited(dom:any) {
@@ -533,32 +523,38 @@ class Excel extends React.Component<any, any>  {
             <span className="current_coordinate"> {(String.fromCharCode(65 +this.state.editor_coordinate_x ))}{this.state.editor_coordinate_y}</span>
             {/* 输入编辑组件 */}
             <div className="editor_content">
-                <div  
-                    className={`editor_excel`} 
+                <div  className={`editor_excel`} 
                     contentEditable='true'
                     style={{ 
-                        height:this.state.editor_height,
-                        width:this.state.editor_width,
-                        top:this.state.editor_top,
-                        left:this.state.editor_left, display:this.state.editor_display}}
+                        height:this.state.editor_height + 4,
+                        width:this.state.editor_width + 4,
+                        top:this.state.editor_top -2,
+                        left:this.state.editor_left - 2,
+                        display:this.state.editor_display}}
                     suppressContentEditableWarning = {true}>
-                    <span className="content"></span>
+                    <span className="content">{this.state.editor_top+'_'+this.state.editor_left+'_'+this.state.editor_display}</span>
                 </div>
-                <span  
-                    className="editor_coordinate c-t" 
+                <span className="editor_coordinate c-t" 
                     style={{
                         width:this.state.editor_width,
                         left:this.state.editor_left,
-                        top:0}}></span>
-                <span className="editor_coordinate c-l" style={{height:this.state.editor_height,top:this.state.editor_top,left:0}}></span>
+                        top:this.excelObject.setting_def.rowTitleHeight  -2}}></span>
+                <span className="editor_coordinate c-l" style={{
+                    height:this.state.editor_height,
+                    top:this.state.editor_top,
+                    left:this.excelObject.setting_def.columTitleDefWidth  -2 }}></span>
             </div>
 
             {/* Excel下标工具栏拖拽组件*/}
-            <div ref={this.changeSizeDOMRef} 
-                className={`change_size  ${this.state.changeSizeState}`} 
+            <div className={`change_size  ${this.state.changeSizeState}`} 
                 draggable='true'
                 onMouseUp={this.changeSizeByDrag.bind(this)}
-                onMouseDown={this.changeSizeByDrag.bind(this)}>
+                onMouseDown={this.changeSizeByDrag.bind(this)}
+                style={{
+                    top:this.state.change_size_top,
+                    left:this.state.change_size_left,
+                    display:this.state.change_size_display
+                }}>
                 <span className="content" style={{width:this.state.change_size_w, height:this.state.change_size_h}}></span>
             </div>
 

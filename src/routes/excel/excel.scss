@@ -1,5 +1,5 @@
 .excel_body {
-    $border-color:#006600;
+    $border-color:rgba(0,102,0, 0.8);
     position: relative;
     margin-top: 40px;
     [contenteditable=true] {
@@ -61,12 +61,12 @@
         .editor_coordinate {
             z-index: 2;
             position: absolute;
-            background: rgba(0,102,0, 0.1);
+            background: rgba(0,102,0, 0.8);
             &.c-t {
-                height: 25px;
+                height: 2px;
             }   
             &.c-l {
-                width: 30px;
+                width: 2px;
             }
         }
     }
@@ -78,7 +78,7 @@
     .change_size {
         position: absolute;
         background:  $border-color;
-        z-index: 12;
+        z-index: 99;
         display: none
     }
     .change_size_w {
