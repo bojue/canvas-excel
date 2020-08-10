@@ -246,8 +246,17 @@ class Excel extends React.Component<any, any>  {
             this.updateEditorDOM(_eX, _eY);
             this.editorRef.current.setAttribute("contenteditable", "true");
             this.editorRef.current.focus();
-        
-            let p = document.getElementById('editorRef');
+
+            let d = document.getElementById('editorRef') as HTMLDivElement;
+            let range = document.createRange();//创建一个选中区域
+            range.selectNodeContents(d);//选中节点的内容
+            if(d.innerHTML.length > 0) {
+              range.setStart(d.childNodes[0], pos); //设置光标起始为指定位置
+            }
+            range.collapse(true);       //设置选中区域为一个点
+            let  selection = window.getSelection();//获取当前选中区域
+            selection.removeAllRanges();//移出所有的选中范围
+            selection.addRange(range);//添加新建的范围
         }); 
         // ctx.addEventListener('click', (e:MouseEvent)=> {
         //     let _eX = e.clientX - this.clientRect.x;
