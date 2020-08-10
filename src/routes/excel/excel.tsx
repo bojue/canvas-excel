@@ -2,6 +2,7 @@ import * as React from 'react';
 import { Props } from 'react';
 import "./excel.scss";
 import { settings } from 'cluster';
+import { log } from 'util';
 
 export interface Txt {
     v:string;
@@ -11,15 +12,15 @@ export interface Txt {
 
 class Excel extends React.Component<any, any>  {
     excelRef:any;
-    changeSizeDOMRef:any;
     clientRect:DOMRect;
     excelObject:any;
     currentLabelDOMRef:any;
+    editorRef:any;
    
     constructor(props:any) {
         super(props);
         this.excelRef = React.createRef();
-        this.changeSizeDOMRef = React.createRef();
+        this.editorRef = React.createRef();
         this.currentLabelDOMRef = React.createRef();
         this.state = {
             // Excel下标工具栏参数
@@ -239,19 +240,31 @@ class Excel extends React.Component<any, any>  {
     }
     addLister() {
         const ctx = this.excelRef;
-        ctx.addEventListener('click', (e:MouseEvent)=> {
+        ctx.addEventListener('dblclick', (e:MouseEvent)=> {
             let _eX = e.clientX - this.clientRect.x;
             let _eY = e.clientY - this.clientRect.y;
-            this.updateEditorDOM(_eX, _eY)
+            this.updateEditorDOM(_eX, _eY);
+            this.editorRef.current.setAttribute("contenteditable", "true");
+            this.editorRef.current.focus();
+        
+            let p = document.getElementById('editorRef');
         }); 
+        // ctx.addEventListener('click', (e:MouseEvent)=> {
+        //     let _eX = e.clientX - this.clientRect.x;
+        //     let _eY = e.clientY - this.clientRect.y;
+        //     this.updateEditorDOM(_eX, _eY)
+        // }); 
         ctx.addEventListener('mousemove', (e:MouseEvent)=> {
             let _eX = e.clientX - this.clientRect.x;
             let _eY = e.clientY - this.clientRect.y;
             this.updateChangeSizeButton(_eX, _eY, e)
+            this.editorRef.current.setAttribute("contenteditable", "true")
         }); 
     }
-    initDomState() {
-
+    initChangeSizeState() {
+        this.setState({
+            change_size_display:'none'
+        })
     }
     updateChangeSizeButton(left:number, top:number, event:MouseEvent) {
         //当前选中下标
@@ -264,11 +277,8 @@ class Excel extends React.Component<any, any>  {
         let infoLeft = info.left / ratio;
 
         if(!(left > infoLeft && top <= infoTop ||  top > infoTop && left <= infoLeft)) {
-            this.initDomState();
-            console.log("err")
+            this.initChangeSizeState();
             return;
-        }else {
-            console.log("succ")
         }
         let _left = this.excelObject.setting_custome.columnLefts[currentIndex-1] || 
                     this.excelObject.setting_def.columTitleDefWidth ;
@@ -390,6 +400,7 @@ class Excel extends React.Component<any, any>  {
                     let _top = this.excelObject.setting_custome.rowTops[this.state.change_size_current_index -1] || this.excelObject.setting_def.rowTitleHeight
                     this.excelObject.setting_custome.row[this.state.change_size_current_index]  = Math.max((_eY - _top),2)
                 }
+                this.initChangeSizeState();
                 this.clearFullRect();
                 this.drawBorder();
                 this.initExcel();
@@ -514,6 +525,9 @@ class Excel extends React.Component<any, any>  {
     clearFullRect() {
         this.context.clearRect(0, 0,this.excelObject.info.scalingRatio * 1000, this.excelObject.info.scalingRatio * 500 );
     }
+    clickEditor(e:MouseEvent) {
+        console.log(e)
+    }
     style = {
         width: 1000 + 'px',
         height: 500 + 'px'
@@ -522,9 +536,12 @@ class Excel extends React.Component<any, any>  {
         return  <div className='excel_body'>
             <span className="current_coordinate"> {(String.fromCharCode(65 +this.state.editor_coordinate_x ))}{this.state.editor_coordinate_y}</span>
             {/* 输入编辑组件 */}
-            <div className="editor_content">
-                <div  className={`editor_excel`} 
-                    contentEditable='true'
+            <div className="editor_content" >
+                <div 
+                    className={`editor_excel`} 
+                    ref={this.editorRef}
+                    id="editorRef"
+                    onClick={this.clickEditor.bind(this)}
                     style={{ 
                         height:this.state.editor_height + 4,
                         width:this.state.editor_width + 4,
@@ -539,10 +556,11 @@ class Excel extends React.Component<any, any>  {
                         width:this.state.editor_width,
                         left:this.state.editor_left,
                         top:this.excelObject.setting_def.rowTitleHeight  -2}}></span>
-                <span className="editor_coordinate c-l" style={{
-                    height:this.state.editor_height,
-                    top:this.state.editor_top,
-                    left:this.excelObject.setting_def.columTitleDefWidth  -2 }}></span>
+                <span className="editor_coordinate c-l" 
+                    style={{
+                        height:this.state.editor_height,
+                        top:this.state.editor_top,
+                        left:this.excelObject.setting_def.columTitleDefWidth  -2 }}></span>
             </div>
 
             {/* Excel下标工具栏拖拽组件*/}
