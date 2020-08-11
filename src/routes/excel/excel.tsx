@@ -337,11 +337,10 @@ class Excel extends React.Component<any, any>  {
                     let _w = (currentLeft + width) * ratio - _l;
                     let _h = (currentTop + height) * ratio -_t;
 
-
                     console.log(_l, _t, _w, _h)
-                    ctx.lineWidth = 2;
+                    ctx.lineWidth = 2 * ratio  ;
                     ctx.strokeStyle = 'rgba(0, 102, 0, 0.8)';
-                    ctx.rect(_l, _t, _w, _h) ;
+                    ctx.rect(_l - 2 , _t -  2 , _w +  ctx.lineWidth , _h + ctx.lineWidth) ;
                     ctx.fillStyle =  'rgba(0, 102, 0, 0.02)';
                     ctx.fillRect(_l, _t, _w, _h) ;
                 }
