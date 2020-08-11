@@ -279,9 +279,10 @@ class Excel extends React.Component<any, any>  {
         ctx.addEventListener('mousedown', (e:MouseEvent)=> {
             let _eX = e.clientX - this.clientRect.x;
             let _eY = e.clientY - this.clientRect.y;
+            let ratio = this.excelObject.info.scalingRatio;
             this.setState({
-                regional_sel_x:_eX,
-                regional_sel_y:_eY
+                regional_sel_x:_eX * ratio,
+                regional_sel_y:_eY * ratio
             })
             this.setState({
                 regional_sel_state: 1,
@@ -315,6 +316,7 @@ class Excel extends React.Component<any, any>  {
         let currentTop = def.rowTitleHeight;
         this.reDrawCanvas();
         ctx.beginPath();
+        let ratio = this.excelObject.info.scalingRatio;
         for(let row = 0;row < rLen;row++) {
             currentTop = def.rowTitleHeight;
             let width = colums[row];
@@ -330,10 +332,13 @@ class Excel extends React.Component<any, any>  {
                             regional_sel_state:2,
                         })
                     }
-                    let _l = this.state.regional_sel_l ;
-                    let _t = this.state.regional_sel_t ;
-                    let _w = currentLeft + width-this.state.regional_sel_l;
-                    let _h = currentTop + height-this.state.regional_sel_t;
+                    let _l = this.state.regional_sel_l * ratio;
+                    let _t = this.state.regional_sel_t * ratio;
+                    let _w = (currentLeft + width) * ratio - _l;
+                    let _h = (currentTop + height) * ratio -_t;
+
+
+                    console.log(_l, _t, _w, _h)
                     ctx.lineWidth = 2;
                     ctx.strokeStyle = 'rgba(0, 102, 0, 0.8)';
                     ctx.rect(_l, _t, _w, _h) ;
