@@ -2,6 +2,7 @@ import * as React from 'react';
 import { Props } from 'react';
 import "./excel.scss";
 import { settings } from 'cluster';
+import { number } from 'prop-types';
 import { log } from 'util';
 
 export interface Txt {
@@ -16,6 +17,10 @@ class Excel extends React.Component<any, any>  {
     excelObject:any;
     currentLabelDOMRef:any;
     editorRef:any;
+    style = {
+        width: 1000 + 'px',
+        height: 500 + 'px'
+    }
    
     constructor(props:any) {
         super(props);
@@ -48,7 +53,18 @@ class Excel extends React.Component<any, any>  {
             // 工具栏下标拖拽参数
             change_size_top:0,
             change_size_left:0,
-            change_size_display:0
+            change_size_display:0,
+
+            // 区域选择参数
+            regional_sel_x:0, // 焦点位置
+            regional_sel_y:0, // 焦点位置
+            regional_sel_l:0,
+            regional_sel_t:0,
+            regional_sel_width:0,
+            regional_sel_height:0,
+            regional_sel_x_count:0, // 行网格数
+            regional_sel_y_conut:0, // 列网格数
+
         }
         this.excelObject = {
             info:{
@@ -223,6 +239,7 @@ class Excel extends React.Component<any, any>  {
                 let width = colums[col];
                 ctx.lineWidth = 1;
                 ctx.strokeStyle = "#d4d4d4";
+                // ctx.strokeStyle = "#000";
                 ctx.rect(currentLeft* ratio, currentTop* ratio, width* ratio, height* ratio);
                 ctx.fillStyle = "#fff";
                 ctx.fillRect(currentLeft* ratio, currentTop* ratio, width* ratio, height* ratio);
@@ -244,31 +261,90 @@ class Excel extends React.Component<any, any>  {
             let _eX = e.clientX - this.clientRect.x;
             let _eY = e.clientY - this.clientRect.y;
             this.updateEditorDOM(_eX, _eY);
+            this.initSelection();
             this.editorRef.current.setAttribute("contenteditable", "true");
             this.editorRef.current.focus();
-
-            let d = document.getElementById('editorRef') as HTMLDivElement;
-            let range = document.createRange();//创建一个选中区域
-            range.selectNodeContents(d);//选中节点的内容
-            if(d.innerHTML.length > 0) {
-              range.setStart(d.childNodes[0], pos); //设置光标起始为指定位置
-            }
-            range.collapse(true);       //设置选中区域为一个点
-            let  selection = window.getSelection();//获取当前选中区域
-            selection.removeAllRanges();//移出所有的选中范围
-            selection.addRange(range);//添加新建的范围
         }); 
-        // ctx.addEventListener('click', (e:MouseEvent)=> {
-        //     let _eX = e.clientX - this.clientRect.x;
-        //     let _eY = e.clientY - this.clientRect.y;
-        //     this.updateEditorDOM(_eX, _eY)
-        // }); 
+        ctx.addEventListener('click', (e:MouseEvent)=> {
+            let _eX = e.clientX - this.clientRect.x;
+            let _eY = e.clientY - this.clientRect.y;
+            this.updateSelectArea(_eX, _eY);
+            this.initSelection();
+        }); 
         ctx.addEventListener('mousemove', (e:MouseEvent)=> {
             let _eX = e.clientX - this.clientRect.x;
             let _eY = e.clientY - this.clientRect.y;
-            this.updateChangeSizeButton(_eX, _eY, e)
-            this.editorRef.current.setAttribute("contenteditable", "true")
+            this.updateChangeSizeButton(_eX, _eY, e);
         }); 
+        ctx.addEventListener('mousedown', (e:MouseEvent)=> {
+            let _eX = e.clientX - this.clientRect.x;
+            let _eY = e.clientY - this.clientRect.y;
+            this.setState({
+                regional_sel_x:_eX,
+                regional_sel_y:_eY
+            })
+            this.setState({
+                regional_sel_state: 1,
+            })
+            this.regionalSelection(_eX, _eY);
+        }); 
+        ctx.addEventListener('mouseup', (e:MouseEvent)=> {
+
+        }); 
+    }
+
+    initSelection() {
+        this.setState({
+            regional_sel_state: 0,
+            regional_sel_l:0,
+            regional_sel_t:0,
+        })
+    }
+    regionalSelection(left:number, top:number){
+        this.updateSelectArea(left, top)
+    }
+    updateSelectArea(left:number, top:number){
+        const ctx = this.context;
+        let def = this.excelObject.setting_def;
+        let setting = this.excelObject.setting_custome;
+        let rows = setting.row;
+        let colums = setting.column;
+        let rLen = rows.length;
+        let cLen = colums.length;
+        let currentLeft = def.columTitleDefWidth;
+        let currentTop = def.rowTitleHeight;
+        this.reDrawCanvas();
+        ctx.beginPath();
+        for(let row = 0;row < rLen;row++) {
+            currentTop = def.rowTitleHeight;
+            let width = colums[row];
+            for(let col=0;col< cLen;col++) {
+                let height = rows[col];
+                if(currentTop <= top && currentTop + height >= top && currentLeft <= left && currentLeft + width >= left) {
+                    //绘制矩形
+                    if(this.state.regional_sel_state === 1) {
+                        console.log('set', currentLeft)
+                        this.setState({
+                            regional_sel_l:currentLeft,
+                            regional_sel_t:currentTop,
+                            regional_sel_state:2,
+                        })
+                    }
+                    let _l = this.state.regional_sel_l ;
+                    let _t = this.state.regional_sel_t ;
+                    let _w = currentLeft + width-this.state.regional_sel_l;
+                    let _h = currentTop + height-this.state.regional_sel_t;
+                    ctx.lineWidth = 2;
+                    ctx.strokeStyle = 'rgba(0, 102, 0, 0.8)';
+                    ctx.rect(_l, _t, _w, _h) ;
+                    ctx.fillStyle =  'rgba(0, 102, 0, 0.02)';
+                    ctx.fillRect(_l, _t, _w, _h) ;
+                }
+                currentTop += height;
+            }
+            currentLeft += width;
+        }
+        ctx.stroke();
     }
     initChangeSizeState() {
         this.setState({
@@ -278,13 +354,16 @@ class Excel extends React.Component<any, any>  {
     updateChangeSizeButton(left:number, top:number, event:MouseEvent) {
         //当前选中下标
         let currentIndex = this.state.change_size_current_index;
-
         // 初始化计算数据
         let info = this.excelObject.info;
         let ratio =  this.excelObject.info.scalingRatio; // canvas画板缩放比例
         let infoTop = info.top / ratio;
         let infoLeft = info.left / ratio;
 
+        if( left > infoLeft && top > infoTop && event.buttons === 1) {
+            this.regionalSelection(left,top);
+            return;
+        }
         if(!(left > infoLeft && top <= infoTop ||  top > infoTop && left <= infoLeft)) {
             this.initChangeSizeState();
             return;
@@ -407,15 +486,20 @@ class Excel extends React.Component<any, any>  {
                     this.excelObject.setting_custome.column[this.state.change_size_current_index]  = Math.max(_eX - _left, 2)
                 }else {
                     let _top = this.excelObject.setting_custome.rowTops[this.state.change_size_current_index -1] || this.excelObject.setting_def.rowTitleHeight
-                    this.excelObject.setting_custome.row[this.state.change_size_current_index]  = Math.max((_eY - _top),2)
+                    this.excelObject.setting_custome.row[this.state.change_size_current_index]  = Math.max((_eY - _top),2);
+                    this.reDrawCanvas();
+                    this.updateEditorDOM(-1, -1,'changeSize');
                 }
-                this.initChangeSizeState();
-                this.clearFullRect();
-                this.drawBorder();
-                this.initExcel();
-                this.updateEditorDOM(-1, -1,'changeSize');
             }
         }
+    }
+
+    reDrawCanvas() {
+        this.initChangeSizeState();
+        this.clearFullRect();
+        this.drawBorder();
+        this.initExcel();
+
     }
 
     updateEditorDOM(left:number,top:number, state ?:string) {
@@ -531,18 +615,15 @@ class Excel extends React.Component<any, any>  {
         }
        ctx.stroke();
     }
+
+
     clearFullRect() {
-        this.context.clearRect(0, 0,this.excelObject.info.scalingRatio * 1000, this.excelObject.info.scalingRatio * 500 );
+        this.context.clearRect(0, 0,this.excelObject.info.scalingRatio * 1000, this.excelObject.info.scalingRatio* 500 );
     }
-    clickEditor(e:MouseEvent) {
-        console.log(e)
-    }
-    style = {
-        width: 1000 + 'px',
-        height: 500 + 'px'
-    }
+
     render() {
-        return  <div className='excel_body'>
+        return<> 
+        <div className="excel_body">
             <span className="current_coordinate"> {(String.fromCharCode(65 +this.state.editor_coordinate_x ))}{this.state.editor_coordinate_y}</span>
             {/* 输入编辑组件 */}
             <div className="editor_content" >
@@ -550,13 +631,13 @@ class Excel extends React.Component<any, any>  {
                     className={`editor_excel`} 
                     ref={this.editorRef}
                     id="editorRef"
-                    onClick={this.clickEditor.bind(this)}
                     style={{ 
                         height:this.state.editor_height + 4,
                         width:this.state.editor_width + 4,
                         top:this.state.editor_top -2,
                         left:this.state.editor_left - 2,
-                        display:this.state.editor_display}}
+                        display:this.state.editor_display
+                    }}
                     suppressContentEditableWarning = {true}>
                     <span className="content">{this.state.editor_top+'_'+this.state.editor_left+'_'+this.state.editor_display}</span>
                 </div>
@@ -597,6 +678,7 @@ class Excel extends React.Component<any, any>  {
                 style={this.style}  width={this.excelObject.info.scalingRatio * 1000} height={this.excelObject.info.scalingRatio * 500} />
             <button onClick={this.merge.bind(this)}>合并</button>
         </div>
+        </>
     }
 }
 
