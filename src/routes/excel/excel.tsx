@@ -281,9 +281,10 @@ class Excel extends React.Component<any, any>  {
         ctx.addEventListener('mousedown', (e:MouseEvent)=> {
             let _eX = e.clientX - this.clientRect.x;
             let _eY = e.clientY - this.clientRect.y;
+            let ratio = this.excelObject.info.scalingRatio;
             this.setState({
-                regional_sel_x:_eX,
-                regional_sel_y:_eY
+                regional_sel_x:_eX * ratio,
+                regional_sel_y:_eY * ratio
             })
             this.setState({
                 regional_sel_state: 1,
@@ -321,6 +322,7 @@ class Excel extends React.Component<any, any>  {
         if(this.state.regional_sel_state === 0) {
             return;
         }
+        let ratio = this.excelObject.info.scalingRatio;
         for(let row = 0;row < rLen;row++) {
             currentTop = def.rowTitleHeight;
             let width = colums[row];
@@ -358,7 +360,7 @@ class Excel extends React.Component<any, any>  {
                             regional_sel_end:[col, row],
                         })
                     }
-      
+
                     //绘制矩形
                     this.reDrawCanvas();
                     //绘制选中区域
@@ -449,7 +451,7 @@ class Excel extends React.Component<any, any>  {
                         change_size_current_index:index,
                         changeSizeState:'change_size_h',
                         change_size_h: 1,
-                        change_size_w:Math.min(this.excelObject.setting_def.columTitleDefWidth/ratio,  1000),
+                        change_size_w:Math.min(this.excelObject.setting_def.columTitleDefWidth,  1000),
                         currentLabel_val:_height,
                         currentLabel_top:  _top + 'px',
                         currentLabel_left: this.excelObject.setting_def.columTitleDefWidth+ 'px',
@@ -545,6 +547,8 @@ class Excel extends React.Component<any, any>  {
                 this.updateEditorDOM(-1, -1,'changeSize');
                 this.reDrawSelectArea();
             }
+            this.reDrawCanvas();
+            this.updateEditorDOM(-1, -1,'changeSize');
         }
     }
 
@@ -692,7 +696,7 @@ class Excel extends React.Component<any, any>  {
                         display:this.state.editor_display
                     }}
                     suppressContentEditableWarning = {true}>
-                    <span className="content">{this.state.editor_top+'_'+this.state.editor_left+'_'+this.state.editor_display}</span>
+                    <span className="content">{this.state.editor_width + "_" +this.state.editor_top+'_'+this.state.editor_left+'_'+this.state.editor_display}</span>
                 </div>
                 <span className="editor_coordinate c-t" 
                     style={{
