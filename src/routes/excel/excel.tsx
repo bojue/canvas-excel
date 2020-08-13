@@ -179,7 +179,7 @@ class Excel extends React.Component<any, any>  {
             ctx.stroke();
 
             startLeft += setting.column[i];
-            this.excelObject.setting_custome.columnLefts[i] =startLeft;
+            this.excelObject.setting_custome.columnLefts[i] = startLeft;
             if( i === setting.column.length -1) {
                 this.excelObject.info.width = startLeft * ratio;
             }
@@ -384,6 +384,7 @@ class Excel extends React.Component<any, any>  {
         // 鼠标选中从右向左选中
         let col_start = Math.min(_start[1],_end[1]);
         let col_end = Math.max(_start[1], _end[1]) 
+        console.log(setting.columnLefts)
         let _l= col_start > 0 ? setting.columnLefts[col_start -1] :  def.columTitleDefWidth;
         let _w = (setting.columnLefts.length === col_end + 1) ? setting.columnLefts[col_end] + setting.column[setting.column.length-1] - setting.columnLefts[col_start] : setting.columnLefts[col_end + 1] - setting.columnLefts[col_start];
         // 鼠标选中从下向上选中
@@ -396,8 +397,6 @@ class Excel extends React.Component<any, any>  {
         ctx.strokeStyle = 'rgba(0, 102, 0, 0.8)';
         ctx.rect(_l, _t, _w, _h) ;
         ctx.fillStyle =  'rgba(0, 102, 0, 0.02)';
-
-        console.log("left ->  ",_l, " width -> ", _w, 'col_end -> ',col_end,'setting.columnLefts', setting.columnLefts, setting.columnLefts[col_end] )
         ctx.fillRect(_l, _t, _w, _h) ;
         ctx.stroke();
     } 
@@ -537,18 +536,16 @@ class Excel extends React.Component<any, any>  {
         }else if(e.type === 'mouseup') {
             if(this.state.change_size_current_index > -1) {
                 if(this.state.changeSizeState === 'change_size_w') { 
-                    let _left = this.excelObject.setting_custome.columnLefts[this.state.change_size_current_index -1] || this.excelObject.setting_def.columTitleDefWidth ;
+                    let _left = this.excelObject.setting_custome.columnLefts[this.state.change_size_current_index -1] || this.excelObject.setting_def.columTitleDefWidth;
                     this.excelObject.setting_custome.column[this.state.change_size_current_index]  = Math.max(_eX - _left, 2)
                 }else {
                     let _top = this.excelObject.setting_custome.rowTops[this.state.change_size_current_index -1] || this.excelObject.setting_def.rowTitleHeight
                     this.excelObject.setting_custome.row[this.state.change_size_current_index]  = Math.max(_eY - _top,2);
                 }
-                this.reDrawCanvas();
-                this.updateEditorDOM(-1, -1,'changeSize');
-                this.reDrawSelectArea();
             }
             this.reDrawCanvas();
-            this.updateEditorDOM(-1, -1,'changeSize');
+            // this.updateEditorDOM(-1, -1,'changeSize');
+            this.updateSelectArea(_eX, _eY);
         }
     }
 
