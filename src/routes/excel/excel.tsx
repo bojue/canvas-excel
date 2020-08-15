@@ -351,10 +351,7 @@ class Excel extends React.Component<any, any>  {
                       
              
                         })
-                        console.log("保存 --> ",col, row)
                     }else {
-                        console.log(this.state.regional_sel_state )
-                        console.log("保存2 --> ",col, row)
                         this.setState({
                             regional_sel_end:[col,row],
                         })
