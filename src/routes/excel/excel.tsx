@@ -296,22 +296,16 @@ class Excel extends React.Component<any, any>  {
         }); 
     }
 
-    initSelection() {
-        this.setState({
-            regional_sel_state: 0,
-            regional_sel_l:0,
-            regional_sel_t:0,
-            regional_cantch_before:[0,0]
-        })
-    }
+    // 区域选择
     regionalSelection(left:number, top:number){
-        this.updateSelectArea(left, top)
+        this.updateSelectArea(left, top);
     }
+
+    // 更新区域选择
     updateSelectArea(left:number, top:number){
         const ctx = this.context;
         let def = this.excelObject.setting_def;
         let setting = this.excelObject.setting_custome;
-
         let rows = setting.row;
         let colums = setting.column;
         let rLen = rows.length;
@@ -374,8 +368,10 @@ class Excel extends React.Component<any, any>  {
   
     }
 
+    // 重新绘制区域选择
     reDrawSelectArea() {
         const ctx = this.context;
+        let ratio = this.excelObject.info.scalingRatio;
         let def = this.excelObject.setting_def;
         let setting = this.excelObject.setting_custome;
         ctx.beginPath();
@@ -384,7 +380,6 @@ class Excel extends React.Component<any, any>  {
         // 鼠标选中从右向左选中
         let col_start = Math.min(_start[1],_end[1]);
         let col_end = Math.max(_start[1], _end[1]) 
-        console.log(setting.columnLefts)
         let _l= col_start > 0 ? setting.columnLefts[col_start -1] :  def.columTitleDefWidth;
         let _w = (setting.columnLefts.length === col_end + 1) ? setting.columnLefts[col_end] + setting.column[setting.column.length-1] - setting.columnLefts[col_start] : setting.columnLefts[col_end + 1] - setting.columnLefts[col_start];
         // 鼠标选中从下向上选中
@@ -392,12 +387,24 @@ class Excel extends React.Component<any, any>  {
         let row_end = Math.max(_start[0], _end[0]);
         let _t=  row_start > 0 ? setting.rowTops[row_start -1] : def.rowTitleHeight;
         let _h = (setting.rowTops.length === row_end + 1) ? setting.rowTops[row_end] + setting.row[setting.row.length-1] - setting.rowTops[col_start]:
-         setting.rowTops[row_end] - (row_start > 0 ? setting.rowTops[row_start-1] : def.rowTitleHeight);
+        setting.rowTops[row_end] - (row_start > 0 ? setting.rowTops[row_start-1] : def.rowTitleHeight);
         ctx.lineWidth = 2;
         ctx.strokeStyle = 'rgba(0, 102, 0, 0.8)';
-        ctx.rect(_l, _t, _w, _h) ;
-        ctx.fillStyle =  'rgba(0, 102, 0, 0.02)';
-        ctx.fillRect(_l, _t, _w, _h) ;
+        ctx.rect(_l * ratio, _t * ratio, _w * ratio, _h * ratio);
+        ctx.fillStyle =  'rgba(0, 102, 0, 0.04)';
+        ctx.fillRect(_l * ratio, _t * ratio, _w * ratio, _h * ratio)
+
+        // 选中区域的起始网格
+        this.setState({
+            editor_coordinate_x:col_start,
+            editor_coordinate_y:row_start
+        })
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(
+            _l * ratio, 
+            _t * ratio, 
+            (setting.columnLefts[col_start] - _l) * ratio,
+            (setting.rowTops[row_start] -_t) * ratio);
         ctx.stroke();
     } 
     initChangeSizeState() {
@@ -673,6 +680,15 @@ class Excel extends React.Component<any, any>  {
 
     clearFullRect() {
         this.context.clearRect(0, 0,this.excelObject.info.scalingRatio * 1000, this.excelObject.info.scalingRatio* 500 );
+    }
+
+    initSelection() {
+        this.setState({
+            regional_sel_state: 0,
+            regional_sel_l:0,
+            regional_sel_t:0,
+            regional_cantch_before:[0,0]
+        })
     }
 
     render() {
