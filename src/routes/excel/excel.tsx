@@ -269,7 +269,7 @@ class Excel extends React.Component<any, any>  {
             let _eX = e.clientX - this.clientRect.x;
             let _eY = e.clientY - this.clientRect.y;
             this.updateSelectArea(_eX, _eY);
-            this.initSelection();
+            // this.initSelection();
         }); 
         ctx.addEventListener('mousemove', (e:MouseEvent)=> {
             let _eX = e.clientX - this.clientRect.x;
@@ -314,13 +314,13 @@ class Excel extends React.Component<any, any>  {
         if(this.state.regional_sel_state === 0) {
             return;
         }
+
         let ratio = this.excelObject.info.scalingRatio;
         for(let row = 0;row < cLen;row++) {
             currentTop = def.rowTitleHeight;
-            // currentLeft = def.columTitleDefWidth;
-            let width = colums[row];
+            let width = colums[row]  ;
             for(let col=0;col< rLen;col++) {
-                let height = rows[col];
+                let height = rows[col] ;
                 currentTop = col > 0 ? setting.rowTops[col -1] : def.rowTitleHeight;
                 currentLeft = row > 0 ? setting.columnLefts[row -1] : def.columTitleDefWidth;
                 if(currentTop < top && (currentTop + height) >= top && currentLeft < left && (currentLeft + width) >= left) {
@@ -348,9 +348,13 @@ class Excel extends React.Component<any, any>  {
                             regional_sel_t:currentTop,
                             regional_sel_state:2,
                             regional_cantch_before:[currentLeft, currentTop],
+                      
              
                         })
+                        console.log("保存 --> ",col, row)
                     }else {
+                        console.log(this.state.regional_sel_state )
+                        console.log("保存2 --> ",col, row)
                         this.setState({
                             regional_sel_end:[col,row],
                         })
@@ -376,10 +380,13 @@ class Excel extends React.Component<any, any>  {
         let _start = this.state.regional_sel_start;
         let _end = this.state.regional_sel_end;
         
+        console.log(_start, _end)
         // 鼠标选中从右向左选中
         let col_start = Math.min(_start[1],_end[1]);
         let col_end = Math.max(_start[1], _end[1]) 
         let _l= col_start > 0 ? setting.columnLefts[col_start -1] :  def.columTitleDefWidth;
+        console.log(setting.columnLefts)
+        console.log('_l', _l, col_start)
         let _w = (setting.columnLefts.length === (col_end + 1)) ? 
             setting.columnLefts[col_end] + setting.column[setting.column.length-1] - setting.columnLefts[col_start] : 
             setting.columnLefts[col_end + 1] - setting.columnLefts[col_start];
@@ -404,6 +411,8 @@ class Excel extends React.Component<any, any>  {
             editor_coordinate_y:row_start
         })
         ctx.fillStyle = '#fff';
+
+        console.log(_l * ratio, _t * ratio)
         ctx.fillRect(
             _l * ratio, 
             _t * ratio, 
