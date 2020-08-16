@@ -50,7 +50,7 @@ module.exports = {
       contentBase: path.join(__dirname, 'public'),
       port: 3000,
       hot:true,
-      host:"localhostç",
+      host:"localhost",
       historyApiFallback: true,
       compress: true,
       open:"Chrome",
