@@ -104,9 +104,9 @@ class Excel extends React.Component<any, any>  {
                 columTitleDefWidth:30,
             },
             setting_custome: {
-                row:[100,100,100,100],
+                row:[50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50],
                 rowTops:[],
-                column:[50,50,50,50],
+                column:[50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50],
                 columnLefts:[]
             }
         };
