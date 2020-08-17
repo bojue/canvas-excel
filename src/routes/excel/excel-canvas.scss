@@ -44,7 +44,7 @@
             overflow-wrap: break-word;
             display: none;
             .content {
-                font-family: "Microsoft YaHei", '微软雅黑';
+                font-family: "Microsoft YaHei", 'å¾®è½¯é›…é»‘';
                 font-size: 10pt;
                 text-decoration: nonmal;
                 width: 100%;
@@ -131,4 +131,10 @@
             color:forestgreen;
         }
     }
+    .state {
+        position:absolute;
+        top: -30px;
+        left:100px;
+    }
 }
+

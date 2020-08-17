@@ -1,0 +1,15 @@
+.setting {
+    position: relative;
+    width: 100%;
+    height: 50px;
+    line-height: 60px;
+    border-top: 1px solid #dadce0;
+    border-bottom: 1px solid #dadce0;
+    padding: 5px;
+    display: flex;
+
+    .btn {
+        padding: 3px 5px;
+        margin: 10px;
+    }
+}
