@@ -740,6 +740,11 @@ class Excel extends React.Component<any, any>  {
         let currentTop = def.rowTitleHeight + 0.5;
         let _s = this.state.regional_sel_start;
         let _e = this.state.regional_sel_end;
+        // 判断是否选择区域
+        let _arr = [..._s,..._e];
+        if(_arr.indexOf(-1) > -1){
+            return
+        }
         for(let row = 0;row < rLen;row++) {
             currentTop = def.rowTitleHeight+ 0.5;
             let width = colums[row];
