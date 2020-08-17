@@ -447,9 +447,8 @@ class Excel extends React.Component<any, any>  {
             setting.rowTops[row_end] - (row_start > 0 ? setting.rowTops[row_start-1] : def.rowTitleHeight);
         ctx.lineWidth = 2;
         ctx.strokeStyle = 'rgba(0, 102, 0, 0.8)';
-        ctx.rect(_l, _t, _w, _h) ;
         ctx.fillStyle =  'rgba(0, 102, 0, 0.02)';
-        ctx.fillRect(_l, _t, _w, _h) ;
+        ctx.fillRect(_l * ratio, _t * ratio, _w * ratio, _h * ratio);
         this.setState({
             regional_sel:[_l,_t,_w,_h]
         });
