@@ -58,8 +58,11 @@ class Excel extends React.Component<any, any>  {
             // 区域选择参数
             regional_sel_x:0, // 焦点位置
             regional_sel_y:0, // 焦点位置
-            regional_sel_l:0,
-            regional_sel_t:0,
+            regional_sel_state:0, // 选中区域状态
+            regional_sel:[0,0,0,0], // _l,_t,_w,_h
+            regional_sel_by_click_state:0,// 点击选中状态
+            regional_sel_l:0,  // 选中区域left
+            regional_sel_t:0, // 选中区域top
             regional_sel_start:[-1, -1], // 开始坐标
             regional_sel_end:[-1,1], //结束坐标
             regional_cantch_before:[0, 0], // 焦点区域位置缓存
@@ -299,8 +302,11 @@ class Excel extends React.Component<any, any>  {
     initSelection() {
         this.setState({
             regional_sel_state: 0,
+            regional_sel_by_click_state:0,
             regional_sel_l:0,
             regional_sel_t:0,
+            regional_sel_w:0,
+            regional_sel_h:0, 
             regional_cantch_before:[0,0]
         })
     }
@@ -352,6 +358,7 @@ class Excel extends React.Component<any, any>  {
                             regional_sel_l:currentLeft,
                             regional_sel_t:currentTop,
                             regional_sel_state:2,
+                            regional_sel_by_click_state:1,
                             regional_cantch_before:[currentLeft, currentTop],
              
                         })
@@ -384,7 +391,6 @@ class Excel extends React.Component<any, any>  {
         // 鼠标选中从右向左选中
         let col_start = Math.min(_start[1],_end[1]);
         let col_end = Math.max(_start[1], _end[1]) 
-        console.log(setting.columnLefts)
         let _l= col_start > 0 ? setting.columnLefts[col_start -1] :  def.columTitleDefWidth;
         let _w = (setting.columnLefts.length === col_end + 1) ? setting.columnLefts[col_end] + setting.column[setting.column.length-1] - setting.columnLefts[col_start] : setting.columnLefts[col_end + 1] - setting.columnLefts[col_start];
         // 鼠标选中从下向上选中
@@ -398,6 +404,9 @@ class Excel extends React.Component<any, any>  {
         ctx.rect(_l, _t, _w, _h) ;
         ctx.fillStyle =  'rgba(0, 102, 0, 0.02)';
         ctx.fillRect(_l, _t, _w, _h) ;
+        this.setState({
+            regional_sel:[_l,_t,_w,_h]
+        });
         ctx.stroke();
     } 
     initChangeSizeState() {
@@ -697,13 +706,13 @@ class Excel extends React.Component<any, any>  {
                 </div>
                 <span className="editor_coordinate c-t" 
                     style={{
-                        width:this.state.editor_width,
-                        left:this.state.editor_left,
+                        width:this.state.regional_sel[2],
+                        left:this.state.regional_sel[0],
                         top:this.excelObject.setting_def.rowTitleHeight  -2}}></span>
                 <span className="editor_coordinate c-l" 
                     style={{
-                        height:this.state.editor_height,
-                        top:this.state.editor_top,
+                        height:this.state.regional_sel[3],
+                        top:this.state.regional_sel[1],
                         left:this.excelObject.setting_def.columTitleDefWidth  -2 }}></span>
             </div>
 
