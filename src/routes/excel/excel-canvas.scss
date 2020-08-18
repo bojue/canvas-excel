@@ -77,9 +77,9 @@
    
     .change_size {
         position: absolute;
-        background:  $border-color;
+        // display: contents;
         z-index: 99;
-        display: none
+        // display: none
     }
     .change_size_w {
         top: 1px;
@@ -87,9 +87,19 @@
         width: 1px;
         height: 25px;
         cursor: ew-resize;
-        .content {
+        .title {
             position: absolute;
-            width: 1px;
+            width: 4px;
+            height: 500px;
+            background:  $border-color;
+            left: 0px;
+            top: 1;
+            z-index: 12;
+        }
+        .content {
+            z-index: 12;
+            position: absolute;
+            width: 4px;
             height: 500px;
             background:  $border-color;
             left: 0px;
