@@ -3,7 +3,6 @@ import { Props } from 'react';
 import "./excel-setting.scss";
 import "./excel-canvas.scss";
 const Merge = require( './../../assets/merge.svg');
-// import Merge from './../../assets/merge.svg'
 
 export interface Txt {
     v:string;
