@@ -2,9 +2,7 @@ import * as React from 'react';
 import { Props } from 'react';
 import "./excel-setting.scss";
 import "./excel-canvas.scss";
-import { settings } from 'cluster';
-import { number } from 'prop-types';
-import { log } from 'util';
+const Merge = require( './../../assets/merge.svg');
 
 export interface Txt {
     v:string;
@@ -15,14 +13,14 @@ export interface Txt {
 class Excel extends React.Component<any, any>  {
     excelRef:any;
     clientRect:DOMRect;
-    excelObject:any;
+    excelData:any; // excel数据源
+    excelObject:any; // excel设置设置信息
     currentLabelDOMRef:any;
     editorRef:any;
     style = {
         width: 1000 + 'px',
         height: 500 + 'px'
     }
-   
     constructor(props:any) {
         super(props);
         this.excelRef = React.createRef();
@@ -40,7 +38,7 @@ class Excel extends React.Component<any, any>  {
             currentLabel_top:-22,
             currentLabel_val:22,
             currentLabel_state:'w',
-
+     
             /**
             * Excel下标/区域鼠标状态维护
             * m_up
@@ -51,7 +49,6 @@ class Excel extends React.Component<any, any>  {
             */ 
 
             currentLabel_mouse_state:'m_up',
-              
             // 可输入状态DOM参数
             editor_width:0,
             editor_height:0,
@@ -123,6 +120,23 @@ class Excel extends React.Component<any, any>  {
     }
     getExcelCanvas() {
         this.clientRect = this.excelRef.getBoundingClientRect();
+    }
+    getFillText(lineWidth:number, txt:string, ctx:CanvasRenderingContext2D) {
+        if(txt === null || txt === undefined) return txt;
+        let len = txt.length;
+        let count = 0;
+        let width = 0;                                                                                      
+        for (let i = 0; i < len; i++) {
+            let fontWidth = ctx.measureText(txt[i]).width; 
+            if(width + fontWidth > lineWidth) {
+                count = i;
+                break;
+            }else {
+                width += fontWidth;
+            }
+        }
+        let str = count + 1 < len ? txt.substring(0, count) : txt;
+        return str;
     }
     drawBorder() {
         let def = this.excelObject.setting_def;
@@ -248,6 +262,7 @@ class Excel extends React.Component<any, any>  {
         let cLen = colums.length;
         let currentTop = def.rowTitleHeight + 0.5;
         let currentLeft = def.columTitleDefWidth+ 0.5;
+        let str = "";
         for(let row = 0;row <rLen;row++) {
             let height = rows[row];
             currentLeft = def.columTitleDefWidth + 0.5;
@@ -261,9 +276,10 @@ class Excel extends React.Component<any, any>  {
                 ctx.fillStyle = '#000';
                 let size = 10 * ratio;
                 ctx.font = 'lighter '+size+'pt  微软雅黑';
-                ctx.textAlign = "center";
+                ctx.textAlign = "left";
                 ctx.textBaseline = 'middle';
-                ctx.fillText("(" +col +"," +row+")" + width+'_' + currentLeft ,currentLeft * ratio+ width /2* ratio, currentTop * ratio+ height /2* ratio + 0.5);
+                str = this.getFillText( (width - 6)* ratio,"_currnet", ctx);
+                ctx.fillText( str, (currentLeft  + 3)* ratio , currentTop * ratio+ height /2* ratio + 0.5);
                 currentLeft += width;
             }
             currentTop += height;
@@ -287,6 +303,7 @@ class Excel extends React.Component<any, any>  {
             // this.initSelection();
         }); 
         ctx.addEventListener('mousemove', (e:MouseEvent)=> {
+
             let _eX = e.clientX - this.clientRect.x;
             let _eY = e.clientY - this.clientRect.y;
             this.updateChangeSizeButton(_eX, _eY, e);
@@ -740,6 +757,7 @@ class Excel extends React.Component<any, any>  {
         let currentTop = def.rowTitleHeight + 0.5;
         let _s = this.state.regional_sel_start;
         let _e = this.state.regional_sel_end;
+        console.log(_s, _e);
         for(let row = 0;row < rLen;row++) {
             currentTop = def.rowTitleHeight+ 0.5;
             let width = colums[row];
@@ -782,7 +800,9 @@ class Excel extends React.Component<any, any>  {
         return<> 
         <div className="setting">
             <span className="item">
-                <button className="merge btn" onClick={this.merge.bind(this)}>合并单元格</button>
+                <span className="merge s_img" onClick={this.merge.bind(this)}>
+                    <img src={ Merge && Merge.default} alt="" title="合并"/>
+                </span>
             </span>
         </div>
         <div className="excel_body">

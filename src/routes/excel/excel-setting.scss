@@ -8,8 +8,18 @@
     padding: 5px;
     display: flex;
 
-    .btn {
-        padding: 3px 5px;
-        margin: 10px;
+    .item {
+        margin: 5px 10px;
+    }
+    .s_img {
+        cursor: pointer;
+        width: 40px;
+        height: 40px;
+        display: inline-block;
+        padding: 5px;
+        img {
+            width: 26px;
+            height: 26px;
+        }
     }
 }
