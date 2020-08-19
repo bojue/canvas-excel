@@ -41,17 +41,23 @@ class Excel extends React.Component<any, any>  {
             currentLabel_left:400,
             currentLabel_top:-22,
             currentLabel_val:22,
-            currentLabel_state:'w',
      
             /**
-            * Excel下标/区域鼠标状态维护
+            * Excel下标/区域鼠标状态维护|
             * m_up
-            * m_chaneg_zize|改变大小鼠标按下
-            * m_sel_area|改变区域鼠标按下
-            * m_input|输入状态
-            * m_enter
+            * m_move
+            * m_down
+            * m_drag
             */ 
-            mouse_state:'m_up',
+            mouse_state:'m_up', 
+            /**
+             * 鼠标事件维护|
+             * init
+             * w
+             * h
+             * sel_area
+             */
+            mouse_event_type:'init', 
 
             currentLabel_mouse_state:'m_up',
             // 可输入状态DOM参数
@@ -95,6 +101,8 @@ class Excel extends React.Component<any, any>  {
                 left:60,
                 top:25
             },
+
+            // 选择的区域
             selection_board: {
                 width:0,
                 height:0,
@@ -283,8 +291,8 @@ class Excel extends React.Component<any, any>  {
                 ctx.font = 'lighter '+size+'pt  微软雅黑';
                 ctx.textAlign = "left";
                 ctx.textBaseline = 'middle';
-                str = this.getFillText( (width - 5)* ratio,"_currnet", ctx);
-                ctx.fillText( str, (currentLeft + 3)* ratio , currentTop * ratio+ height /2* ratio + 0.5, (width - 5)* ratio);
+                str = this.getFillText( (width - 6)* ratio,"_currnet", ctx);
+                ctx.fillText( str, (currentLeft  + 3)* ratio , currentTop * ratio+ height /2* ratio + 0.5);
                 currentLeft += width;
             }
             currentTop += height;
@@ -308,10 +316,33 @@ class Excel extends React.Component<any, any>  {
             // this.initSelection();
         }); 
         ctx.addEventListener('mousemove', (e:MouseEvent)=> {
-
             let _eX = e.clientX - this.clientRect.x;
             let _eY = e.clientY - this.clientRect.y;
-            this.updateChangeSizeButton(_eX, _eY, e);
+            let tit_h = this.excelObject.setting_def.rowTitleHeight;
+            let tit_w = this.excelObject.setting_def.columTitleDefWidth;
+            let ratio =  this.excelObject.info.scalingRatio; // canvas画板缩放比例
+            let change_type = 'init';
+            if(tit_h < _eY && tit_w >= _eX) {
+                change_type = 'h';
+            }else if(tit_w < _eX && tit_h >= _eY) {
+                change_type = 'w';
+            }else if(tit_h < _eY && tit_w < _eX ){
+                change_type = 'sel_area';
+            }
+   
+            if(e.buttons === 1 && change_type === 'sel_area') {
+                this.setState({
+                    mouse_state:'m_move',
+                    mouse_event_type: change_type
+                })
+                this.updateChangeSizeButton(_eX, _eY, e);
+            }else if(['w', 'h'].indexOf(change_type) > -1){
+                this.setState({
+                    mouse_state:'m_move',
+                    mouse_event_type: change_type
+                })
+                this.changeSizeByDrag(_eX, _eY);
+            }
         }); 
         ctx.addEventListener('mousedown', (e:MouseEvent)=> {
             let _eX = e.clientX - this.clientRect.x;
@@ -319,18 +350,132 @@ class Excel extends React.Component<any, any>  {
             let ratio = this.excelObject.info.scalingRatio;
             this.setState({
                 regional_sel_x:_eX * ratio,
-                regional_sel_y:_eY * ratio
-            })
-            this.setState({
+                regional_sel_y:_eY * ratio,
                 regional_sel_state: 1,
+                mouse_state:'m_down'
             })
-            this.regionalSelection(_eX, _eY);
+            console.log(this.state.change_size_current_index)
+            // this.regionalSelection(_eX, _eY);
         }); 
         ctx.addEventListener('mouseup', (e:MouseEvent)=> {
+            let _eX = e.clientX - this.clientRect.x;
+            let _eY = e.clientY - this.clientRect.y;
             this.setState({
-                mouse_state:'m_up'
+                mouse_state:'m_up',
+                mouse_event_type:'init'
             })
         }); 
+    }
+
+    dragChangeSize(e:MouseEvent) {
+        if(e.buttons !== 1 && e.type !== 'dragend') {
+            return;
+        }
+        let m_type =  e.type !== 'dragend' ?'m_drag':'m_dragend'
+        this.setState({
+            mouse_state:m_type
+        })
+        let _eX = e.clientX - this.clientRect.x;
+        let _eY = e.clientY - this.clientRect.y;
+        if(e.type === 'dragend') {
+            this.reDrawByDragEnd(_eX, _eY);
+        }else {
+            this.changeSizeByDrag(_eX, _eY);
+        }
+    }
+
+    changeSizeByDrag(_eX:number, _eY:number){
+        let current_index = ['m_drag', 'm_dragend'].indexOf(this.state.mouse_state) > -1 && 
+                            this.state.change_size_current_index > -1 ?  this.state.change_size_current_index : null;
+        let change_type = this.state.mouse_event_type;
+        let def = this.excelObject.setting_def;
+        let ratio = this.excelObject.info.scalingRatio;
+        let index = -1;
+        if(change_type === 'w') {
+            index = current_index || this.excelObject.setting_custome.columnLefts.indexOf(_eX);
+        }else if(change_type === 'h') {
+            index = current_index || this.excelObject.setting_custome.rowTops.indexOf(_eY)
+        }
+        if(index > -1) {
+            if(change_type === 'w') {
+                let _left = this.excelObject.setting_custome.columnLefts[this.state.change_size_current_index -1] || this.excelObject.setting_def.columTitleDefWidth;
+                let _width = Math.max(_eX - _left, 2);
+                this.setState({
+                    change_size_w:1,
+                    change_size_h:500,
+                    change_size_l:_eX,
+                    change_size_top:0,
+                    change_size_title_l:-2 * ratio,
+                    change_size_title_t: 0,
+                    change_size_title_w: 4* ratio + 1,
+                    change_size_title_h: def.rowTitleHeight,
+                    change_size_current_index:index,
+                    currentLabel_val:_width,
+                    currentLabel_top:  (-22 ) + 'px',
+                    currentLabel_left: _eX + 'px',
+                    change_size_left:_eX,
+                    change_size_display:'block',
+                    changeSizeState:'change_size_w',
+                })
+            }else {
+                let _top = this.excelObject.setting_custome.rowTops[this.state.change_size_current_index -1] || this.excelObject.setting_def.rowTitleHeight ;
+                let _height  = Math.max(_eY - _top, 2);
+                this.setState({
+                    change_size_h: 1,
+                    change_size_w: 1000,
+                    change_size_l: _eX,
+                    change_size_title_l:0,
+                    change_size_title_t: -2 * ratio,
+                    change_size_title_w: this.excelObject.setting_def.columTitleDefWidth,
+                    change_size_title_h:  4* ratio + 1,
+                    change_size_current_index:index,
+                    currentLabel_val:_height,
+                    currentLabel_top:_top + 'px',
+                    currentLabel_left: this.excelObject.setting_def.columTitleDefWidth,
+                    change_size_top: _eY,
+                    change_size_left:0 + 'px',
+                    change_size_display:'block',
+                    changeSizeState:'change_size_h',
+                })
+      
+            }
+        }
+    }
+
+    reDrawByDragEnd(_eX:number, _eY:number) {
+        let def = this.excelObject.setting_def;
+        let ratio = this.excelObject.info.scalingRatio;
+        let change_type = this.state.mouse_event_type;
+        let setting = this.excelObject.setting_custome;
+        if(change_type === 'w') { 
+            let _left = setting.columnLefts[this.state.change_size_current_index -1] || this.excelObject.setting_def.columTitleDefWidth;
+            setting.column[this.state.change_size_current_index]  = Math.max(_eX - _left, 2)
+            this.setState({
+                change_size_w:1,
+                change_size_h:500,
+                change_size_top:0,
+                change_size_title_l:-2 * ratio,
+                change_size_title_t: 0,
+                change_size_title_w: 4* ratio,
+                change_size_title_h: def.rowTitleHeight,
+                mouse_state:'m_up'
+            })
+        }else {
+            this.setState({
+                change_size_top: _eY,
+                change_size_h: 1,
+                change_size_w: 1000,
+                change_size_l:_eX,
+                change_size_title_l:0,
+                change_size_title_t: -2 * ratio,
+                change_size_title_w: def.columTitleDefWidth,
+                change_size_title_h:  4* ratio + 1,
+                mouse_state:'m_up',
+            })
+            let _top = setting.rowTops[this.state.change_size_current_index -1] || this.excelObject.setting_def.rowTitleHeight
+            setting.row[this.state.change_size_current_index]  = Math.max(_eY - _top,2);
+        }
+        this.reDrawCanvas();
     }
 
     initSelection() {
@@ -492,14 +637,6 @@ class Excel extends React.Component<any, any>  {
             _t * ratio, 
             (setting.columnLefts[merge_col] - _l) * ratio,
             (setting.rowTops[merge_row] -_t) * ratio);
-
-        // ctx.fillStyle = '#000';
-        // let size = 10 * ratio;
-        // ctx.textAlign = "left";
-        // ctx.font = 'lighter '+size+'pt  微软雅黑';
-        // ctx.textBaseline = 'middle';
-        // ctx.fillText("(" +merge_row  +"," +merge_col+")"  + "_" + _t + "_" + _l,   _l * ratio, _t * ratio +   (setting.rowTops[merge_col] -_t) * ratio /2, _w * ratio, _h * ratio)
-    
         ctx.stroke();
     } 
 
@@ -561,13 +698,6 @@ class Excel extends React.Component<any, any>  {
             } 
         }else  {
             
-        // :{
-        //     width:110,
-        //     height:23,
-        //     rowTitleHeight:25,
-        //     columTitleDefWidth:30,
-        // },
-            
             // 设置纵向
             if(event.buttons === 1 && currentIndex > -1) {
                 this.setState({
@@ -609,109 +739,6 @@ class Excel extends React.Component<any, any>  {
         }
     }
     
-    changeSizeByDrag(e:MouseEvent){
-        if(e.type === 'mouseleave' && e.buttons === 0) {
-
-        }
-        e.stopPropagation();
-        let _eX = e.clientX - this.clientRect.x;
-        let _eY = e.clientY - this.clientRect.y;
-        let tit_h = this.excelObject.setting_def.rowTitleHeight;
-        let tit_w = this.excelObject.setting_def.columTitleDefWidth;
-        let ratio =  this.excelObject.info.scalingRatio; // canvas画板缩放比例
-        let change_type = ''
-        if(tit_h < _eY && tit_w >= _eX) {
-            change_type = 'h'
-        }else if(tit_w < _eX && tit_h >= _eY) {
-            change_type = 'w'
-        }
-        let def = this.excelObject.setting_def;
-
-        // :{
-        //     width:110,
-        //     height:23,
-        //     rowTitleHeight:25,
-        //     columTitleDefWidth:30,
-        // },
-        if(['mousedown','mouseenter'].indexOf(e.type)>-1 ) {
-            let index = change_type === 'w' ?
-                        this.excelObject.setting_custome.columnLefts.indexOf(_eX) :
-                        this.excelObject.setting_custome.rowTops.indexOf(_eY);
-            if(index > -1) {
-                if(change_type === 'w') {
-                    let _left = this.excelObject.setting_custome.columnLefts[this.state.change_size_current_index -1] || this.excelObject.setting_def.columTitleDefWidth;
-                    let _width = Math.max(_eX - _left, 2);
-                    this.setState({
-                        change_size_w:1,
-                        change_size_h: Math.min(this.excelObject.info.top / ratio, 500),
-                        change_size_top:0,
-                        change_size_title_l:-2 * ratio,
-                        change_size_title_t: 0,
-                        change_size_title_w: 4* ratio + 1,
-                        change_size_title_h: def.rowTitleHeight,
-                        change_size_current_index:index,
-                        currentLabel_val:_width,
-                        currentLabel_top:  (-22 ) + 'px',
-                        currentLabel_left: _eX + 'px',
-                        change_size_left:_eX,
-                        change_size_display:'block',
-                        changeSizeState:'change_size_w',
-                    })
-                }else {
-                    let _top = this.excelObject.setting_custome.rowTops[this.state.change_size_current_index -1] || this.excelObject.setting_def.rowTitleHeight ;
-                    let _height  = Math.max(_eY - _top, 2);
-                    this.setState({
-                        change_size_h: 1,
-                        change_size_w:Math.min(this.excelObject.info.width / this.excelObject.info.scalingRatio, 1000),
-                        change_size_current_index:index,
-                        currentLabel_val:_height,
-                        currentLabel_top:_top + 'px',
-                        currentLabel_left: this.excelObject.setting_def.columTitleDefWidth+ 'px',
-                        change_size_top: _eY,
-                        change_size_left:0 + 'px',
-                        change_size_display:'block',
-                        changeSizeState:'change_size_h',
-                    })
-                }
-            }
-        }else if(e.type === 'mouseup') {
-            if(this.state.change_size_current_index > -1) {
-                if(this.state.changeSizeState === 'change_size_w') { 
-                    let _left = this.excelObject.setting_custome.columnLefts[this.state.change_size_current_index -1] || this.excelObject.setting_def.columTitleDefWidth;
-                    this.excelObject.setting_custome.column[this.state.change_size_current_index]  = Math.max(_eX - _left, 2)
-                    this.setState({
-                        change_size_w:1,
-                        change_size_h: Math.min(this.excelObject.info.top / ratio, 500),
-                        change_size_top:0,
-                        change_size_title_l:-2 * ratio,
-                        change_size_title_t: 0,
-                        change_size_title_w: 4* ratio,
-                        change_size_title_h: def.rowTitleHeight,
-                        mouse_state:'m_up'
-                    })
-                }else {
-                    this.setState({
-                        change_size_w:1,
-                        change_size_h: Math.min(this.excelObject.info.top / ratio, 500),
-                        change_size_top:0,
-                        change_size_title_l:-2 * ratio,
-                        change_size_title_t: 0,
-                        change_size_title_w: 4* ratio,
-                        change_size_title_h: def.rowTitleHeight,
-                        mouse_state:'m_up'
-                    })
-                    let _top = this.excelObject.setting_custome.rowTops[this.state.change_size_current_index -1] || this.excelObject.setting_def.rowTitleHeight
-                    this.excelObject.setting_custome.row[this.state.change_size_current_index]  = Math.max(_eY - _top,2);
-                }
-            }
-            this.reDrawCanvas();
-            // this.updateEditorDOM(-1, -1,'changeSize');
-            this.updateSelectArea(_eX, _eY);
-        }
-    }
-
-
-
     updateEditorDOM(left:number,top:number, state ?:string) {
         let info = this.excelObject.info;
         if(state !== 'changeSize') {
@@ -852,11 +879,11 @@ class Excel extends React.Component<any, any>  {
         <div className="setting">
             <span className="item">
                 <span className="merge s_img" onClick={this.merge.bind(this)}>
-                    <img src={ Merge } alt="" title="合并"/>
+                    <img src={ Merge && Merge.default} alt="" title="合并"/>
                 </span>
             </span>
             <span className="item">
-                {this.state.mouse_state}
+                {this.state.mouse_state} - {this.state.mouse_event_type} - { this.excelObject.info.top}
             </span>
         </div>
         <div className="excel_body">
@@ -891,14 +918,15 @@ class Excel extends React.Component<any, any>  {
 
             {/* Excel下标工具栏拖拽组件*/}
             <div className={`change_size  ${this.state.changeSizeState}`} 
-                onMouseUp={this.changeSizeByDrag.bind(this)}
-                onMouseDown={this.changeSizeByDrag.bind(this)}
-                onMouseEnter={this.changeSizeByDrag.bind(this)}
-                onMouseLeave={this.changeSizeByDrag.bind(this)}
-                style={{
-                    top:this.state.change_size_top,
+                draggable = 'true'
+                onClick={this.dragChangeSize.bind(this)}
+                onDragStart={this.dragChangeSize.bind(this)}
+                onDrag={this.dragChangeSize.bind(this)}
+                onDragEnd={this.dragChangeSize.bind(this)}
+                style={{top:this.state.change_size_top,
                     left:this.state.change_size_left ,
-                    width:this.state.change_size_title_w
+                    width:this.state.change_size_title_w,
+                    display:['w','h'].indexOf(this.state.mouse_event_type) > -1 ? 'block' :'none' 
                     // display:this.state.change_size_display
                 }}>
                 <span className="title" style={{
@@ -906,13 +934,20 @@ class Excel extends React.Component<any, any>  {
                     left:this.state.change_size_title_l,
                     width:this.state.change_size_title_w , 
                     height:this.state.change_size_title_h}}></span>
-                <span className="content" style={{width:this.state.change_size_w , height:this.state.change_size_h}}></span>
+                <span className="content" style={{
+                    width:this.state.change_size_w, 
+                    height:this.state.change_size_h,
+                    display:this.state.mouse_state === 'm_up'?'none':'block'
+                }}></span>
             </div>
 
             {/* Excle下标工具栏拖拽坐标组件 */}
-            <div ref={this.currentLabelDOMRef} 
+            <div 
+                ref={this.currentLabelDOMRef} 
+                className="currentLabel"
                 style={{left:this.state.currentLabel_left,top:this.state.currentLabel_top ,
-                  display:this.state.mouse_state === 'm_up'?'none':'block'}} className="currentLabel">
+                  display:this.state.mouse_state === 'm_up'?'none':'block'
+            }}>
                     <label className="lab">{this.state.changeSizeState === 'change_size_w' ? '宽度': '高度'}:</label>
                     <span className="val">{this.state.currentLabel_val} 像素 </span>
             </div>
