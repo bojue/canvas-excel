@@ -946,7 +946,7 @@ class Excel extends React.Component<any, any>  {
                 ref={this.currentLabelDOMRef} 
                 className="currentLabel"
                 style={{left:this.state.currentLabel_left,top:this.state.currentLabel_top ,
-                  display:this.state.mouse_state === 'm_up'?'none':'block'
+                  display:['m_drag','m_dragend'].indexOf(this.state.mouse_state) > -1 ?'block':'none'
             }}>
                     <label className="lab">{this.state.changeSizeState === 'change_size_w' ? '宽度': '高度'}:</label>
                     <span className="val">{this.state.currentLabel_val} 像素 </span>
