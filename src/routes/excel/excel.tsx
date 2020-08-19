@@ -1,8 +1,6 @@
 import * as React from 'react';
 import "./excel-setting.scss";
 import "./excel-canvas.scss";
-import removeDragGhosting from "./../../utils/remove-drag-ghosting"
-
 const Merge = require( './../../assets/merge.svg');
 
 export interface Txt {
@@ -369,19 +367,27 @@ class Excel extends React.Component<any, any>  {
     }
 
     dragChangeSize(e:any) {
-        if(['drag','dragstart','dragend'].indexOf(e.type) > -1) {
-            removeDragGhosting(e);
-        }
-        
         if(e.buttons !== 1 && e.type !== 'dragend') {
             return;
         }
-        let m_type =  e.type !== 'dragend' ?'m_drag':'m_dragend'
+        let m_type =  e.type !== 'dragend' ?
+            e.type !== 'dragstart' ?'m_drag' :'m_dragstart':'m_dragend'
+        let _eX = e.clientX - this.clientRect.x;
+        let _eY = e.clientY - this.clientRect.y;
+        if(this.state.change_size_l === _eX && this.state.change_size_t === _eY) {
+            return;
+        }
+        if(['drag','dragstart','dragend'].indexOf(e.type) > -1) {
+            let dragIcon = document.createElement('img');
+            let url = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+            dragIcon.src = url;
+            dragIcon.width = 0;
+            dragIcon.height = 0;
+            e.dataTransfer &&  e.dataTransfer.setDragImage(dragIcon,0, 0);
+        }
         this.setState({
             mouse_state:m_type
         })
-        let _eX = e.clientX - this.clientRect.x;
-        let _eY = e.clientY - this.clientRect.y;
         if(e.type === 'dragend') {
             this.reDrawByDragEnd(_eX, _eY);
         }else {
@@ -401,6 +407,7 @@ class Excel extends React.Component<any, any>  {
         }else if(change_type === 'h') {
             index = current_index || this.excelObject.setting_custome.rowTops.indexOf(_eY)
         }
+
         if(index > -1) {
             if(change_type === 'w') {
                 let _left = this.excelObject.setting_custome.columnLefts[this.state.change_size_current_index -1] || this.excelObject.setting_def.columTitleDefWidth;
@@ -424,7 +431,7 @@ class Excel extends React.Component<any, any>  {
                 })
             }else {
                 let _top = this.excelObject.setting_custome.rowTops[this.state.change_size_current_index -1] || this.excelObject.setting_def.rowTitleHeight ;
-                let _height  = Math.max(_eY - _top, 2);
+                let _height = Math.max(_eY - _top, 2);
                 this.setState({
                     change_size_h: 1,
                     change_size_w: 1000,
@@ -435,10 +442,10 @@ class Excel extends React.Component<any, any>  {
                     change_size_title_h:  4,
                     change_size_current_index:index,
                     currentLabel_val:_height,
-                    currentLabel_top:_top + 'px',
+                    currentLabel_top:_top ,
                     currentLabel_left: this.excelObject.setting_def.columTitleDefWidth,
                     change_size_top: _eY,
-                    change_size_left:0 + 'px',
+                    change_size_left:0,
                     change_size_display:'block',
                     changeSizeState:'change_size_h',
                 })
@@ -888,7 +895,7 @@ class Excel extends React.Component<any, any>  {
                 </span>
             </span>
             <span className="item">
-                {this.state.mouse_state} - {this.state.mouse_event_type} - { this.excelObject.info.top}
+                {this.state.mouse_state} - {this.state.mouse_event_type} - { this.state.change_size_top}
             </span>
         </div>
         <div className="excel_body">
@@ -928,7 +935,8 @@ class Excel extends React.Component<any, any>  {
                 onDragStart={this.dragChangeSize.bind(this)}
                 onDrag={this.dragChangeSize.bind(this)}
                 onDragEnd={this.dragChangeSize.bind(this)}
-                style={{top:this.state.change_size_top,
+                style={{
+                    top:this.state.change_size_top,
                     left:this.state.change_size_left ,
                     width:this.state.change_size_title_w,
                     display:['w','h'].indexOf(this.state.mouse_event_type) > -1 ? 'block' :'none' 
