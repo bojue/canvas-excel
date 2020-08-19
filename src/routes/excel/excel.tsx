@@ -1,7 +1,8 @@
 import * as React from 'react';
-import { Props } from 'react';
 import "./excel-setting.scss";
 import "./excel-canvas.scss";
+import removeDragGhosting from "./../../utils/remove-drag-ghosting"
+
 const Merge = require( './../../assets/merge.svg');
 
 export interface Txt {
@@ -367,7 +368,11 @@ class Excel extends React.Component<any, any>  {
         }); 
     }
 
-    dragChangeSize(e:MouseEvent) {
+    dragChangeSize(e:any) {
+        if(['drag','dragstart','dragend'].indexOf(e.type) > -1) {
+            removeDragGhosting(e);
+        }
+        
         if(e.buttons !== 1 && e.type !== 'dragend') {
             return;
         }
@@ -405,9 +410,9 @@ class Excel extends React.Component<any, any>  {
                     change_size_h:500,
                     change_size_l:_eX,
                     change_size_top:0,
-                    change_size_title_l:-2 * ratio,
+                    change_size_title_l:-2,
                     change_size_title_t: 0,
-                    change_size_title_w: 4* ratio + 1,
+                    change_size_title_w: 4,
                     change_size_title_h: def.rowTitleHeight,
                     change_size_current_index:index,
                     currentLabel_val:_width,
@@ -425,9 +430,9 @@ class Excel extends React.Component<any, any>  {
                     change_size_w: 1000,
                     change_size_l: _eX,
                     change_size_title_l:0,
-                    change_size_title_t: -2 * ratio,
+                    change_size_title_t: -2 ,
                     change_size_title_w: this.excelObject.setting_def.columTitleDefWidth,
-                    change_size_title_h:  4* ratio + 1,
+                    change_size_title_h:  4,
                     change_size_current_index:index,
                     currentLabel_val:_height,
                     currentLabel_top:_top + 'px',
@@ -454,9 +459,9 @@ class Excel extends React.Component<any, any>  {
                 change_size_w:1,
                 change_size_h:500,
                 change_size_top:0,
-                change_size_title_l:-2 * ratio,
+                change_size_title_l:-2 ,
                 change_size_title_t: 0,
-                change_size_title_w: 4* ratio,
+                change_size_title_w: 4,
                 change_size_title_h: def.rowTitleHeight,
                 mouse_state:'m_up'
             })
@@ -467,9 +472,9 @@ class Excel extends React.Component<any, any>  {
                 change_size_w: 1000,
                 change_size_l:_eX,
                 change_size_title_l:0,
-                change_size_title_t: -2 * ratio,
+                change_size_title_t: -2 ,
                 change_size_title_w: def.columTitleDefWidth,
-                change_size_title_h:  4* ratio + 1,
+                change_size_title_h:  4,
                 mouse_state:'m_up',
             })
             let _top = setting.rowTops[this.state.change_size_current_index -1] || this.excelObject.setting_def.rowTitleHeight
@@ -704,9 +709,9 @@ class Excel extends React.Component<any, any>  {
                     changeSizeState:'change_size_w',
                     change_size_h: Math.min(this.excelObject.info.height /  ratio, 500),
                     change_size_w:1,
-                    change_size_title_l: -2 * ratio,
+                    change_size_title_l: -2 ,
                     change_size_title_t:0,
-                    change_size_title_w:4* ratio ,
+                    change_size_title_w:4 ,
                     change_size_title_h: def.rowTitleHeight,
                     currentLabel_val:_width,
                     currentLabel_top:  (-22) + 'px',
@@ -723,9 +728,9 @@ class Excel extends React.Component<any, any>  {
                         change_size_h: Math.min(this.excelObject.info.top / ratio, 500),
                         change_size_w:1,
                         change_size_top:0,
-                        change_size_title_l:-2 * ratio,
+                        change_size_title_l:-2,
                         change_size_title_t: 0,
-                        change_size_title_w: 4* ratio,
+                        change_size_title_w: 4,
                         change_size_title_h: def.rowTitleHeight,
                         change_size_current_index:index,
                         currentLabel_val:_width,
