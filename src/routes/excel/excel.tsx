@@ -1,6 +1,7 @@
 import * as React from 'react';
 import "./excel-setting.scss";
 import "./excel-canvas.scss";
+import { settings } from 'cluster';
 const Merge = require( './../../assets/merge.svg');
 
 export interface Txt {
@@ -401,6 +402,7 @@ class Excel extends React.Component<any, any>  {
         let change_type = this.state.mouse_event_type;
         let def = this.excelObject.setting_def;
         let ratio = this.excelObject.info.scalingRatio;
+        let setting = this.excelObject.setting_custome;
         let index = -1;
         if(change_type === 'w') {
             index = current_index || this.excelObject.setting_custome.columnLefts.indexOf(_eX);
@@ -412,6 +414,7 @@ class Excel extends React.Component<any, any>  {
             if(change_type === 'w') {
                 let _left = this.excelObject.setting_custome.columnLefts[this.state.change_size_current_index -1] || this.excelObject.setting_def.columTitleDefWidth;
                 let _width = Math.max(_eX - _left, 2);
+                setting.column[this.state.change_size_current_index]  = Math.max(_eX - _left, 2)
                 this.setState({
                     change_size_w:1,
                     change_size_h:500,
