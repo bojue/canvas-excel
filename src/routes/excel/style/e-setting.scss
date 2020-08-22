@@ -1,0 +1,24 @@
+.setting {
+    position: relative;
+    width: 100%;
+    height: 40px;
+    line-height: 40px;
+    border-bottom: 1px solid #dadce0;
+    display: flex;
+    user-select: none;
+    .item {
+        border-right: 1px solid #cccccc;
+        min-width: 100px;
+        height: 40px;
+        line-height: 40px;
+        padding: 0 10px;
+        img {
+            cursor: pointer;
+            width: 21px;
+            height: 21px;
+            display: inline-block;
+            margin-top: 8px;
+            padding: 0px 9px 0 0;
+        }
+    }
+}
