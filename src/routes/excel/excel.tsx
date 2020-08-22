@@ -340,12 +340,15 @@ class Excel extends React.Component<any, any>  {
                 change_type = 'w';
             }else if(tit_h < _eY && tit_w < _eX ){
                 change_type = 'sel_area';
+                this.setState({
+                    change_size_current_index:-1
+                })
             }
    
             if(e.buttons === 1 && change_type === 'sel_area') {
                 this.setState({
                     mouse_state:'m_move',
-                    mouse_event_type: change_type
+                    mouse_event_type: change_type,
                 })
                 this.updateChangeSizeButton(_eX, _eY, e);
             }else if(['w', 'h'].indexOf(change_type) > -1){
@@ -372,7 +375,8 @@ class Excel extends React.Component<any, any>  {
             let _eY = e.clientY - this.clientRect.y;
             this.setState({
                 mouse_state:'m_up',
-                mouse_event_type:'init'
+                mouse_event_type:'init',
+                change_size_current_index:-1,
             })
         }); 
     }
@@ -663,6 +667,13 @@ class Excel extends React.Component<any, any>  {
             _t * ratio, 
             (setting.columnLefts[merge_col] - _l) * ratio,
             (setting.rowTops[merge_row] -_t) * ratio);
+
+        ctx.fillStyle = '#000';
+        ctx.font = "10pt serif";
+        ctx.textAlign = "center";
+        ctx.fillText('newo', _l * ratio, 
+        _t * ratio,  )
+      
         ctx.stroke();
     } 
 
