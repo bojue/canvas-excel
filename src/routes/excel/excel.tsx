@@ -120,8 +120,8 @@ class Excel extends React.Component<any, any>  {
                 activeColums:[]
             },
             setting_def:{
-                width:110,
-                height:23,
+                width:60,
+                height:20,
                 rowTitleHeight:25,
                 columTitleDefWidth:30,
             },
@@ -265,18 +265,20 @@ class Excel extends React.Component<any, any>  {
             ctx.lineTo( def.columTitleDefWidth* ratio, rowTop);
             ctx.lineWidth = 1;
             ctx.strokeStyle = '#bcbcbc';
+            ctx.fillText(val++, def.columTitleDefWidth /2* ratio, rowTop + setting.row[i] * ratio - 3.5);
             ctx.stroke();
 
-            ctx.fillText(val++, def.columTitleDefWidth /2* ratio, rowTop + setting.row[i] * ratio - 3.5);
-            this.excelObject.setting_custome.rowTops[i] = startHeight;
             startHeight += setting.row[i];
+
             if( i === setting.row.length -1 || startHeight > 500) {
                 this.excelObject.info.height = startHeight * ratio;
             }
+
             if(startHeight > 500) {
                 break;
             }
-  
+
+            this.excelObject.setting_custome.rowTops[i] = startHeight;
         }
         ctx.stroke();
     }
@@ -520,7 +522,7 @@ class Excel extends React.Component<any, any>  {
             setting.row[this.state.change_size_current_index]  = Math.max(_eY - _top,2);
         }
         this.reDrawCanvas();
-        // this.reDrawSelectArea();
+        this.reDrawSelectArea();
     }
 
     initSelection() {
@@ -573,6 +575,7 @@ class Excel extends React.Component<any, any>  {
         }
 
         let ratio = this.excelObject.info.scalingRatio;
+        
         for(let row = 0;row < cLen;row++) {
             currentTop = def.rowTitleHeight;
             let width = colums[row]  ;
@@ -606,13 +609,11 @@ class Excel extends React.Component<any, any>  {
                             regional_sel_state:2,
                             regional_sel_by_click_state:1,
                             regional_cantch_before:[currentLeft, currentTop],
-                      
-             
                         })
                     }else {
                         this.setState({
                             regional_sel_end:[col,row],
-                        })
+                        });
                     }
                     //绘制矩形
                     this.reDrawCanvas();
@@ -691,6 +692,10 @@ class Excel extends React.Component<any, any>  {
         //     _t * ratio)
         // }
 
+        if(state === 'merge') {
+            console.log(_start, _end);
+        }
+        
         ctx.stroke();
     } 
 
@@ -795,28 +800,12 @@ class Excel extends React.Component<any, any>  {
     
     updateEditorDOM(left:number,top:number, state ?:string) {
         let info = this.excelObject.info;
-        console.log(left > info.left && left < info.width)
-        console.log( left, top, info)
-        // if(state !== 'changeSize') {
-        //     if(!(left > info.left && left < info.width || 
-        //         0 <= top && top < info.top )){
-        //         console.info("请点击Excel区域");
-        //         return;
-        //     }
-        // }
-
         let width = Math.min(info.width, 1000);
         let height = Math.min(info.height, 500);
-
-        console.log(left > 0 && left < width && top > 0 &&top < height)
-        console.log(left , width , top , height)
-
         if(!(left > 0 && left < width && top > 0 &&top < height)) {
             console.info("请点击Excel区域");
             return;
         }
-
-
         let def = this.excelObject.setting_def;
         let setting = this.excelObject.setting_custome;
         let cols = setting.column;
@@ -932,6 +921,10 @@ class Excel extends React.Component<any, any>  {
         this.reDrawSelectArea('merge');
     }
 
+    // 设置文字
+    font(param:string, val:string) {
+        console.log(param, val)
+    }
     // 计算合并网格大小
     getMergeVal(start:number, end:number, arr:[], ratio:number) {
         let val = 0;
@@ -952,9 +945,9 @@ class Excel extends React.Component<any, any>  {
                     <img src={ F_Under && F_Under.default} alt="" title="下划线"/>
                 </span>
                 <span className="item">
-                    <img src={ F_L && F_L.default} alt="" title="居左"/>
-                    <img src={ F_C && F_C.default} alt="" title="居中"/>
-                    <img src={ F_R && F_R.default} alt="" title="居右"/>
+                    <img src={ F_L && F_L.default} alt="" title="居左" onClick={this.font.bind(this, 'textAlign', 'left')}/>
+                    <img src={ F_C && F_C.default} alt="" title="居中" onClick={this.font.bind(this, 'textAlign', 'center')}/>
+                    <img src={ F_R && F_R.default} alt="" title="居右" onClick={this.font.bind(this, 'textAlign', 'right')}/>
                 </span>
                 <span className="item">
                     <img onClick={this.merge.bind(this)} src={ Merge && Merge.default} alt="" title="合并"/>
