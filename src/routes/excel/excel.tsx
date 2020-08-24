@@ -31,6 +31,12 @@ class Excel extends React.Component<any, any>  {
     }
     constructor(props:any) {
         super(props);
+        this.initData();
+        this.initExcelData();
+    }
+
+    initData() {
+        this.excelData = [];
         this.excelRef = React.createRef();
         this.editorRef = React.createRef();
         this.currentLabelDOMRef = React.createRef();
@@ -132,6 +138,10 @@ class Excel extends React.Component<any, any>  {
                 columnLefts:[]
             }
         };
+    }
+
+    initExcelData() {
+
     }
     componentDidMount() {
         this.getExcelCanvas();
@@ -683,21 +693,26 @@ class Excel extends React.Component<any, any>  {
             (setting.columnLefts[merge_col] - _l) * ratio,
             (setting.rowTops[merge_row] -_t) * ratio);
 
-        // if(state === 'merge') {
-        //     // 选中区域的文本
-        //     ctx.fillStyle = '#000';
-        //     ctx.font = "10pt serif";
-        //     ctx.textAlign = "center";
-        //     ctx.fillText('newo', _l * ratio, 
-        //     _t * ratio)
-        // }
+        if(state === 'merge') {
+            // 选中区域的文本
+            ctx.fillStyle = '#000';
+            ctx.font = "10pt serif";
+            ctx.textAlign = "center";
+            ctx.fillText('newo', _l * ratio, 
+            _t * ratio)
+            this.updateExcelData();
+        }
 
         if(state === 'merge') {
             console.log(_start, _end);
         }
-        
         ctx.stroke();
     } 
+
+    updateExcelData() {
+        console.log("excelData")
+        
+    }
 
     updateChangeSizeButton(left:number, top:number, event:MouseEvent) {
         //当前选中下标
@@ -907,10 +922,6 @@ class Excel extends React.Component<any, any>  {
                     ctx.rect(currentLeft * ratio, currentTop * ratio,  _w, _h );
                     ctx.fillStyle = "#fff";
                     ctx.fillRect(currentLeft * ratio, currentTop * ratio, _w,_h);
-                    ctx.fillStyle = '#000';
-                    ctx.font = "10pt serif";
-                    ctx.textAlign = "center";
-                    ctx.fillText(col + "-" + row + new Date().getTime(),currentLeft * ratio + _w /2 , currentTop * ratio+ _h/2 )
                 }
                 currentTop += height;
             }
