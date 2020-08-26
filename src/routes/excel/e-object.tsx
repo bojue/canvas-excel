@@ -6,18 +6,26 @@ let EXCEL_OBJ = {
 
 let EXCLE_DATAS = [
     [
-        'start_colum',
-        'start_row', 
-        'end_colum', 
-        'end_row', 
+        [
+            'start_colum',  //开始列
+            'start_row',    //开始行
+            'end_colum',    //结束列
+            'end_row'       //结束行
+        ],     
+        'txt',          
         {
-            'fillStyle':null,
-            'fontStyle':'normal' || 'italic',
-            'fontWeight':'normal' || 'bold',
-            'textAlign': 'center' || 'right' || 'left'
-        },
-        {
-            'textLine':'underline'
+            'font':{
+                'fillStyle':null,
+                'fontStyle':'normal' || 'italic',
+                'fontWeight':'normal' || 'bold',
+                'textAlign': 'center' || 'right' || 'left',
+            },
+            'line':{
+                'textLine':'underline'
+            },
+            'bg': {
+                fillStyle:"#fff"
+            }
         }
     ]
 ]
