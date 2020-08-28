@@ -1,4 +1,4 @@
-let excelState = {
+let excelStateModel = {
     // Excel下标工具栏参数
     changeSizeState: 'change_size_h',
     change_size_w:0,
@@ -64,4 +64,4 @@ let excelState = {
     regional_sel_y_conut:0, // 列网格数
 }
 
-export { excelState }
+export { excelStateModel }

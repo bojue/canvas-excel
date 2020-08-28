@@ -1,3 +1,3 @@
-let excelData:any[] = [] 
+let excelDataModel:any[][] = [[]]
 
-export { excelData }
+export { excelDataModel }

@@ -11,10 +11,12 @@ const F_C = require( './../../assets/f_c.svg');
 const F_L = require( './../../assets/f_l.svg');
 const F_R = require( './../../assets/f_r.svg');
 
-import { excelObject } from "./models/excel-object";
-import { excelState } from './models/excel-state';
-import { excelItem } from './models/excel-item';
-import { excelData } from './models/excel-data';
+import { excelObjectModel } from "./models/excel-object";
+import { excelStateModel } from './models/excel-state';
+import { excelItemModel } from './models/excel-item';
+import { excelDataModel } from './models/excel-data';
+
+import { getFillText } from './service/excel-draw-text';
 
 export interface Txt {
     v:string;
@@ -40,16 +42,20 @@ class Excel extends React.Component<any, any>  {
     }
 
     initData() {
-        this.excelData = [];
         this.excelRef = React.createRef();
         this.editorRef = React.createRef();
         this.currentLabelDOMRef = React.createRef();
-        this.state = excelState;
-        this.excelObject = excelObject;
+        this.state = excelStateModel;
+        this.excelObject = excelObjectModel;
+        this.excelData = excelDataModel;
     }
 
     initExcelData() {
 
+    }   
+
+    updateExcelDataByItem(x:number, y:number,coordinate:any[],type:string, val:string, setting?:object ) {
+        this.excelData[x][y] = [coordinate, type, val, setting || excelItemModel[3]];
     }
     
     componentDidMount() {
@@ -61,23 +67,7 @@ class Excel extends React.Component<any, any>  {
     getExcelCanvas() {
         this.clientRect = this.excelRef.getBoundingClientRect();
     }
-    getFillText(lineWidth:number, txt:string, ctx:CanvasRenderingContext2D) {
-        if(txt === null || txt === undefined) return txt;
-        let len = txt.length;
-        let count = 0;
-        let width = 0;                                                                                      
-        for (let i = 0; i < len; i++) {
-            let fontWidth = ctx.measureText(txt[i]).width; 
-            if(width + fontWidth > lineWidth) {
-                count = i;
-                break;
-            }else {
-                width += fontWidth;
-            }
-        }
-        let str = count + 1 < len ? txt.substring(0, count) : txt;
-        return str;
-    }
+
     drawBorder() {
         let def = this.excelObject.setting_def;
         let setting = this.excelObject.setting_custome;
@@ -213,6 +203,7 @@ class Excel extends React.Component<any, any>  {
         for(let row = 0;row <rLen && currentTop <= 500;row++) {
             let height = rows[row];
             currentLeft = def.columTitleDefWidth + 0.5;
+            this.excelData[row] = new Array(rLen)
             for(let col=0;col< cLen && currentLeft <= 1000;col++) {
                 let width = colums[col];
                 ctx.lineWidth = 1;
@@ -220,18 +211,22 @@ class Excel extends React.Component<any, any>  {
                 ctx.rect(currentLeft* ratio, currentTop* ratio, width* ratio, height* ratio);
                 ctx.fillStyle = "#fff";
                 ctx.fillRect(currentLeft* ratio, currentTop* ratio, width* ratio, height* ratio);
-                ctx.fillStyle = '#000';
+     
+                str = getFillText( (width - 6)* ratio,  (col + 1 )+'-'+(row + 1), ctx);
+                this.updateExcelDataByItem(row, col, [col, row, 1, 1], 'txt', ''+ col +'-'+ row)
+                let color = this.excelData[row][col][3]['text']['color'];
+                ctx.fillStyle = color;
                 let size = 10 * ratio;
                 ctx.font = 'lighter '+size+'pt  微软雅黑';
                 ctx.textAlign = "left";
                 ctx.textBaseline = 'middle';
-                str = this.getFillText( (width - 6)* ratio,"_currnet", ctx);
                 ctx.fillText( str, (currentLeft  + 3)* ratio , currentTop * ratio+ height /2* ratio + 0.5);
                 currentLeft += width;
             }
             currentTop += height;
         }
         ctx.stroke();
+        console.log(this.excelData)
     }
     addLister() {
         document.addEventListener("mousemove", (e:MouseEvent)=>{
