@@ -1,10 +1,4 @@
-let EXCEL_OBJ = {
-    rows:[], // 行
-    columns:[], // 列
-    datas:[] // 数据对象
-}
-
-let EXCLE_DATAS = [
+let excelItem = [
     [
         [
             'start_colum',  //开始列
@@ -12,9 +6,10 @@ let EXCLE_DATAS = [
             'end_colum',    //结束列
             'end_row'       //结束行
         ],     
-        'txt',          
+        'txt', 
+        'value',    
         {
-            'font':{
+            'text':{
                 'fillStyle':null,
                 'fontStyle':'normal' || 'italic',
                 'fontWeight':'normal' || 'bold',
@@ -29,3 +24,5 @@ let EXCLE_DATAS = [
         }
     ]
 ]
+
+export { excelItem }

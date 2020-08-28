@@ -2,8 +2,7 @@ import * as React from 'react';
 import "./style/e-setting.scss";
 import "./style/e-current.scss";
 import "./style/e-content.scss";
-import { settings } from 'cluster';
-import { timingSafeEqual } from 'crypto';
+
 const Merge = require( './../../assets/merge.svg');
 const F_Blod = require( './../../assets/f_b.svg');
 const F_Ltalic = require( './../../assets/f_i.svg');
@@ -11,6 +10,11 @@ const F_Under = require( './../../assets/f_ul.svg');
 const F_C = require( './../../assets/f_c.svg');
 const F_L = require( './../../assets/f_l.svg');
 const F_R = require( './../../assets/f_r.svg');
+
+import { excelObject } from "./models/excel-object";
+import { excelState } from './models/excel-state';
+import { excelItem } from './models/excel-item';
+import { excelData } from './models/excel-data';
 
 export interface Txt {
     v:string;
@@ -40,109 +44,14 @@ class Excel extends React.Component<any, any>  {
         this.excelRef = React.createRef();
         this.editorRef = React.createRef();
         this.currentLabelDOMRef = React.createRef();
-        this.state = {
-            // Excel下标工具栏参数
-            changeSizeState: 'change_size_h',
-            change_size_w:0,
-            change_size_h:0,
-            change_size_title_l: 0,
-            change_size_title_t: 0,
-            change_size_title_w:0,
-            change_size_title_h:0,
-            change_size_current_index:-1,
-                         
-            // Excel下标工具栏操作状态坐标参数
-            currentLabel_left:400,
-            currentLabel_top:-22,
-            currentLabel_val:22,
-     
-            /**
-            * Excel下标/区域鼠标状态维护|
-            * m_up
-            * m_move
-            * m_down
-            * m_drag
-            */ 
-            mouse_state:'m_up', 
-            /**
-             * 鼠标事件维护|
-             * init
-             * w
-             * h
-             * sel_area
-             */
-            mouse_event_type:'init', 
-
-            currentLabel_mouse_state:'m_up',
-            // 可输入状态DOM参数
-            editor_width:0,
-            editor_height:0,
-            editor_top:0,
-            editor_left:0,
-            editor_text:"",
-            editor_display:'none',
-            editor_coordinate_x:0,
-            editor_coordinate_y:0,
-
-            // 工具栏下标拖拽参数
-            change_size_top:0,
-            change_size_left:0,
-            change_size_display:0,
-
-            // 区域选择参数
-            regional_sel_x:0, // 焦点位置
-            regional_sel_y:0, // 焦点位置
-            regional_sel_state:0, // 选中区域状态
-            regional_sel:[0,0,0,0], // _l,_t,_w,_h
-            regional_sel_by_click_state:0,// 点击选中状态
-            regional_sel_l:0,  // 选中区域left
-            regional_sel_t:0, // 选中区域top
-            regional_sel_start:[-1, -1], // 开始坐标
-            regional_sel_end:[-1,1], //结束坐标
-            regional_cantch_before:[0, 0], // 焦点区域位置缓存
-            regional_sel_width:0,
-            regional_sel_height:0,
-            regional_sel_x_count:0, // 行网格数
-            regional_sel_y_conut:0, // 列网格数
-
-        }
-        this.excelObject = {
-            info:{
-                title:"Excel",
-                scalingRatio: /macintosh|mac os x/i.test(navigator.userAgent) ? 2: 1,
-                width:0,
-                height:0,
-                left:60,
-                top:25
-            },
-
-            // 选择的区域
-            selection_board: {
-                width:0,
-                height:0,
-                left:0,
-                top:0,
-                activeRows:[],
-                activeColums:[]
-            },
-            setting_def:{
-                width:60,
-                height:20,
-                rowTitleHeight:25,
-                columTitleDefWidth:30,
-            },
-            setting_custome: {
-                row:[20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,2020,20,20,20,20,20,20,20,20],
-                rowTops:[],
-                column:[60,60,60,60,60,60,60,60,60,60,60,60,60,60,60,60,60,60,60,60,60,60,60,60,60,60,60,60,60,60,60,60,60,60],
-                columnLefts:[]
-            }
-        };
+        this.state = excelState;
+        this.excelObject = excelObject;
     }
 
     initExcelData() {
 
     }
+    
     componentDidMount() {
         this.getExcelCanvas();
         this.drawBorder();
@@ -247,10 +156,6 @@ class Excel extends React.Component<any, any>  {
         // 获取Excel高度
         let startHeight = def.rowTitleHeight;
         let _h = startHeight + 0.5;
-        // for(let i=0;i<setting.row.length;i++) {
-        //     _h +=  setting.row[i] ;
-        // }
-        // this.excelObject.info.height  = _h * ratio;
 
         // 绘制左侧统计行工具栏
         for(let i=0;i<setting.row.length;i++) {
