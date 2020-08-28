@@ -1,7 +1,10 @@
+.content {
+    width: 1000px;
+    height: 500px;
+}
 .excel_body {
     $border-color:rgba(0,102,0,1);
     position: relative;
-    margin-top: 40px;
     [contenteditable=true] {
         caret-color:  $border-color;
     }
@@ -86,7 +89,7 @@
         left: 100px;
         width: 1px;
         height: 25px;
-        cursor: ew-resize;
+        cursor: col-resize;
         .title {
             position: absolute;
             width: 4px;
@@ -112,7 +115,7 @@
         left: 1px;
         width: 30px;
         height: 0px;
-        cursor: ns-resize;
+        cursor: row-resize;
         .title {
             position: absolute;
             width: 4px;
