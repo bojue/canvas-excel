@@ -65,7 +65,7 @@ class Excel extends React.Component<any, any>  {
     } 
 
     updateExcelDataByItem(x:number, y:number,coordinate:any[],type:string, val:string, setting?:object ) {
-        this.excelData[x][y] = [coordinate, type, val, setting || excelItemModel[3]];
+        this.excelData[x][y] = JSON.parse(JSON.stringify([coordinate, type, val, setting || this.excelData[x] && this.excelData[x][y] && this.excelData[x][y][3] || excelItemModel[3]]));
     }
     
     componentDidMount() {
@@ -213,7 +213,7 @@ class Excel extends React.Component<any, any>  {
         for(let row = 0;row <rLen && currentTop <= 500;row++) {
             let height = rows[row];
             currentLeft = def.columTitleDefWidth + 0.5;
-            this.excelData[row] = new Array(rLen)
+            this.excelData[row] = this.excelData[row] || new Array(rLen)
             for(let col=0;col< cLen && currentLeft <= 1000;col++) {
                 let width = colums[col];
                 ctx.lineWidth = 1;
@@ -222,7 +222,6 @@ class Excel extends React.Component<any, any>  {
                 ctx.fillStyle = "#fff";
                 ctx.fillRect(currentLeft* ratio, currentTop* ratio, width* ratio, height* ratio);
                 str = getFillText( (width - 6)* ratio,  (col + 1 )+'-'+(row + 1), ctx);
-                console.log(this.excelData[row] && this.excelData[row][col] && this.excelData[row][col][3])
                 this.updateExcelDataByItem(row, col, [col, row, 1, 1], 'txt', ''+ col +'-'+ row,)
                 let color = this.excelData[row][col][3]['text']['color'];
                 ctx.fillStyle = color;
@@ -848,12 +847,21 @@ class Excel extends React.Component<any, any>  {
     }
 
     selCol(col:string) {
-        console.log(col)
-        console.log(this.excelData)
-        // this.excelData[row][col][3]
-        console.log(this.state.regional_sel)
-        console.log(this.state.regional_sel_start)
-        console.log(this.state.regional_sel_end)
+        let rowLen = this.excelData.length;
+        let _r_s = Math.max(0, this.state.regional_sel_start[0]);
+        let _r_e = Math.min(rowLen, this.state.regional_sel_end[0])
+        for(let i=_r_s;i<_r_e;i++) {
+            let item = this.excelData[i];
+            let colLen = item.length;
+            let _c_s = Math.max(0, this.state.regional_sel_start[1]);
+            let _c_e = Math.min(colLen, this.state.regional_sel_end[1])
+            for(let j=_c_s;j<_c_e;j++) {
+                this.excelData[i][j][3]['text']['color']  = col;
+            }
+        }
+
+        this.initExcel();
+        
     }
     // 计算合并网格大小
     getMergeVal(start:number, end:number, arr:[], ratio:number) {
