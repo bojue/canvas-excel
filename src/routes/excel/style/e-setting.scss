@@ -12,6 +12,9 @@
         height: 40px;
         line-height: 40px;
         padding: 0 10px;
+        &.col {
+            width: 175px;
+        }
         img {
             cursor: pointer;
             width: 21px;
@@ -21,6 +24,20 @@
             padding: 6px;
             &:hover {
                 background: #e5e5e5;
+            }
+        }
+        .cols {
+            display: inline-block;
+            top: 50%;
+            position: absolute;
+            transform: translateY(-50%);
+            .col-item {
+                cursor: pointer;
+                width: 20px;
+                height: 20px;
+                background:red;
+                display: inline-block;
+                margin-right: 5px;
             }
         }
     }

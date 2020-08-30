@@ -9,7 +9,7 @@ let excelItemModel =  [
     'value',    
     {
         'text':{
-            'color':'red',
+            'color':'#000',
             'fontStyle':'normal' || 'italic',
             'fontWeight':'normal' || 'bold',
             'textAlign': 'center' || 'right' || 'left',
