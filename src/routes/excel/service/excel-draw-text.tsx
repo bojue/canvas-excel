@@ -10,6 +10,16 @@ let drawText = (ctx:any) => {
     ctx.stroke();
 }
 
+let initDrawText = (str:string, ctx:any, excelData:any, width:number, height:number, currentLeft:number, currentTop:number, ratio:number,row:number, col:number)=> {
+    let color = excelData[row][col][3]['text']['color'];
+    ctx.fillStyle = color;
+    let size = 10 * ratio;
+    ctx.font = 'lighter '+size+'pt  微软雅黑';
+    ctx.textAlign = "left";
+    ctx.textBaseline = 'middle';
+    ctx.fillText( str, (currentLeft  + 3)* ratio , currentTop * ratio+ height /2* ratio + 0.5);
+}
+
 let getFillText = (lineWidth:number, txt:string, ctx:CanvasRenderingContext2D) => {
     if(txt === null || txt === undefined) return txt;
     let len = txt.length;
@@ -30,4 +40,4 @@ let getFillText = (lineWidth:number, txt:string, ctx:CanvasRenderingContext2D) =
     return txt;
 }
 
-export { drawText, getFillText };
+export { drawText, getFillText, initDrawText };

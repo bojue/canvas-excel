@@ -16,7 +16,7 @@ import { excelStateModel } from './models/excel-state';
 import { excelItemModel } from './models/excel-item';
 import { excelDataModel } from './models/excel-data';
 
-import { getFillText } from './service/excel-draw-text';
+import { getFillText, initDrawText } from './service/excel-draw-text';
 
 export interface Txt {
     v:string;
@@ -211,16 +211,9 @@ class Excel extends React.Component<any, any>  {
                 ctx.rect(currentLeft* ratio, currentTop* ratio, width* ratio, height* ratio);
                 ctx.fillStyle = "#fff";
                 ctx.fillRect(currentLeft* ratio, currentTop* ratio, width* ratio, height* ratio);
-     
-                str = getFillText( (width - 6)* ratio,  (col + 1 )+'-'+(row + 1), ctx);
                 this.updateExcelDataByItem(row, col, [col, row, 1, 1], 'txt', ''+ col +'-'+ row)
-                let color = this.excelData[row][col][3]['text']['color'];
-                ctx.fillStyle = color;
-                let size = 10 * ratio;
-                ctx.font = 'lighter '+size+'pt  微软雅黑';
-                ctx.textAlign = "left";
-                ctx.textBaseline = 'middle';
-                ctx.fillText( str, (currentLeft  + 3)* ratio , currentTop * ratio+ height /2* ratio + 0.5);
+                str = getFillText( (width - 6)* ratio,  (col + 1 )+'-'+(row + 1), ctx);
+                initDrawText(str, ctx, this.excelData, width, height, currentLeft, currentTop, ratio, row, col);
                 currentLeft += width;
             }
             currentTop += height;
