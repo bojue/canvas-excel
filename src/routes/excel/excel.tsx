@@ -16,7 +16,7 @@ import { excelStateModel } from './models/excel-state';
 import { excelItemModel } from './models/excel-item';
 import { excelDataModel } from './models/excel-data';
 
-import { getFillText, drawText} from './service/excel-draw-text';
+import { drawMergeText, drawText} from './service/excel-draw-text';
 export interface Txt {
     v:string;
     x:number;
@@ -29,6 +29,7 @@ class Excel extends React.Component<any, any>  {
     excelData:any; // excel数据源
     excelObject:any; // excel设置设置信息
     currentLabelDOMRef:any;
+    inputRef:any;
     editorRef:any;
     style = {
         width: 1000 + 'px',
@@ -45,6 +46,7 @@ class Excel extends React.Component<any, any>  {
         this.excelRef = React.createRef();
         this.editorRef = React.createRef();
         this.currentLabelDOMRef = React.createRef();
+        this.inputRef = React.createRef();
         this.state = excelStateModel;
         this.excelObject = excelObjectModel;
         this.excelData = excelDataModel;
@@ -220,8 +222,12 @@ class Excel extends React.Component<any, any>  {
                 ctx.rect(currentLeft* ratio, currentTop* ratio, width* ratio, height* ratio);
                 ctx.fillStyle = "#fff";
                 ctx.fillRect(currentLeft* ratio, currentTop* ratio, width* ratio, height* ratio);
-                this.updateExcelDataByItem(row, col, [col, row, 1, 1], 'txt', ''+ col +'-'+ row)
-                str = "当前坐标:"+(col + 1 )+'-'+(row + 1);
+                
+                if( this.excelData[row] &&  this.excelData[row][col]) {
+                   str = this.excelData[row][col][2];
+                } else {
+                    str = "当前坐标:"+(col + 1 )+'-'+(row + 1);
+                }
                 this.updateExcelDataByItem(row, col, [col, row, 1, 1], 'txt', ''+ col +'-'+ row,)
                 drawText(ctx, this.excelData[row][col], row, col, str, ratio, currentLeft, currentTop, height, width)
                 currentLeft += width;
@@ -547,7 +553,6 @@ class Excel extends React.Component<any, any>  {
 
         let _start = this.state.regional_sel_start;
         let _end = this.state.regional_sel_end;  
-        
         ctx.beginPath();
        
         // 鼠标选中从右向左选中
@@ -595,36 +600,14 @@ class Excel extends React.Component<any, any>  {
             _t * ratio, 
             (setting.columnLefts[merge_col] - _l) * ratio,
             (setting.rowTops[merge_row] -_t) * ratio);
-
+        if(state === 'merge') {
+            this.excelData[row_start ][col_start][2] = this.inputRef.value;
+        }
         // 绘制左上角起始单元格内容
-        let item = this.excelData[row_start ][col_start];
-        let color = item[3]['text']['color'];
-        ctx.fillStyle = color;
-        let size = 10 * ratio;
-        let textAlign = item[3]['text']['textAlign'];
-        let txtVal = getFillText(((setting.columnLefts[merge_col] - _l)  - 3)* ratio, item[2] , ctx, textAlign);
-        ctx.font = `${item[3]['text']['fontStyle'] } ${item[3]['text']['fontWeight']}  ${size}pt  å¾®è½¯é›…é»‘`;
-        ctx.textAlign =textAlign ;
-        ctx.textBaseline = 'middle';
-        let l =  textAlign === 'left' ?  _l * ratio : textAlign === 'center' ?  _l * ratio + (setting.columnLefts[merge_col] - _l) * ratio /2 :
-        setting.columnLefts[merge_col]  * ratio;
-        ctx.fillText(txtVal,l, _t * ratio +  (setting.rowTops[merge_row] -_t) * ratio/ 2);
-
-
-        if(state === 'merge') {
-            //TODO 选中区域的文本
-            this.updateExcelData();
-        }
-
-        if(state === 'merge') {
-            console.log(_start, _end);
-        }
+        drawMergeText(ctx, this.excelData[row_start ][col_start], merge_row, merge_col, _l, _t, setting, ratio);
         ctx.stroke();
+        this.inputRef.value = this.excelData[row_start ][col_start][2];
     } 
-
-    updateExcelData() {
-        
-    }
 
     updateChangeSizeButton(left:number, top:number, event:MouseEvent) {
         //当前选中下标
@@ -843,11 +826,8 @@ class Excel extends React.Component<any, any>  {
         this.reDrawSelectArea('merge');
     }
 
-    // 设置文字
-    font(param:string, val:string) {
-        console.log(param, val)
-    }
 
+    // 属性设置
     setFontStyle(param:string, key:string, val:any) {
         let rowLen = this.excelData.length;
         let _r_s = Math.max(0, this.state.regional_sel_start[0]);
@@ -876,13 +856,39 @@ class Excel extends React.Component<any, any>  {
         return val * ratio;
     }
 
+    onChange(e:Event) {
+        let target =  e.target as HTMLTextAreaElement;
+        this.excelData[this.state.editor_coordinate_x][this.state.editor_coordinate_y][2] = target.value;
+        this.updateExcelItemByInput('merge');
+    }
+
+    updateExcelItemByInput(state:string) {
+        const ctx = this.context;
+        let def = this.excelObject.setting_def;
+        let ratio = this.excelObject.info.scalingRatio;
+        let setting = this.excelObject.setting_custome;
+        let _l= this.state.editor_coordinate_x > 0 ? setting.columnLefts[this.state.editor_coordinate_x -1] :  def.columTitleDefWidth;
+        let _t=  this.state.editor_coordinate_y > 0 ? setting.rowTops[this.state.editor_coordinate_y -1] : def.rowTitleHeight;
+        ctx.beginPath();
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(
+            _l * ratio, 
+            _t * ratio, 
+            (setting.columnLefts[this.state.editor_coordinate_x] - _l) * ratio,
+            (setting.rowTops[this.state.editor_coordinate_y] -_t) * ratio);
+        ctx.fillStyle = '#fff';
+
+        // 绘制左上角起始单元格内容
+        drawMergeText(ctx, this.excelData[this.state.editor_coordinate_x][this.state.editor_coordinate_y], this.state.editor_coordinate_y, this.state.editor_coordinate_x, _l, _t, setting, ratio)
+        ctx.stroke();
+    }
+
     render() {
         return<div className="excel"> 
             <div className="setting">
                 <span className="item">
                     <img onClick={this.setFontStyle.bind(this, 'text','fontWeight', 'bold')} src={ F_Blod && F_Blod.default} alt="" title="粗体"/>
                     <img onClick={this.setFontStyle.bind(this, 'text','fontStyle', 'italic')} src={ F_Ltalic && F_Ltalic.default} alt="" title="斜体"/>
-                    {/* <img src={ F_Under && F_Under.default} alt="" title="下划线"/> */}
                 </span>
                 <span className="item col">
                     <div className="cols">
@@ -906,7 +912,12 @@ class Excel extends React.Component<any, any>  {
                     <span className="current_coordinate"> {(String.fromCharCode(65 +this.state.editor_coordinate_x ))}{this.state.editor_coordinate_y}</span>
                 </div>
                 <div className="item">
-                    <input type="val"/>
+                    <input type="val" 
+                        onChange ={this.onChange.bind(this)}
+                        ref={input => this.inputRef = input} 
+                        defaultValue={this.excelData[this.state.editor_coordinate_x] 
+                            && this.excelData[this.state.editor_coordinate_x][this.state.editor_coordinate_y] 
+                            && this.excelData[this.state.editor_coordinate_x][this.state.editor_coordinate_y][2]}/>
                 </div>
             </div>
             <div className="excel_body">

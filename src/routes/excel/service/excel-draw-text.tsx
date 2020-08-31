@@ -1,3 +1,4 @@
+// ????
 let drawText = (ctx:any, item:any, row:number, col:number, str:string, ratio:number, currentLeft:number, currentTop:number, height:number, width:number) => {
     let color = item[3]['text']['color'];
     ctx.fillStyle = color;
@@ -12,6 +13,22 @@ let drawText = (ctx:any, item:any, row:number, col:number, str:string, ratio:num
                      textAlign === 'right' ? (currentLeft + width -3) * ratio :
                      (currentLeft + width /2 ) * ratio
     ctx.fillText( txtVal, textLeft , currentTop * ratio+ height /2* ratio + 0.5);
+}
+
+
+// ????????
+let drawMergeText = (ctx:any, item:any,merge_row:number, merge_col:number, _l:number, _t:number, setting:any, ratio:number)=> {
+    let color = item[3]['text']['color'];
+    ctx.fillStyle = color;
+    let size = 10 * ratio;
+    let textAlign = item[3]['text']['textAlign'];
+    let txtVal = getFillText(((setting.columnLefts[merge_col] - _l)  - 3)* ratio, item[2] , ctx, textAlign);
+    ctx.font = `${item[3]['text']['fontStyle'] } ${item[3]['text']['fontWeight']}  ${size}pt  微软雅黑`;
+    ctx.textAlign =textAlign ;
+    ctx.textBaseline = 'middle';
+    let l =  textAlign === 'left' ?  _l * ratio : textAlign === 'center' ?  _l * ratio + (setting.columnLefts[merge_col] - _l) * ratio /2 :
+    setting.columnLefts[merge_col]  * ratio;
+    ctx.fillText(txtVal,l, _t * ratio +  (setting.rowTops[merge_row] -_t) * ratio/ 2);
 }
 
 let getFillText = (lineWidth:number, txt:string, ctx:CanvasRenderingContext2D, textAlign:string) => {
@@ -50,15 +67,15 @@ let getFillText = (lineWidth:number, txt:string, ctx:CanvasRenderingContext2D, t
             txt = txt.slice(-count)
             break;
         default: 
-        count = 0;
-        for (let i = 0; i < len; i++) {
-            let fontWidth = ctx.measureText(txt[i]).width; 
-            if(width + fontWidth >= lineWidth) {
-                break;
-            }else {
-                width += fontWidth;
-                count++;
-            }
+            count = 0;
+            for (let i = 0; i < len; i++) {
+                let fontWidth = ctx.measureText(txt[i]).width; 
+                if(width + fontWidth >= lineWidth) {
+                    break;
+                }else {
+                    width += fontWidth;
+                    count++;
+                }
             }
             if(count + 1< len) {
                 let s = parseInt((len / 2 - count/2)+'');
@@ -71,4 +88,4 @@ let getFillText = (lineWidth:number, txt:string, ctx:CanvasRenderingContext2D, t
     return txt;
 }
 
-export { drawText, getFillText };
+export { drawText, drawMergeText, getFillText };

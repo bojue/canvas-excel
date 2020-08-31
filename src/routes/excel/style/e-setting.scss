@@ -22,6 +22,9 @@
             display: inline-block;
             margin-top: 4px;
             padding: 6px;
+            &.active {
+                background: rgba(00,66,00,0.1);
+            }
             &:hover {
                 background: #e5e5e5;
             }
