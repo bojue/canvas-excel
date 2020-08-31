@@ -16,7 +16,7 @@ import { excelStateModel } from './models/excel-state';
 import { excelItemModel } from './models/excel-item';
 import { excelDataModel } from './models/excel-data';
 
-import { getFillText } from './service/excel-draw-text';
+import { getFillText, drawText} from './service/excel-draw-text';
 
 export interface Txt {
     v:string;
@@ -198,7 +198,7 @@ class Excel extends React.Component<any, any>  {
         ctx.stroke();
     }
     initExcel() {
-        let ratio = this.excelObject.info.scalingRatio;
+        const ratio = this.excelObject.info.scalingRatio;
         const ctx = this.context;
         ctx.beginPath();
         let def = this.excelObject.setting_def;
@@ -223,18 +223,11 @@ class Excel extends React.Component<any, any>  {
                 ctx.fillRect(currentLeft* ratio, currentTop* ratio, width* ratio, height* ratio);
                 str = getFillText( (width - 6)* ratio,  (col + 1 )+'-'+(row + 1), ctx);
                 this.updateExcelDataByItem(row, col, [col, row, 1, 1], 'txt', ''+ col +'-'+ row,)
-                let color = this.excelData[row][col][3]['text']['color'];
-                ctx.fillStyle = color;
-                let size = 10 * ratio;
-                ctx.font = 'lighter '+size+'pt  微软雅黑';
-                ctx.textAlign = "left";
-                ctx.textBaseline = 'middle';
-                ctx.fillText( str, (currentLeft  + 3)* ratio , currentTop * ratio+ height /2* ratio + 0.5);
+                drawText(ctx, this.excelData[row][col], row, col, str, ratio, currentLeft, currentTop, height)
                 currentLeft += width;
             }
             currentTop += height;
         }
-        console.log(this.excelData)
         ctx.stroke();
     }
     addLister() {
@@ -836,7 +829,6 @@ class Excel extends React.Component<any, any>  {
             }
             currentLeft += width;
         }
-        
         ctx.stroke();
         this.reDrawSelectArea('merge');
     }
@@ -846,23 +838,23 @@ class Excel extends React.Component<any, any>  {
         console.log(param, val)
     }
 
-    selCol(col:string) {
+    setFontStyle(param:string, key:string, val:any) {
         let rowLen = this.excelData.length;
         let _r_s = Math.max(0, this.state.regional_sel_start[0]);
         let _r_e = Math.min(rowLen, this.state.regional_sel_end[0])
-        for(let i=_r_s;i<_r_e;i++) {
+        for(let i=_r_s;i<=_r_e;i++) {
             let item = this.excelData[i];
             let colLen = item.length;
             let _c_s = Math.max(0, this.state.regional_sel_start[1]);
             let _c_e = Math.min(colLen, this.state.regional_sel_end[1])
-            for(let j=_c_s;j<_c_e;j++) {
-                this.excelData[i][j][3]['text']['color']  = col;
+            for(let j=_c_s;j<=_c_e;j++) {
+                this.excelData[i][j][3][param][key] = val;
             }
         }
-
         this.initExcel();
-        
+        this.reDrawSelectArea();
     }
+
     // 计算合并网格大小
     getMergeVal(start:number, end:number, arr:[], ratio:number) {
         let val = 0;
@@ -878,14 +870,14 @@ class Excel extends React.Component<any, any>  {
         return<div className="excel"> 
             <div className="setting">
                 <span className="item">
-                    <img src={ F_Blod && F_Blod.default} alt="" title="粗体"/>
-                    <img src={ F_Ltalic && F_Ltalic.default} alt="" title="斜体"/>
-                    <img src={ F_Under && F_Under.default} alt="" title="下划线"/>
+                    <img onClick={this.setFontStyle.bind(this, 'text','fontWeight', 'bold')} src={ F_Blod && F_Blod.default} alt="" title="粗体"/>
+                    <img onClick={this.setFontStyle.bind(this, 'text','fontStyle', 'italic')} src={ F_Ltalic && F_Ltalic.default} alt="" title="斜体"/>
+                    {/* <img src={ F_Under && F_Under.default} alt="" title="下划线"/> */}
                 </span>
                 <span className="item col">
                     <div className="cols">
                         { this.txtCols.map(col => {
-                            return <span onClick={this.selCol.bind(this, col)} className="col-item"
+                            return <span onClick={this.setFontStyle.bind(this, 'text','color',col)} className="col-item"
                                 style={{background:col}}></span>
                         })}
                     </div>

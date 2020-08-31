@@ -1,13 +1,15 @@
-let drawText = (ctx:any) => {
-    ctx.font = "20pt";
-    let str = "Hello World"
-    ctx.fillText(str, 10, 50);
-    ctx.beginPath();
-    ctx.lineWidth = 1;
-    let len = ctx.measureText(str).width;
-    ctx.moveTo(10, 50 + 2.5);
-    ctx.lineTo(len + 10,50 + 2.5);
-    ctx.stroke();
+let drawText = (ctx:any, item:any, row:number, col:number, str:string, ratio:number, currentLeft:number, currentTop:number, height:number) => {
+    console.log(item)
+    let color = item[3]['text']['color'];
+    ctx.fillStyle = color;
+    let size = 10 * ratio;
+    ctx.font = `${item[3]['text']['fontStyle'] } ${item[3]['text']['fontWeight']}  ${size}pt  微软雅黑`;
+    ctx.textAlign = "left";
+    ctx.textBaseline = 'middle';
+    ctx.fillText( str, (currentLeft  + 3)* ratio , currentTop * ratio+ height /2* ratio + 0.5);
+    // ctx.moveTo((currentLeft  + 3)* ratio , currentTop * ratio+ height /2* ratio + 0.5);
+    // ctx.lineTo((currentLeft  + 3)* ratio + ctx.measureText(str).width, currentTop * ratio+ height /2* ratio + 0.5);
+
 }
 
 let getFillText = (lineWidth:number, txt:string, ctx:CanvasRenderingContext2D) => {
@@ -29,5 +31,7 @@ let getFillText = (lineWidth:number, txt:string, ctx:CanvasRenderingContext2D) =
     }
     return txt;
 }
+
+
 
 export { drawText, getFillText };

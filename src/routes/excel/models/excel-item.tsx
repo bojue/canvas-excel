@@ -10,12 +10,12 @@ let excelItemModel =  [
     {
         'text':{
             'color':'#000',
-            'fontStyle':'normal' || 'italic',
-            'fontWeight':'normal' || 'bold',
+            'fontStyle': 'normal' || 'italic',
+            'fontWeight': 'lighter' ||'normal' || 'bold',
             'textAlign': 'center' || 'right' || 'left',
         },
         'line':{
-            'textLine':'underline'
+            'textLine':'underline' || 'normal'
         },
         'bg': {
             fillStyle:"#fff"
