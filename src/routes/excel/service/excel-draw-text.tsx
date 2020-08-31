@@ -4,7 +4,7 @@ let drawText = (ctx:any, item:any, row:number, col:number, str:string, ratio:num
     let size = 10 * ratio;
     let textAlign = item[3]['text']['textAlign'];
     let txtVal = getFillText( (width - 3)* ratio,  str, ctx, textAlign);
-    console.log(txtVal)
+    item[2] = str;
     ctx.font = `${item[3]['text']['fontStyle'] } ${item[3]['text']['fontWeight']}  ${size}pt  微软雅黑`;
     ctx.textAlign =textAlign ;
     ctx.textBaseline = 'middle';
@@ -63,7 +63,6 @@ let getFillText = (lineWidth:number, txt:string, ctx:CanvasRenderingContext2D, t
             if(count + 1< len) {
                 let s = parseInt((len / 2 - count/2)+'');
                 let e = parseInt((len /2 + count /2) + '');
-                console.log(s, e)
                 txt = txt.substring(s, e)
             }
             break;

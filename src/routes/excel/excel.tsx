@@ -587,6 +587,7 @@ class Excel extends React.Component<any, any>  {
         ctx.rect(_l * ratio, _t * ratio, _w * ratio, _h * ratio);
         ctx.fillStyle =  'rgba(0, 102, 0, 0.04)';
         ctx.fillRect(_l * ratio, _t * ratio, _w * ratio, _h * ratio);
+
         // 选中区域的起始网格
         ctx.fillStyle = '#fff';
         ctx.fillRect(
@@ -595,13 +596,23 @@ class Excel extends React.Component<any, any>  {
             (setting.columnLefts[merge_col] - _l) * ratio,
             (setting.rowTops[merge_row] -_t) * ratio);
 
+        // 绘制左上角起始单元格内容
+        let item = this.excelData[row_start ][col_start];
+        let color = item[3]['text']['color'];
+        ctx.fillStyle = color;
+        let size = 10 * ratio;
+        let textAlign = item[3]['text']['textAlign'];
+        let txtVal = getFillText(((setting.columnLefts[merge_col] - _l)  - 3)* ratio, item[2] , ctx, textAlign);
+        ctx.font = `${item[3]['text']['fontStyle'] } ${item[3]['text']['fontWeight']}  ${size}pt  å¾®è½¯é›…é»‘`;
+        ctx.textAlign =textAlign ;
+        ctx.textBaseline = 'middle';
+        let l =  textAlign === 'left' ?  _l * ratio : textAlign === 'center' ?  _l * ratio + (setting.columnLefts[merge_col] - _l) * ratio /2 :
+        setting.columnLefts[merge_col]  * ratio;
+        ctx.fillText(txtVal,l, _t * ratio +  (setting.rowTops[merge_row] -_t) * ratio/ 2);
+
+
         if(state === 'merge') {
-            // 选中区域的文本
-            ctx.fillStyle = '#000';
-            ctx.font = "10pt serif";
-            ctx.textAlign = "center";
-            ctx.fillText('newo', _l * ratio, 
-            _t * ratio)
+            //TODO 选中区域的文本
             this.updateExcelData();
         }
 
@@ -612,7 +623,6 @@ class Excel extends React.Component<any, any>  {
     } 
 
     updateExcelData() {
-        console.log("excelData")
         
     }
 
