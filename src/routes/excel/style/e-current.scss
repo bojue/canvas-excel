@@ -7,10 +7,12 @@
     padding: 0px;
     font-size: 12px;
     user-select: none;
+    background: #fff;
     .item {
         position: relative;
         width: 120px;
         display: inline-block;
+   
         :focus{
             outline:none;
         }
