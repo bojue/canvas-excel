@@ -218,8 +218,8 @@ class Excel extends React.Component<any, any>  {
             for(let col=0;col< cLen && currentLeft <= 1000;col++) {
                 let width = colums[col];
                 ctx.lineWidth = 1;
-                ctx.strokeStyle = "#d4d4d4";
-                ctx.rect(currentLeft* ratio, currentTop* ratio, width* ratio, height* ratio);
+                ctx.strokeStyle = "#ccc";
+                ctx.rect(currentLeft* ratio - 0.5, currentTop* ratio + 0.5, width* ratio, height* ratio);
                 ctx.fillStyle = "#fff";
                 ctx.fillRect(currentLeft* ratio, currentTop* ratio, width* ratio, height* ratio);
                 
