@@ -123,7 +123,7 @@ class Excel extends React.Component<any, any>  {
             //绘制边框
             ctx.lineWidth = 1;
             ctx.strokeStyle = "#b2b2b2";
-            ctx.rect(colLeft, rowTop, setting.column[i] * ratio, def.rowTitleHeight * ratio);
+            ctx.rect(colLeft, rowTop - 0.5, setting.column[i] * ratio, def.rowTitleHeight * ratio);
             
             //绘制矩形
             ctx.fillStyle = "#E6e6e6";
@@ -941,7 +941,7 @@ class Excel extends React.Component<any, any>  {
                         style={{
                             width:parseFloat(this.state.regional_sel[2]) || 0,
                             left:parseFloat(this.state.regional_sel[0]) ||0,
-                            top:(parseFloat(this.excelObject.setting_def.rowTitleHeight)||0)  -2}}></span>
+                            top:(parseFloat(this.excelObject.setting_def.rowTitleHeight + 0.5)||0)  -2}}></span>
                     <span className="editor_coordinate c-l" 
                         style={{
                             height:parseFloat(this.state.regional_sel[3])||0,
