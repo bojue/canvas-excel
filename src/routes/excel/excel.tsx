@@ -219,17 +219,17 @@ class Excel extends React.Component<any, any>  {
                 let width = colums[col];
                 ctx.lineWidth = 1;
                 ctx.strokeStyle = "#ccc";
-                ctx.rect(currentLeft* ratio - 0.5, currentTop* ratio + 0.5, width* ratio, height* ratio);
+                ctx.rect(currentLeft* ratio , currentTop* ratio , width* ratio, height* ratio);
                 ctx.fillStyle = "#fff";
                 ctx.fillRect(currentLeft* ratio, currentTop* ratio, width* ratio, height* ratio);
-                
-                if( this.excelData[row] &&  this.excelData[row][col]) {
-                   str = this.excelData[row][col][2];
+                if( this.excelData[col] &&  this.excelData[col][row]) {
+                   str = this.excelData[col][row][2];
                 } else {
                     str = "当前坐标:"+(col + 1 )+'-'+(row + 1);
                 }
                 this.updateExcelDataByItem(row, col, [col, row, 1, 1], 'txt', ''+ col +'-'+ row,)
-                drawText(ctx, this.excelData[row][col], row, col, str, ratio, currentLeft, currentTop, height, width)
+                drawText(ctx, this.excelData[row][col], row, col, str, ratio, currentLeft, currentTop, height, width);
+             
                 currentLeft += width;
             }
             currentTop += height;
@@ -583,7 +583,8 @@ class Excel extends React.Component<any, any>  {
         });
         this.setState({
             editor_coordinate_x:col_start,
-            editor_coordinate_y:row_start
+            editor_coordinate_y:row_start,
+            editor_coordinate_val: this.excelData[col_start][row_start][2]
         })
 
         let merge_col = state === 'merge' ? col_end :col_start;
@@ -858,8 +859,33 @@ class Excel extends React.Component<any, any>  {
 
     onChange(e:Event) {
         let target =  e.target as HTMLTextAreaElement;
-        this.excelData[this.state.editor_coordinate_x][this.state.editor_coordinate_y][2] = target.value;
+        if(this.excelData[this.state.editor_coordinate_x] 
+        && this.excelData[this.state.editor_coordinate_x][this.state.editor_coordinate_y] ){
+            this.excelData[this.state.editor_coordinate_x][this.state.editor_coordinate_y][2] = target.value || target.innerHTML;
+        }
+        this.setState({
+            editor_coordinate_val:this.excelData[this.state.editor_coordinate_x][this.state.editor_coordinate_y][2]
+        })
         this.updateExcelItemByInput('merge');
+    }
+
+    onInput(e:Event) {
+        let target =  e.target as HTMLTextAreaElement;
+        this.setState({
+            editor_coordinate_val: this.editorRef.current.innerHTML
+        })
+
+    }
+
+    updateInputVal() {
+        if(this.excelData[this.state.editor_coordinate_x] 
+            && this.excelData[this.state.editor_coordinate_x][this.state.editor_coordinate_y] ){
+                this.excelData[this.state.editor_coordinate_x][this.state.editor_coordinate_y][2] = this.editorRef.current.innerHTML;
+        }
+        this.setState({
+            editor_coordinate_val:this.excelData[this.state.editor_coordinate_x][this.state.editor_coordinate_y][2]
+        })
+        this.forceUpdate();
     }
 
     updateExcelItemByInput(state:string) {
@@ -870,6 +896,7 @@ class Excel extends React.Component<any, any>  {
         let _l= this.state.editor_coordinate_x > 0 ? setting.columnLefts[this.state.editor_coordinate_x -1] :  def.columTitleDefWidth;
         let _t=  this.state.editor_coordinate_y > 0 ? setting.rowTops[this.state.editor_coordinate_y -1] : def.rowTitleHeight;
         ctx.beginPath();
+        ctx.lineWidth = 12 * ratio;
         ctx.fillStyle = '#fff';
         ctx.fillRect(
             _l * ratio, 
@@ -915,9 +942,7 @@ class Excel extends React.Component<any, any>  {
                     <input type="val" 
                         onChange ={this.onChange.bind(this)}
                         ref={input => this.inputRef = input} 
-                        defaultValue={this.excelData[this.state.editor_coordinate_x] 
-                            && this.excelData[this.state.editor_coordinate_x][this.state.editor_coordinate_y] 
-                            && this.excelData[this.state.editor_coordinate_x][this.state.editor_coordinate_y][2]}/>
+                        value={ this.state.editor_coordinate_val }/>
                 </div>
             </div>
             <div className="excel_body">
@@ -929,14 +954,19 @@ class Excel extends React.Component<any, any>  {
                         id="editorRef"
                         style={{ 
                             height:(parseFloat(this.state.editor_height) ||0) + 4,
-                            width:(parseFloat(this.state.editor_width )||0)+ 4,
+                            width:(Math.max(parseFloat(this.state.regional_sel[2]), 200)||0)+ 4,
                             top:(parseFloat(this.state.editor_top)||0) -2,
                             left:(parseFloat(this.state.editor_left) || 0)  - 2,
                             display:this.state.editor_display
                         }}
-                        suppressContentEditableWarning = {true}>
-                        <span className="content">{this.state.editor_width + "_" +this.state.editor_top+'_'+this.state.editor_left+'_'+this.state.editor_display}</span>
+                        onInput ={this.onInput.bind(this)}
+                        onBlur={this.updateInputVal.bind(this)}
+                        suppressContentEditableWarning = {true}
+                        dangerouslySetInnerHTML={{__html:this.excelData[this.state.editor_coordinate_x] 
+                            && this.excelData[this.state.editor_coordinate_x][this.state.editor_coordinate_y] && this.excelData[this.state.editor_coordinate_x][this.state.editor_coordinate_y][2] }}               
+                        >
                     </div>
+           
                     <span className="editor_coordinate c-t" 
                         style={{
                             width:parseFloat(this.state.regional_sel[2]) || 0,

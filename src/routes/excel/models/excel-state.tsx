@@ -41,6 +41,7 @@ let excelStateModel = {
     editor_display:'none',
     editor_coordinate_x:0,
     editor_coordinate_y:0,
+    editor_coordinate_val:"",
 
     // 工具栏下标拖拽参数
     change_size_top:0,
