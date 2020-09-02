@@ -620,9 +620,9 @@ class Excel extends React.Component<any, any>  {
             this.excelData[row_start ][col_start][2] = this.inputRef.value;
         }
         // 绘制左上角起始单元格内容
-        drawMergeText(ctx, this.excelData[row_start ][col_start], merge_row, merge_col, _l, _t, setting, ratio);
+        drawMergeText(ctx, this.excelData[ col_start  ][row_start], merge_row, merge_col, _l, _t, setting, ratio);
         ctx.stroke();
-        this.inputRef.value = this.excelData[row_start ][col_start][2];
+        this.inputRef.value = this.excelData[ col_start][ row_start ][2];
     } 
 
     updateChangeSizeButton(left:number, top:number, event:MouseEvent) {
