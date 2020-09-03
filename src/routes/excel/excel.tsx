@@ -10,6 +10,7 @@ const F_Under = require( './../../assets/f_ul.svg');
 const F_C = require( './../../assets/f_c.svg');
 const F_L = require( './../../assets/f_l.svg');
 const F_R = require( './../../assets/f_r.svg');
+const GITHUB = require( './../../assets/github.svg');
 
 import { excelObjectModel } from "./models/excel-object";
 import { excelStateModel } from './models/excel-state';
@@ -845,23 +846,6 @@ class Excel extends React.Component<any, any>  {
 
     // 属性设置
     setFontStyle(param:string, key:string, val:any) {
-        // let rowLen = this.excelData.length;
-        // let _r_s = Math.max(0, this.state.regional_sel_start[0]);
-        // let _r_e = Math.min(rowLen, this.state.regional_sel_end[0])
-        // console.log(this.excelData, _r_s, _r_e)
-        // for(let i=_r_s;i<=_r_e;i++) {
-        //     let item = this.excelData[i];
-        //     console.log(item)
-        //     let colLen = item.length;
-        //     let _c_s = Math.max(0, this.state.regional_sel_start[1]);
-        //     let _c_e = Math.min(colLen, this.state.regional_sel_end[1])
-        //     for(let j=_c_s;j<=_c_e;j++) {
-        //         this.excelData[j][i][3][param][key] = val;
-        //     }
-        // }
-
-        console.log(this.state.regional_sel_start)
-        console.log(this.state.regional_sel_end)
         let rowLen = this.excelData.length;
         let _row_s = Math.max(0, this.state.regional_sel_start[1]);
         let _row_e = Math.min(rowLen, this.state.regional_sel_end[1])
@@ -875,7 +859,6 @@ class Excel extends React.Component<any, any>  {
                 this.excelData[j][i][3][param][key] = val;
             }
         }
-        console.log("y---> ", _row_s, _row_e)
         this.initExcel();
         this.reDrawSelectArea();
     }
@@ -912,7 +895,6 @@ class Excel extends React.Component<any, any>  {
     updateInputVal() {  
         this.onInput();
         this.excelData[this.state.editor_coordinate_x][this.state.editor_coordinate_y][2] = this.editorRef.current.innerHTML;
-        console.log(this.excelData[this.state.editor_coordinate_x][this.state.editor_coordinate_y])
     }
 
     updateExcelItemByInput(state:string) {
@@ -959,6 +941,11 @@ class Excel extends React.Component<any, any>  {
                 </span>
                 <span className="item">
                     <img onClick={this.merge.bind(this)} src={ Merge && Merge.default} alt="" title="合并"/>
+                </span>
+                <span className="github">
+                    <a href="https://github.com/bojue/canvas-excel" target="_black">
+                         <img src={GITHUB && GITHUB.default} alt=""/>
+                    </a>
                 </span>
             </div>
             <div className="current">

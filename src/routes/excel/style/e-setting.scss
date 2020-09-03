@@ -45,5 +45,16 @@
                 margin-right: 5px;
             }
         }
+   
+    }
+    .github {
+        position: absolute;
+        right: 15px;
+        top: 5px;
+        cursor: pointer;
+        img {
+            width: 30px;
+            height: 30px;
+        }
     }
 }
