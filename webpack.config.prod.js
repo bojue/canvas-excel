@@ -10,7 +10,7 @@ module.exports = {
     },
     output: {
         path: path.resolve(__dirname, 'dist'),
-        publicPath:'/dist/',
+        publicPath:'',
         filename: 'js/[name].bundle.js'
     },
     resolve: {
@@ -27,6 +27,15 @@ module.exports = {
                     'sass-loader',
                 ],
             },
+            {
+                test: /\.(png|svg|jpg|gif)$/,
+                use: {
+                    loader: 'url-loader',
+                    options: {
+                       imit: 3*1024
+                    }
+                }
+            }
         ]
     },
     performance : {
