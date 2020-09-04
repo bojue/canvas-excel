@@ -159,7 +159,7 @@ class Excel extends React.Component<any, any>  {
         for(let c = 0;startLeft>=0;c++) {
             let w =  setting.column[c];
             startLeft -= w;
-            this.excelObject.setting_custome.columnLefts[c] = c === 0 ? w +  def.columTitleDefWidth* ratio: this.excelObject.setting_custome.columnLefts[c-1] + w ;   
+            this.excelObject.setting_custome.columnLefts[c] = c === 0 ? w +  def.columTitleDefWidth: this.excelObject.setting_custome.columnLefts[c-1] + w ;   
             if(startLeft < 0) {
                 this.excelObject.setting_custome.columnLefts.length = c + 1;
             }       
@@ -208,7 +208,7 @@ class Excel extends React.Component<any, any>  {
             let h =  setting.row[r];
             startHeight -= h;
             this.excelObject.setting_custome.rowTops[r] = r === 0 ? 
-            h +  def.rowTitleHeight * ratio: 
+            h +  def.rowTitleHeight : 
                 this.excelObject.setting_custome.rowTops[r-1] + h ;   
             if(startHeight < 0) {
                 this.excelObject.setting_custome.rowTops.length = r + 1;
