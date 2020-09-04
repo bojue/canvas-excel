@@ -38,6 +38,7 @@
 - 局部渲染/部分渲染
 - 节流控制页面绘制
 - 工具栏拖拽仅拖拽（dragend）结束绘制
+- 缓存单元格左侧位置信息，减少计算过程
 
 [具体优化Issues](https://github.com/bojue/canvas-excel/issues/1)
 
