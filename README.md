@@ -39,3 +39,6 @@
 - 节流控制页面绘制
 - 工具栏拖拽仅拖拽（dragend）结束绘制
 
+[具体优化Issues](https://github.com/bojue/canvas-excel/issues/1)
+
+
