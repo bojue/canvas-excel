@@ -153,7 +153,16 @@ class Excel extends React.Component<any, any>  {
             if(startLeft > 1000) {
                 break;
             }
-            this.excelObject.setting_custome.columnLefts[i] = startLeft; 
+        }
+
+        let c = 0;
+        for(c ;startLeft>=0;c++) {
+            let w =  setting.column[c];
+            startLeft -= w;
+            this.excelObject.setting_custome.columnLefts[c] = c === 0 ? w +  def.columTitleDefWidth* ratio: this.excelObject.setting_custome.columnLefts[c-1] + w ;   
+            if(startLeft < 0) {
+                this.excelObject.setting_custome.columnLefts.length = c + 1;
+            }       
         }
         // 获取Excel高度
         let startHeight = def.rowTitleHeight;
@@ -509,6 +518,7 @@ class Excel extends React.Component<any, any>  {
                 currentTop = col > 0 ? setting.rowTops[col -1] : def.rowTitleHeight;
                 currentLeft = row > 0 ? setting.columnLefts[row -1] : def.columTitleDefWidth;
                 if(currentTop < top && (currentTop + height) >= top && currentLeft < left && (currentLeft + width) >= left) {
+                    console.log("绘制状态， x-> ", col , 'y -> ', row)
                     // 缓存焦点优化绘制
                     if(this.state.regional_sel_state === 2 && this.state.regional_cantch_before[0] === currentLeft && this.state.regional_cantch_before[1] === currentTop) {
                         return;
@@ -540,12 +550,12 @@ class Excel extends React.Component<any, any>  {
                             regional_sel_end:[col,row],
                         });
                     }
-                    console.log('当前坐标：', this.state.regional_sel_start , this.state.regional_sel_end)
                     //绘制矩形
                     this.reDrawCanvas();
                     //绘制选中区域
                     this.reDrawSelectArea();
-                   
+                }else {
+                    // continue;
                 }
             }
         }
@@ -624,6 +634,8 @@ class Excel extends React.Component<any, any>  {
         drawMergeText(ctx, this.excelData[ col_start  ][row_start], merge_row, merge_col, _l, _t, setting, ratio);
         ctx.stroke();
         this.inputRef.value = this.excelData[ col_start][ row_start ][2];
+
+        console.log('当前坐标：', this.state.regional_sel_start , this.state.regional_sel_end)
     } 
 
     updateChangeSizeButton(left:number, top:number, event:MouseEvent) {
@@ -983,7 +995,7 @@ class Excel extends React.Component<any, any>  {
            
                     <span className="editor_coordinate c-t" 
                         style={{
-                            width:parseFloat(this.state.regional_sel[2]) || 0,
+                            width:Math.min(parseFloat(this.state.regional_sel[2]), 1000 -parseFloat(this.state.regional_sel[0]) ) || 0,
                             left:parseFloat(this.state.regional_sel[0]) ||0,
                             top:(parseFloat(this.excelObject.setting_def.rowTitleHeight + 0.5)||0)  -2}}></span>
                     <span className="editor_coordinate c-l" 
