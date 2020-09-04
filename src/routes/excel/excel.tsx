@@ -231,8 +231,6 @@ class Excel extends React.Component<any, any>  {
                     this.excelData[col][row] = excelItemModel || [];
                     str = (col+1)  +' - '+ (row+1);
                 }
-
-             
                 ctx.rect(currentLeft* ratio , currentTop* ratio , width* ratio, height* ratio);
                 ctx.fillStyle = "#fff";
                 ctx.fillRect(currentLeft* ratio, currentTop* ratio, width* ratio, height* ratio);
@@ -502,9 +500,7 @@ class Excel extends React.Component<any, any>  {
         if(this.state.regional_sel_state === 0) {
             return;
         }
-
         let ratio = this.excelObject.info.scalingRatio;
-        
         for(let row = 0;row < cLen;row++) {
             currentTop = def.rowTitleHeight;
             let width = colums[row]  ;
@@ -544,6 +540,7 @@ class Excel extends React.Component<any, any>  {
                             regional_sel_end:[col,row],
                         });
                     }
+                    console.log('当前坐标：', this.state.regional_sel_start , this.state.regional_sel_end)
                     //绘制矩形
                     this.reDrawCanvas();
                     //绘制选中区域
@@ -678,7 +675,7 @@ class Excel extends React.Component<any, any>  {
                         change_size_w:Math.min(this.excelObject.setting_def.columTitleDefWidth,  1000),
                         currentLabel_val:_height,
                         currentLabel_top:  _top,
-                        currentLabel_left: this.excelObject.setting_def.columTitleDefWidth+ 'px',
+                        currentLabel_left: this.excelObject.setting_def.columTitleDefWidth,
                         change_size_top:top ,
                         change_size_left:0,
                         change_size_display:'block'
@@ -931,8 +928,8 @@ class Excel extends React.Component<any, any>  {
                 </span>
                 <span className="item col">
                     <div className="cols">
-                        { this.txtCols.map(col => {
-                            return <span onClick={this.setFontStyle.bind(this, 'text','color',col)} className="col-item"
+                        { this.txtCols.map((col, ind) => {
+                            return <span key={ind} onClick={this.setFontStyle.bind(this, 'text','color',col)} className="col-item"
                                 style={{background:col}}></span>
                         })}
                     </div>
