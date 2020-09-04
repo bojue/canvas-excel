@@ -86,23 +86,19 @@ class Excel extends React.Component<any, any>  {
         let startLeft = def.columTitleDefWidth;
         let ratio = this.excelObject.info.scalingRatio;
         const ctx = this.context;
-
-        // 绘制矩形
+        
         ctx.beginPath();
-        ctx.strokeStyle = "#E6e6e6";
-        ctx.rect(0.5, 0.5, def.columTitleDefWidth * ratio, def.rowTitleHeight * ratio);
-
         // 绘制矩形
         ctx.fillStyle = "#E6e6e6";
-        ctx.fillRect(0.5, 0.5, def.columTitleDefWidth * ratio, def.rowTitleHeight * ratio);
+        ctx.fillRect(0.5, 0.5, def.columTitleDefWidth * ratio + 0.5, def.rowTitleHeight * ratio + 0.5);
         
         // 绘制三角形
         ctx.strokeStyle = "#b2b2b2";
         ctx.beginPath();
-        ctx.moveTo(11,23);
-        ctx.lineTo(27, 23)
-        ctx.lineTo(27, 7);
-        ctx.lineTo(11, 23);
+        ctx.moveTo(11 * ratio,23 * ratio);
+        ctx.lineTo(27 * ratio, 23 * ratio)
+        ctx.lineTo(27 * ratio, 7 * ratio);
+        ctx.lineTo(11 * ratio, 23 * ratio);
         ctx.fillStyle = "#b4b4b4";
         ctx.fill();
    
@@ -228,10 +224,10 @@ class Excel extends React.Component<any, any>  {
         let colums = setting.column;
         let rLen = rows.length;
         let cLen = colums.length;
-        let currentTop = def.rowTitleHeight + 0.5;
-        let currentLeft = def.columTitleDefWidth+ 0.5;
+        let currentTop = def.rowTitleHeight;
+        let currentLeft = def.columTitleDefWidth;
         let str = "";
-        currentLeft = def.columTitleDefWidth + 0.5;
+        currentLeft = def.columTitleDefWidth;
         for(let col=0;col< cLen && currentLeft <= 1000;col++) {
             if(!(this.excelData && this.excelData[col])) {
                 this.excelData[col] = [];
@@ -240,7 +236,7 @@ class Excel extends React.Component<any, any>  {
             let width = colums[col];
             ctx.lineWidth = 1;
             ctx.strokeStyle = "#ccc";
-            currentTop = def.rowTitleHeight + 0.5;
+            currentTop = def.rowTitleHeight ;
             for(let row = 0;row <rLen && currentTop <= 500;row++) {
                 let height = rows[row];
                 if(this.excelData &&this.excelData[col] && this.excelData[col][row]){
@@ -250,7 +246,7 @@ class Excel extends React.Component<any, any>  {
                     this.excelData[col][row] = excelItemModel || [];
                     str = (col+1)  +' - '+ (row+1);
                 }
-                ctx.rect(currentLeft* ratio , currentTop* ratio , width* ratio, height* ratio);
+                ctx.rect(currentLeft* ratio +0.5 , currentTop* ratio + 0.5, width* ratio, height* ratio);
                 ctx.fillStyle = "#fff";
                 ctx.fillRect(currentLeft* ratio, currentTop* ratio, width* ratio, height* ratio);
                 this.updateExcelDataByItem(col, row, [col, row, 1, 1], 'txt', str)
