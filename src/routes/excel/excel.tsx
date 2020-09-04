@@ -245,6 +245,9 @@ class Excel extends React.Component<any, any>  {
         ctx.stroke();
     }
     addLister() {
+        window.addEventListener('resize', ()=> {
+            this.getExcelCanvas();
+        })
         document.addEventListener("mousemove", (e:MouseEvent)=>{
             let _eX = e.clientX - this.clientRect.x;
             let _eY = e.clientY - this.clientRect.y;
