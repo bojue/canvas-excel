@@ -2,7 +2,7 @@
   "name": "canvas-excel",
   "version": "0.1.0",
   "private": true,
-  "homepage":"D:\\workspace\\canvas-excel\\dist",
+  "homepage": "D:\\workspace\\canvas-excel\\dist",
   "dependencies": {
     "@types/react-dom": "^16.9.8",
     "cra-template": "1.0.3",
