@@ -528,7 +528,6 @@ class Excel extends React.Component<any, any>  {
                 currentTop = col > 0 ? setting.rowTops[col -1] : def.rowTitleHeight;
                 currentLeft = row > 0 ? setting.columnLefts[row -1] : def.columTitleDefWidth;
                 if(currentTop < top && (currentTop + height) >= top && currentLeft < left && (currentLeft + width) >= left) {
-                    console.log("绘制状态， x-> ", col , 'y -> ', row)
                     // 缓存焦点优化绘制
                     if(this.state.regional_sel_state === 2 && this.state.regional_cantch_before[0] === currentLeft && this.state.regional_cantch_before[1] === currentTop) {
                         return;
@@ -605,7 +604,10 @@ class Excel extends React.Component<any, any>  {
             setting.rowTops[ setting.rowTops.length -1] - setting.rowTops[row_start  -1] :
             setting.rowTops[row_end] - (row_start > 0 ? setting.rowTops[row_start-1] : def.rowTitleHeight);
 
-
+        
+        console.log('当前坐标：', this.state.regional_sel_start , this.state.regional_sel_end);
+        console.log("行开始",row_start,"行结束", row_end)
+        console.log("列开始",col_start,"列结束", col_end)
         if(col_start === -1 || row_start === -1) return;
         ctx.lineWidth = 2 * ratio;
         ctx.strokeStyle = 'rgba(0, 102, 0, 0.8)';
@@ -644,8 +646,6 @@ class Excel extends React.Component<any, any>  {
         drawMergeText(ctx, this.excelData[ col_start  ][row_start], merge_row, merge_col, _l, _t, setting, ratio);
         ctx.stroke();
         this.inputRef.value = this.excelData[ col_start][ row_start ][2];
-
-        console.log('当前坐标：', this.state.regional_sel_start , this.state.regional_sel_end)
     } 
 
     updateChangeSizeButton(left:number, top:number, event:MouseEvent) {
@@ -869,16 +869,19 @@ class Excel extends React.Component<any, any>  {
     // 属性设置
     setFontStyle(param:string, key:string, val:any) {
         let rowLen = this.excelData.length;
-        let _row_s = Math.max(0, this.state.regional_sel_start[1]);
-        let _row_e = Math.min(rowLen, this.state.regional_sel_end[1])
-        let _col_s = Math.max(0, this.state.regional_sel_start[0]);
+        let _start = this.state.regional_sel_start;
+        let _end = this.state.regional_sel_end;  
         let _col_e = this.state.regional_sel_end[0];
+        let col_start = Math.min(_start[1],_end[1]);
+        let col_end = Math.max(_start[1], _end[1]);
+        let row_start = Math.min(_start[0], _end[0]);
+        let row_end = Math.max(_start[0], _end[0]);
 
-
-        for(let j=_row_s;j<=_row_e;j++) {
-            for(let i=_col_s;i<=_col_e;i++) {
+        for(let j=row_start;j<=row_end;j++) {
+            for(let i=col_start;i<=col_end;i++) {
                 let item = this.excelData[i];
-                this.excelData[j][i][3][param][key] = val;
+                item[j][3][param][key] = val;
+                console.log("坐标", i, j)
             }
         }
         this.initExcel();
