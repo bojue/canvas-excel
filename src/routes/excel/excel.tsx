@@ -155,8 +155,8 @@ class Excel extends React.Component<any, any>  {
             }
         }
 
-        let c = 0;
-        for(c ;startLeft>=0;c++) {
+     
+        for(let c = 0;startLeft>=0;c++) {
             let w =  setting.column[c];
             startLeft -= w;
             this.excelObject.setting_custome.columnLefts[c] = c === 0 ? w +  def.columTitleDefWidth* ratio: this.excelObject.setting_custome.columnLefts[c-1] + w ;   
@@ -203,11 +203,21 @@ class Excel extends React.Component<any, any>  {
             if(startHeight > 500) {
                 break;
             }
-
-            this.excelObject.setting_custome.rowTops[i] = startHeight;
+        }
+        for(let r = 0;startHeight>=0;r++) {
+            let h =  setting.row[r];
+            startHeight -= h;
+            this.excelObject.setting_custome.rowTops[r] = r === 0 ? 
+            h +  def.rowTitleHeight * ratio: 
+                this.excelObject.setting_custome.rowTops[r-1] + h ;   
+            if(startHeight < 0) {
+                this.excelObject.setting_custome.rowTops.length = r + 1;
+            }       
         }
         ctx.stroke();
     }
+
+    
     initExcel() {
         const ratio = this.excelObject.info.scalingRatio;
         const ctx = this.context;
@@ -1000,7 +1010,7 @@ class Excel extends React.Component<any, any>  {
                             top:(parseFloat(this.excelObject.setting_def.rowTitleHeight + 0.5)||0)  -2}}></span>
                     <span className="editor_coordinate c-l" 
                         style={{
-                            height:parseFloat(this.state.regional_sel[3])||0,
+                            height:Math.min(parseFloat(this.state.regional_sel[3]), 500 - parseFloat(this.state.regional_sel[1]))||0,
                             top:parseFloat(this.state.regional_sel[1])||0,
                             left:parseFloat(this.excelObject.setting_def.columTitleDefWidth ) -2 ||0}}></span>
                 </div>
