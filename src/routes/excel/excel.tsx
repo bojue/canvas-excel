@@ -267,7 +267,7 @@ class Excel extends React.Component<any, any>  {
             let _eY = e.clientY - this.clientRect.y;
             let tit_h = this.excelObject.setting_def.rowTitleHeight;
             let tit_w = this.excelObject.setting_def.columTitleDefWidth;
-            if(_eX < 0 && _eY < 0 && tit_h > 500 && tit_w > 1000) {
+            if((_eX < 0 ||  _eY < 0 ) &&  e.buttons === 0 ) {
                 this.setState({
                     change_size_current_index:-1
                 })
@@ -879,7 +879,6 @@ class Excel extends React.Component<any, any>  {
         if(key === 'color') {
             this.initExtendedAttribute(key, val)
         }else {
-            console.log(key, val)
             switch (key) {
                 case 'fontWeight':
                     this.setState({
