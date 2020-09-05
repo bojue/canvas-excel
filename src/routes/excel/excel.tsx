@@ -377,7 +377,16 @@ class Excel extends React.Component<any, any>  {
         if(e.type === 'dragend') {
             this.reDrawByDragEnd(_eX, _eY);
         }else {
-            this.changeSizeByDrag(_eX, _eY);
+            let [x, y] = this.state.change_size_by_drag_throttling_params;
+            if(x === _eX && y === _eY) {
+                return;
+            }else {
+                this.setState({
+                    change_size_by_drag_throttling_params: [_eX, _eY]
+                })
+                this.changeSizeByDrag(_eX, _eY);
+            }
+        
         }
     }
 

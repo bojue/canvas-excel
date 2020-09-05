@@ -33,8 +33,6 @@ let drawMergeText = (ctx:any, item:any,merge_row:number, merge_col:number, _l:nu
         fontWeight,
         fontStyle
     } = setText;
-    console.log(setText, color, fontSize)
-
     ctx.fillStyle = color;
 
     let textAlign = item[3]['text']['textAlign'];
