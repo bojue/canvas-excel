@@ -69,19 +69,43 @@ let getFillText = (lineWidth:number, txt:string, ctx:CanvasRenderingContext2D, t
             break;
         default: 
             count = 0;
-            for (let i = 0; i < len; i++) {
-                let fontWidth = ctx.measureText(txt[i]).width; 
-                if(width + fontWidth >= lineWidth) {
-                    break;
-                }else {
-                    width += fontWidth;
-                    count++;
+            let indexL = 0;
+            let indexR = 0;
+            let current = parseInt(len / 2 +'' );
+            console.log('current',current, 'left', indexL, 'right', indexR)
+            let  fontWidth = ctx.measureText(txt[current]).width;
+            let bool = width + fontWidth >= lineWidth;
+            if(!bool) {
+                width += fontWidth;
+                count++;
+                indexR= current+1;
+                indexL = current -1;
+            }
+            while( (indexL >= 0 || indexR <= len +1) && !bool) {
+                if(indexL >=0 ) {
+                    fontWidth = ctx.measureText(txt[indexL]).width;
+                    bool = width + fontWidth >= lineWidth;
+                    if(!bool) {
+                        width += fontWidth;
+                        count++;
+                        indexL--;
+                        indexL = Math.max(indexL, 0)
+                    }
+                }
+
+                if(!bool && indexR < len) {
+                    fontWidth = ctx.measureText(txt[indexR]).width;
+                    bool = width + fontWidth >= lineWidth;
+                    if(!bool) {
+                        width += fontWidth;
+                        count++;
+                        indexR++;
+                        indexR =  Math.min(indexR,  len)
+                    }
                 }
             }
             if(count + 1< len) {
-                let s = parseInt((len / 2 - count/2)+'');
-                let e = parseInt((len /2 + count /2) + '');
-                txt = txt.substring(s, e)
+                txt = txt.substring(indexR - indexL > 1 ? indexL +1 : indexL, indexR)
             }
             break;
     }
