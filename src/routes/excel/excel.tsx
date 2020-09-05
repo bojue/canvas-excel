@@ -465,6 +465,7 @@ class Excel extends React.Component<any, any>  {
         }
         this.reDrawCanvas();
         this.reDrawSelectArea();
+        this.updateEditorDOM(_eX, _eY, 'changeSize');
     }
 
     initSelection() {
@@ -879,6 +880,7 @@ class Excel extends React.Component<any, any>  {
         this.reDrawSelectArea();
     }
 
+    // 获取单元格input状态下的属性
     getInputItemStyle(type:string, param:string) {
         let data = this.state.editor_coordinate_x && this.state.editor_coordinate_y && 
                    this.excelData[this.state.editor_coordinate_x][this.state.editor_coordinate_y] && 
