@@ -466,7 +466,10 @@ class Excel extends React.Component<any, any>  {
         }
         this.reDrawCanvas();
         this.reDrawSelectArea();
-        this.updateEditorDOM(_eX, _eY, 'changeSize');
+        if(this.state.editor_display === 'block') {
+            this.updateEditorDOM(_eX, _eY, 'changeSize');
+        }
+ 
     }
 
     initSelection() {
