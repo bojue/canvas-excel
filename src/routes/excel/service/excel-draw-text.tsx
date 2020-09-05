@@ -12,9 +12,7 @@ let drawText = (ctx:any, item:any, row:number, col:number, str:string, ratio:num
     let textAlign = item[3]['text']['textAlign'];
     let txtVal = getFillText( (width - 3)* ratio,  str, ctx, textAlign);
     item[2] = str;
-    ctx.font = `${fontStyle} ${fontWeight}  ${fontSize}pt  ${fontFamily}`;
-    ctx.fontSize = fontSize + 'px',
-    ctx.lineHeight = fontSize +'px',
+    ctx.font = `${fontStyle} ${fontWeight}  ${fontSize * ratio }pt  ${fontFamily}`;
     ctx.textAlign =textAlign ;
     ctx.textBaseline = 'middle';
     let textLeft = textAlign === 'left' ? (currentLeft + 3) * ratio :
@@ -41,7 +39,7 @@ let drawMergeText = (ctx:any, item:any,merge_row:number, merge_col:number, _l:nu
 
     let textAlign = item[3]['text']['textAlign'];
     let txtVal = getFillText(((setting.columnLefts[merge_col] - _l)  - 3)* ratio, item[2] , ctx, textAlign);
-    ctx.font = `${fontStyle } ${fontWeight}  ${fontSize}pt  ${fontFamily}`;
+    ctx.font = `${fontStyle  } ${fontWeight}  ${fontSize * ratio}pt  ${fontFamily}`;
     ctx.textAlign = textAlign ;
     ctx.textBaseline = 'middle';
     let l =  textAlign === 'left' ?  (_l + 3) * ratio : textAlign === 'center' ?  
