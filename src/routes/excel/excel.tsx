@@ -1116,7 +1116,8 @@ class Excel extends React.Component<any, any>  {
                             color: this.getInputItemStyle('text', 'color'),
                             fontStyle: this.getInputItemStyle('text', 'fontStyle'),
                             fontWeight: this.getInputItemStyle('text', 'fontWeight'),
-                            textAlign: this.getInputItemStyle('text', 'textAlign')
+                            textAlign: this.getInputItemStyle('text', 'textAlign'),
+                            background: this.getInputItemStyle('rect', 'fillStyle')
                         }}
                         onInput ={this.onInput.bind(this)}
                         onBlur={this.updateInputVal.bind(this)}
