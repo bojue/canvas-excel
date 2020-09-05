@@ -599,11 +599,6 @@ class Excel extends React.Component<any, any>  {
             setting.rowTops[ setting.rowTops.length-1] -  def.rowTitleHeight :
             setting.rowTops[ setting.rowTops.length -1] - setting.rowTops[row_start  -1] :
             setting.rowTops[row_end] - (row_start > 0 ? setting.rowTops[row_start-1] : def.rowTitleHeight);
-
-        
-        console.log('当前坐标：', this.state.regional_sel_start , this.state.regional_sel_end);
-        console.log("行开始",row_start,"行结束", row_end)
-        console.log("列开始",col_start,"列结束", col_end)
         if(col_start === -1 || row_start === -1) return;
         ctx.lineWidth = 2 * ratio;
         ctx.strokeStyle = 'rgba(0, 102, 0, 0.8)';
@@ -639,7 +634,7 @@ class Excel extends React.Component<any, any>  {
             this.excelData[row_start ][col_start][2] = this.inputRef.value;
         }
         // 绘制左上角起始单元格内容
-        drawMergeText(ctx, this.excelData[ col_start  ][row_start], merge_row, merge_col, _l, _t, setting, ratio);
+        drawMergeText(ctx, this.excelData[ col_start  ][row_start], merge_row, merge_col, _l + 0.5, _t + 0.5, setting, ratio);
         ctx.stroke();
         this.inputRef.value = this.excelData[ col_start][ row_start ][2];
     } 
@@ -884,6 +879,14 @@ class Excel extends React.Component<any, any>  {
         this.reDrawSelectArea();
     }
 
+    getInputItemStyle(type:string, param:string) {
+        let data = this.state.editor_coordinate_x && this.state.editor_coordinate_y && 
+                   this.excelData[this.state.editor_coordinate_x][this.state.editor_coordinate_y] && 
+                   this.excelData[this.state.editor_coordinate_x][this.state.editor_coordinate_y][3];
+        if(!data) return;
+        return data[type][param];
+    }
+
     // 计算合并网格大小
     getMergeVal(start:number, end:number, arr:[], ratio:number) {
         let val = 0;
@@ -992,7 +995,11 @@ class Excel extends React.Component<any, any>  {
                             width:(Math.max(parseFloat(this.state.regional_sel[2]), 200)||0)+ 4,
                             top:(parseFloat(this.state.editor_top)||0) -2,
                             left:(parseFloat(this.state.editor_left) || 0)  - 2,
-                            display:this.state.editor_display
+                            display:this.state.editor_display,
+                            color: this.getInputItemStyle('text', 'color'),
+                            fontStyle: this.getInputItemStyle('text', 'fontStyle'),
+                            fontWeight: this.getInputItemStyle('text', 'fontWeight'),
+                            textAlign: this.getInputItemStyle('text', 'textAlign')
                         }}
                         onInput ={this.onInput.bind(this)}
                         onBlur={this.updateInputVal.bind(this)}

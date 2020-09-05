@@ -16,7 +16,7 @@ let drawText = (ctx:any, item:any, row:number, col:number, str:string, ratio:num
 }
 
 
-// ????????
+// 绘制合并区域文本
 let drawMergeText = (ctx:any, item:any,merge_row:number, merge_col:number, _l:number, _t:number, setting:any, ratio:number)=> {
     let color = item[3]['text']['color'];
     ctx.fillStyle = color;
@@ -26,8 +26,9 @@ let drawMergeText = (ctx:any, item:any,merge_row:number, merge_col:number, _l:nu
     ctx.font = `${item[3]['text']['fontStyle'] } ${item[3]['text']['fontWeight']}  ${size}pt  微软雅黑`;
     ctx.textAlign =textAlign ;
     ctx.textBaseline = 'middle';
-    let l =  textAlign === 'left' ?  _l * ratio : textAlign === 'center' ?  _l * ratio + (setting.columnLefts[merge_col] - _l) * ratio /2 :
-    setting.columnLefts[merge_col]  * ratio;
+    let l =  textAlign === 'left' ?  (_l + 3) * ratio : textAlign === 'center' ?  
+        _l * ratio + (setting.columnLefts[merge_col] - _l) * ratio /2 :
+   ( setting.columnLefts[merge_col]  -3) * ratio;
     ctx.fillText(txtVal,l, _t * ratio +  (setting.rowTops[merge_row] -_t) * ratio/ 2);
 }
 
