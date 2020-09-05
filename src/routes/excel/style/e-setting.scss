@@ -72,6 +72,7 @@
             width: 25px;
             display: inline-block;
             background: black;
+            box-shadow: 0px 0px 4px #aaaaaa;
         }
         .attr-cols {
             background: #ffffff;
@@ -87,6 +88,13 @@
             box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.12);
             border-radius: 1px;
             padding: 2px 0 8px;
+
+            .col-item {
+                border:1px solid #e5e5e5;
+            }
+        }
+        .fillstyles {
+           
         }
     }
 }

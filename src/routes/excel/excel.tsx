@@ -10,6 +10,7 @@ const F_Under = require( './../../assets/f_ul.svg');
 const F_C = require( './../../assets/f_c.svg');
 const F_L = require( './../../assets/f_l.svg');
 const F_R = require( './../../assets/f_r.svg');
+const BG = require( './../../assets/bg.svg');
 const F_Color = require( './../../assets/f_color.svg');
 const GITHUB = require( './../../assets/github.svg');
 
@@ -38,6 +39,7 @@ class Excel extends React.Component<any, any>  {
         height: 500 + 'px'
     }
     txtCols:any[];
+    rectFillStylesCols:any[];
     constructor(props:any) {
         super(props);
         this.initData();
@@ -55,6 +57,14 @@ class Excel extends React.Component<any, any>  {
         this.txtCols = [
             'rgb(0,0,0)',
             'rgb(66, 133, 244)',
+            'rgb(70, 189, 198)',
+            'rgb(52, 168, 83)',
+            'rgb(251, 188, 4)',
+            'rgb(255, 109, 1)',
+            'rgb(234, 67, 53)',
+        ],
+        this.rectFillStylesCols = [
+            'rgb(255, 255, 255)',
             'rgb(70, 189, 198)',
             'rgb(52, 168, 83)',
             'rgb(251, 188, 4)',
@@ -242,13 +252,14 @@ class Excel extends React.Component<any, any>  {
                 let height = rows[row];
                 if(this.excelData &&this.excelData[col] && this.excelData[col][row]){
                     str = this.excelData &&this.excelData[col] && this.excelData[col][row] &&  this.excelData[col][row][2];
-
                 }else {
                     this.excelData[col][row] = excelItemModel || [];
                     str = (col+1)  +' - '+ (row+1);
                 }
                 ctx.rect(currentLeft* ratio +0.5 , currentTop* ratio + 0.5, width* ratio, height* ratio);
-                ctx.fillStyle = "#fff";
+                ctx.fillStyle = this.excelData &&this.excelData[col] && this.excelData[col][row] ?
+                                this.excelData[col][row][3]['rect']['fillStyle']:
+                                "#fff"
                 ctx.fillRect(currentLeft* ratio, currentTop* ratio, width* ratio, height* ratio);
                 this.updateExcelDataByItem(col, row, [col, row, 1, 1], 'txt', str)
                 drawText(ctx, this.excelData[col][row], col, row, str, ratio, currentLeft, currentTop, height, width);
@@ -868,7 +879,7 @@ class Excel extends React.Component<any, any>  {
 
 
     // 属性设置
-    setFontStyle(param:string, key:string, val:any) {
+    setStyle(param:string, key:string, val:any) {
         let _start = this.state.regional_sel_start;
         let _end = this.state.regional_sel_end;  
         let col_start = Math.min(_start[1],_end[1]);
@@ -876,7 +887,7 @@ class Excel extends React.Component<any, any>  {
         let row_start = Math.min(_start[0], _end[0]);
         let row_end = Math.max(_start[0], _end[0]);
         let hasChangeState = false; // 性能优化点：如果当前区域内所有对象的属性未变化，则不需要渲染
-        if(key === 'color') {
+        if(key === 'color' || key === 'fillStyle') {
             this.initExtendedAttribute(key, val)
         }else {
             switch (key) {
@@ -889,19 +900,20 @@ class Excel extends React.Component<any, any>  {
                     this.setState({
                         extended_attribute_font_style:val,
                     })
+                    break;
             }
         }
         if([col_start, col_end, row_start, row_end].indexOf(-1) > -1) return;
-
         for(let j=row_start;j<=row_end;j++) {
             for(let i=col_start;i<=col_end;i++) {
                 let item = this.excelData[i];
-                if( item[j][3][param][key]  !== val) {
+                if( item[j][3][param][key] !== val) {
                     item[j][3][param][key] = val;
                     hasChangeState = true;
                 }
             }
         }
+
         if(hasChangeState) {
             this.initExcel();
             this.reDrawSelectArea();
@@ -909,9 +921,9 @@ class Excel extends React.Component<any, any>  {
     }
 
     // 扩展属性
-    extendedAttribute() {
+    extendedAttribute(stateParma:string) {
         this.setState({
-            extended_attribute_font_color_state: !this.state.extended_attribute_font_color_state
+            [stateParma]: !this.state[stateParma]
         })
     }
 
@@ -923,6 +935,13 @@ class Excel extends React.Component<any, any>  {
                 extended_attribute_font_color: val,
                 extended_attribute_font_color_state: !this.state.extended_attribute_font_color_state
             })
+            break;
+            case 'fillStyle':{
+                this.setState({
+                    extended_attribute_rect_fillstyle: val,
+                    extended_attribute_rect_fillstyle_state: !this.state.extended_attribute_rect_fillstyle_state
+                })
+            }
             break;
 
         }
@@ -999,7 +1018,7 @@ class Excel extends React.Component<any, any>  {
             <div className="setting">
                 <span className="item">
                     <img onClick={
-                        this.setFontStyle.bind(this, 'text','fontWeight',this.state.extended_attribute_font_weight === 'normal' ? 'bold' : 'normal')} 
+                        this.setStyle.bind(this, 'text','fontWeight',this.state.extended_attribute_font_weight === 'normal' ? 'bold' : 'normal')} 
                         src={ F_Blod && F_Blod.default} 
                         className = {
                             this.state.extended_attribute_font_weight === 'bold' ? 'active': ''
@@ -1007,15 +1026,18 @@ class Excel extends React.Component<any, any>  {
                         alt="" 
                         title="粗体"/>
                     <img onClick={
-                        this.setFontStyle.bind(this, 'text','fontStyle', this.state.extended_attribute_font_style === 'normal' ? 'italic': 'normal')} 
+                        this.setStyle.bind(this, 'text','fontStyle', this.state.extended_attribute_font_style === 'normal' ? 'italic': 'normal')} 
                         className = {
                             this.state.extended_attribute_font_style === 'italic' ? 'active': ''
                         }
                         src={ F_Ltalic && F_Ltalic.default} 
                         alt="" 
                         title="斜体"/>
+                </span>
+                
+                <span className="item">
                     <span className="extend-attribute">
-                        <img onClick={this.extendedAttribute.bind(this)} src={ F_Color && F_Color.default} alt="" title="字体颜色"/>
+                        <img onClick={this.extendedAttribute.bind(this, 'extended_attribute_font_color_state')} src={ F_Color && F_Color.default} alt="" title="字体颜色"/>
                         <span className="color" style={{
                             background:this.state.extended_attribute_font_color
                         }}></span>
@@ -1025,7 +1047,26 @@ class Excel extends React.Component<any, any>  {
                                 <span className="item col">
                                     <div className="cols">
                                     { this.txtCols.map((col, ind) => {
-                                            return <span key={ind} onClick={this.setFontStyle.bind(this, 'text','color',col)} className="col-item"
+                                            return <span key={ind} onClick={this.setStyle.bind(this, 'text','color',col)} className="col-item"
+                                                style={{background:col}}></span>
+                                        })}
+                                    </div>
+                                </span>       
+                            </span>
+                        }
+                    </span>
+                    <span className="extend-attribute">
+                        <img onClick={this.extendedAttribute.bind(this, 'extended_attribute_rect_fillstyle_state')} src={ BG && BG.default} alt="" title="字体颜色"/>
+                        <span className="color" style={{
+                            background:this.state.extended_attribute_rect_fillstyle
+                        }}></span>
+                        {
+                            this.state.extended_attribute_rect_fillstyle_state && 
+                            <span className="attr-cols fillstyles">
+                                <span className="item col">
+                                    <div className="cols">
+                                    { this.rectFillStylesCols.map((col, ind) => {
+                                            return <span key={ind} onClick={this.setStyle.bind(this, 'rect','fillStyle',col) } className="col-item"
                                                 style={{background:col}}></span>
                                         })}
                                     </div>
@@ -1035,9 +1076,9 @@ class Excel extends React.Component<any, any>  {
                     </span>
                 </span>
                 <span className="item">
-                    <img src={ F_L && F_L.default} alt="" title="居左" onClick={this.setFontStyle.bind(this, 'text', 'textAlign', 'left')}/>
-                    <img src={ F_C && F_C.default} alt="" title="居中" onClick={this.setFontStyle.bind(this, 'text', 'textAlign', 'center')}/>
-                    <img src={ F_R && F_R.default} alt="" title="居右" onClick={this.setFontStyle.bind(this, 'text', 'textAlign', 'right')}/>
+                    <img src={ F_L && F_L.default} alt="" title="居左" onClick={this.setStyle.bind(this, 'text', 'textAlign', 'left')}/>
+                    <img src={ F_C && F_C.default} alt="" title="居中" onClick={this.setStyle.bind(this, 'text', 'textAlign', 'center')}/>
+                    <img src={ F_R && F_R.default} alt="" title="居右" onClick={this.setStyle.bind(this, 'text', 'textAlign', 'right')}/>
                 </span>
                 <span className="item">
                     <img onClick={this.merge.bind(this)} src={ Merge && Merge.default} alt="" title="合并"/>

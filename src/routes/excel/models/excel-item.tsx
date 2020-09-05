@@ -18,14 +18,17 @@ let excelItemModel =  [
         'text':{
             'color':'#000',
             'fontStyle': 'normal' || 'italic',
+            'fontFamily':'微软雅黑',
+            'fontSize':10,
             'fontWeight': 'normal' || 'bold',
+            'lineHeight':10,
             'textAlign': 'center' || 'right' || 'center',
         },
         'line':{
             'textLine':'underline' || 'normal'
         },
-        'bg': {
-            fillStyle:"#fff"
+        'rect': {
+            'fillStyle':"#fff"
         }
     }
 ]

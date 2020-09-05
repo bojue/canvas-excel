@@ -1,12 +1,20 @@
-// ????
+// 绘制文本
 let drawText = (ctx:any, item:any, row:number, col:number, str:string, ratio:number, currentLeft:number, currentTop:number, height:number, width:number) => {
-    let color = item[3]['text']['color'];
+    let setText = item[3]['text'];
+    let {
+        color,
+        fontFamily,
+        fontSize,
+        fontWeight,
+        fontStyle
+    } = setText;
     ctx.fillStyle = color;
-    let size = 10 * ratio;
     let textAlign = item[3]['text']['textAlign'];
     let txtVal = getFillText( (width - 3)* ratio,  str, ctx, textAlign);
     item[2] = str;
-    ctx.font = `${item[3]['text']['fontStyle'] } ${item[3]['text']['fontWeight']}  ${size}pt  微软雅黑`;
+    ctx.font = `${fontStyle} ${fontWeight}  ${fontSize}pt  ${fontFamily}`;
+    ctx.fontSize = fontSize + 'px',
+    ctx.lineHeight = fontSize +'px',
     ctx.textAlign =textAlign ;
     ctx.textBaseline = 'middle';
     let textLeft = textAlign === 'left' ? (currentLeft + 3) * ratio :
@@ -18,13 +26,23 @@ let drawText = (ctx:any, item:any, row:number, col:number, str:string, ratio:num
 
 // 绘制合并区域文本
 let drawMergeText = (ctx:any, item:any,merge_row:number, merge_col:number, _l:number, _t:number, setting:any, ratio:number)=> {
-    let color = item[3]['text']['color'];
+    let setText = item[3]['text']
+
+    let {
+        color,
+        fontFamily,
+        fontSize,
+        fontWeight,
+        fontStyle
+    } = setText;
+    console.log(setText, color, fontSize)
+
     ctx.fillStyle = color;
-    let size = 10 * ratio;
+
     let textAlign = item[3]['text']['textAlign'];
     let txtVal = getFillText(((setting.columnLefts[merge_col] - _l)  - 3)* ratio, item[2] , ctx, textAlign);
-    ctx.font = `${item[3]['text']['fontStyle'] } ${item[3]['text']['fontWeight']}  ${size}pt  微软雅黑`;
-    ctx.textAlign =textAlign ;
+    ctx.font = `${fontStyle } ${fontWeight}  ${fontSize}pt  ${fontFamily}`;
+    ctx.textAlign = textAlign ;
     ctx.textBaseline = 'middle';
     let l =  textAlign === 'left' ?  (_l + 3) * ratio : textAlign === 'center' ?  
         _l * ratio + (setting.columnLefts[merge_col] - _l) * ratio /2 :
@@ -72,7 +90,6 @@ let getFillText = (lineWidth:number, txt:string, ctx:CanvasRenderingContext2D, t
             let indexL = 0;
             let indexR = 0;
             let current = parseInt(len / 2 +'' );
-            console.log('current',current, 'left', indexL, 'right', indexR)
             let  fontWidth = ctx.measureText(txt[current]).width;
             let bool = width + fontWidth >= lineWidth;
             if(!bool) {

@@ -69,6 +69,11 @@ let excelStateModel = {
     extended_attribute_font_color:'#000', //当前字体的颜色，方便获取当前字体的颜色
     extended_attribute_font_weight:"normal", //当前区域的字体粗细
     extended_attribute_font_style:'normal',  //当前区域的字体样式
+    extended_attribute_font_size:'normal',  //当前区域的字体样式
+    extended_attribute_font_family:'normal',  //当前区域的字体样式
+    
+    extended_attribute_rect_fillstyle_state: false, // 展示填充色扩展部分
+    extended_attribute_rect_fillstyle:'#fff', //设置填充色
 }
 
 export { excelStateModel }
