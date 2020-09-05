@@ -1,4 +1,5 @@
 const htmlWebpackPlugin = require('html-webpack-plugin');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const path = require('path');
 const webpack = require('webpack');
 
@@ -42,10 +43,19 @@ module.exports = {
         hints : false
     },
     plugins: [
+  
         new htmlWebpackPlugin({
             template: "./public/index.html",
             filename:'index.html',
             favicon:'./public/favicon.ico'
-        })
+        }),
+        new CleanWebpackPlugin(
+            {
+                root: path.resolve(__dirname,'../'), 
+                verbose:true,
+                dry: false
+            }
+        )
+        
     ]
 };
