@@ -12,7 +12,7 @@ let excelItemModel =  [
             'color':'#000',
             'fontStyle': 'normal' || 'italic',
             'fontWeight': 'lighter' ||'normal' || 'bold',
-            'textAlign': 'right' || 'right' || 'center',
+            'textAlign': 'center' || 'right' || 'center',
         },
         'line':{
             'textLine':'underline' || 'normal'
