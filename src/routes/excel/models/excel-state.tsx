@@ -63,6 +63,10 @@ let excelStateModel = {
     regional_sel_height:0,
     regional_sel_x_count:0, // 行网格数
     regional_sel_y_conut:0, // 列网格数
+
+    // 扩展属性设置
+    extended_attribute_font_color_state: false, //展示字体颜色扩展部分
+    extended_attribute_font_color:'#000', //当前字体的颜色，方便获取当前字体的颜色
 }
 
 export { excelStateModel }

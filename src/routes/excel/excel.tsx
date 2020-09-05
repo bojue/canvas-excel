@@ -10,6 +10,7 @@ const F_Under = require( './../../assets/f_ul.svg');
 const F_C = require( './../../assets/f_c.svg');
 const F_L = require( './../../assets/f_l.svg');
 const F_R = require( './../../assets/f_r.svg');
+const F_Color = require( './../../assets/f_color.svg');
 const GITHUB = require( './../../assets/github.svg');
 
 import { excelObjectModel } from "./models/excel-object";
@@ -873,11 +874,23 @@ class Excel extends React.Component<any, any>  {
             for(let i=col_start;i<=col_end;i++) {
                 let item = this.excelData[i];
                 item[j][3][param][key] = val;
-                console.log("坐标", i, j)
             }
         }
         this.initExcel();
         this.reDrawSelectArea();
+        if(key === 'color') {
+            this.setState({
+                extended_attribute_font_color: val,
+                extended_attribute_font_color_state: !this.state.extended_attribute_font_color_state
+            })
+        }
+    }
+
+    // 扩展属性
+    extendedAttribute() {
+        this.setState({
+            extended_attribute_font_color_state: !this.state.extended_attribute_font_color_state
+        })
     }
 
     // 获取单元格input状态下的属性
@@ -951,14 +964,25 @@ class Excel extends React.Component<any, any>  {
                 <span className="item">
                     <img onClick={this.setFontStyle.bind(this, 'text','fontWeight', 'bold')} src={ F_Blod && F_Blod.default} alt="" title="粗体"/>
                     <img onClick={this.setFontStyle.bind(this, 'text','fontStyle', 'italic')} src={ F_Ltalic && F_Ltalic.default} alt="" title="斜体"/>
-                </span>
-                <span className="item col">
-                    <div className="cols">
-                        { this.txtCols.map((col, ind) => {
-                            return <span key={ind} onClick={this.setFontStyle.bind(this, 'text','color',col)} className="col-item"
-                                style={{background:col}}></span>
-                        })}
-                    </div>
+                    <span className="extend-attribute">
+                        <img onClick={this.extendedAttribute.bind(this)} src={ F_Color && F_Color.default} alt="" title="字体颜色"/>
+                        <span className="color" style={{
+                            background:this.state.extended_attribute_font_color
+                        }}></span>
+                        {
+                            this.state.extended_attribute_font_color_state && 
+                            <span className="attr-cols">
+                                <span className="item col">
+                                    <div className="cols">
+                                    { this.txtCols.map((col, ind) => {
+                                            return <span key={ind} onClick={this.setFontStyle.bind(this, 'text','color',col)} className="col-item"
+                                                style={{background:col}}></span>
+                                        })}
+                                    </div>
+                                </span>       
+                            </span>
+                        }
+                    </span>
                 </span>
                 <span className="item">
                     <img src={ F_L && F_L.default} alt="" title="居左" onClick={this.setFontStyle.bind(this, 'text', 'textAlign', 'left')}/>
