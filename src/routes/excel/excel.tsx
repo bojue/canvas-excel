@@ -612,14 +612,19 @@ class Excel extends React.Component<any, any>  {
         this.setState({
             regional_sel:[_l,_t,_w,_h]
         });
-
+        let currentItem =  this.excelData[col_start][row_start];
         if(col_start > -1 && row_start > -1) {
             this.setState({
                 editor_coordinate_x:col_start,
                 editor_coordinate_y:row_start,
-                editor_coordinate_val: this.excelData[col_start][row_start][2]
+                editor_coordinate_val:currentItem[2],
+                extended_attribute_font_color:currentItem[3]['text']['color'], 
+                extended_attribute_font_weight:currentItem[3]['text']['fontWeight'], 
+                extended_attribute_font_style:currentItem[3]['text']['fontStyle'], 
             })
         } 
+
+        
 
         let merge_col = state === 'merge' ? col_end :col_start;
         let merge_row = state === 'merge' ? row_end : row_start;
@@ -864,27 +869,44 @@ class Excel extends React.Component<any, any>  {
 
     // 属性设置
     setFontStyle(param:string, key:string, val:any) {
-        let rowLen = this.excelData.length;
         let _start = this.state.regional_sel_start;
         let _end = this.state.regional_sel_end;  
-        let _col_e = this.state.regional_sel_end[0];
         let col_start = Math.min(_start[1],_end[1]);
         let col_end = Math.max(_start[1], _end[1]);
         let row_start = Math.min(_start[0], _end[0]);
         let row_end = Math.max(_start[0], _end[0]);
+        let hasChangeState = false; // 性能优化点：如果当前区域内所有对象的属性未变化，则不需要渲染
         if(key === 'color') {
             this.initExtendedAttribute(key, val)
+        }else {
+            console.log(key, val)
+            switch (key) {
+                case 'fontWeight':
+                    this.setState({
+                        extended_attribute_font_weight:val,
+                    })
+                    break;
+                case 'fontStyle':
+                    this.setState({
+                        extended_attribute_font_style:val,
+                    })
+            }
         }
         if([col_start, col_end, row_start, row_end].indexOf(-1) > -1) return;
 
         for(let j=row_start;j<=row_end;j++) {
             for(let i=col_start;i<=col_end;i++) {
                 let item = this.excelData[i];
-                item[j][3][param][key] = val;
+                if( item[j][3][param][key]  !== val) {
+                    item[j][3][param][key] = val;
+                    hasChangeState = true;
+                }
             }
         }
-        this.initExcel();
-        this.reDrawSelectArea();
+        if(hasChangeState) {
+            this.initExcel();
+            this.reDrawSelectArea();
+        }
     }
 
     // 扩展属性
@@ -977,8 +999,22 @@ class Excel extends React.Component<any, any>  {
         return<div className="excel"> 
             <div className="setting">
                 <span className="item">
-                    <img onClick={this.setFontStyle.bind(this, 'text','fontWeight', 'bold')} src={ F_Blod && F_Blod.default} alt="" title="粗体"/>
-                    <img onClick={this.setFontStyle.bind(this, 'text','fontStyle', 'italic')} src={ F_Ltalic && F_Ltalic.default} alt="" title="斜体"/>
+                    <img onClick={
+                        this.setFontStyle.bind(this, 'text','fontWeight',this.state.extended_attribute_font_weight === 'normal' ? 'bold' : 'normal')} 
+                        src={ F_Blod && F_Blod.default} 
+                        className = {
+                            this.state.extended_attribute_font_weight === 'bold' ? 'active': ''
+                        }
+                        alt="" 
+                        title="粗体"/>
+                    <img onClick={
+                        this.setFontStyle.bind(this, 'text','fontStyle', this.state.extended_attribute_font_style === 'normal' ? 'italic': 'normal')} 
+                        className = {
+                            this.state.extended_attribute_font_style === 'italic' ? 'active': ''
+                        }
+                        src={ F_Ltalic && F_Ltalic.default} 
+                        alt="" 
+                        title="斜体"/>
                     <span className="extend-attribute">
                         <img onClick={this.extendedAttribute.bind(this)} src={ F_Color && F_Color.default} alt="" title="字体颜色"/>
                         <span className="color" style={{

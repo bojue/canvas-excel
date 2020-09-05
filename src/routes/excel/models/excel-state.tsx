@@ -67,6 +67,8 @@ let excelStateModel = {
     // 扩展属性设置
     extended_attribute_font_color_state: false, //展示字体颜色扩展部分
     extended_attribute_font_color:'#000', //当前字体的颜色，方便获取当前字体的颜色
+    extended_attribute_font_weight:"normal", //当前区域的字体粗细
+    extended_attribute_font_style:'normal',  //当前区域的字体样式
 }
 
 export { excelStateModel }

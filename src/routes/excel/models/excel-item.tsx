@@ -18,7 +18,7 @@ let excelItemModel =  [
         'text':{
             'color':'#000',
             'fontStyle': 'normal' || 'italic',
-            'fontWeight': 'lighter' ||'normal' || 'bold',
+            'fontWeight': 'normal' || 'bold',
             'textAlign': 'center' || 'right' || 'center',
         },
         'line':{
