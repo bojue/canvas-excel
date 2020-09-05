@@ -872,6 +872,10 @@ class Excel extends React.Component<any, any>  {
         let col_end = Math.max(_start[1], _end[1]);
         let row_start = Math.min(_start[0], _end[0]);
         let row_end = Math.max(_start[0], _end[0]);
+        if(key === 'color') {
+            this.initExtendedAttribute(key, val)
+        }
+        if([col_start, col_end, row_start, row_end].indexOf(-1) > -1) return;
 
         for(let j=row_start;j<=row_end;j++) {
             for(let i=col_start;i<=col_end;i++) {
@@ -881,12 +885,6 @@ class Excel extends React.Component<any, any>  {
         }
         this.initExcel();
         this.reDrawSelectArea();
-        if(key === 'color') {
-            this.setState({
-                extended_attribute_font_color: val,
-                extended_attribute_font_color_state: !this.state.extended_attribute_font_color_state
-            })
-        }
     }
 
     // 扩展属性
@@ -894,6 +892,20 @@ class Excel extends React.Component<any, any>  {
         this.setState({
             extended_attribute_font_color_state: !this.state.extended_attribute_font_color_state
         })
+    }
+
+    // 属性设置好后扩展区域状态初始化
+    initExtendedAttribute(type:string, val:string) {
+        switch(type) {
+            case 'color':
+            this.setState({
+                extended_attribute_font_color: val,
+                extended_attribute_font_color_state: !this.state.extended_attribute_font_color_state
+            })
+            break;
+
+        }
+     
     }
 
     // 获取单元格input状态下的属性
@@ -1021,7 +1033,7 @@ class Excel extends React.Component<any, any>  {
                         id="editorRef"
                         style={{ 
                             height:(parseFloat(this.state.editor_height) ||0) + 4,
-                            width:(Math.max(parseFloat(this.state.regional_sel[2]), 200)||0)+ 4,
+                            width:(this.state.regional_sel[2]||0)+ 4,
                             top:(parseFloat(this.state.editor_top)||0) -2,
                             left:(parseFloat(this.state.editor_left) || 0)  - 2,
                             display:this.state.editor_display,
@@ -1080,7 +1092,7 @@ class Excel extends React.Component<any, any>  {
                     ref={this.currentLabelDOMRef} 
                     className="currentLabel"
                     style={{left:parseFloat(this.state.currentLabel_left),top:parseFloat(this.state.currentLabel_top) ,
-                    display:['w','h'].indexOf(this.state.mouse_event_type) > -1 && this.state.change_size_current_index> -1 ?'block':'none'
+                    display:['w','h'].indexOf(this.state.mouse_event_type) > -1 && this.state.change_size_current_index> -1 && parseFloat(this.state.currentLabel_left) > 0 ?'block':'none'
                 }}>
                         <label className="lab">{this.state.changeSizeState === 'change_size_w' ? '宽度': '高度'}:</label>
                         <span className="val">{this.state.currentLabel_val} 像素 </span>
