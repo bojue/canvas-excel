@@ -658,8 +658,8 @@ class Excel extends React.Component<any, any>  {
         ctx.fillRect(
             _l * ratio, 
             _t * ratio, 
-            (setting.columnLefts[merge_col] - _l) * ratio,
-            (setting.rowTops[merge_row] -_t) * ratio);
+            (setting.columnLefts[merge_col] - _l +0.5) * ratio,
+            (setting.rowTops[merge_row] - _t + 0.5) * ratio);
         if(state === 'merge') {
             this.excelData[row_start ][col_start][2] = this.inputRef.value;
         }
