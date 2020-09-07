@@ -570,6 +570,12 @@ class Excel extends React.Component<any, any>  {
         this.updateExcelCanvas();
     }
 
+    reDragSelAreaByTitle(left:number, width:number) {
+        if(this.state.regional_sel_by_title_state === 'x') {
+            
+        }
+
+    }
     // 更新区域选择
     updateSelectArea(left:number, top:number){
         const ctx = this.context;
@@ -591,11 +597,14 @@ class Excel extends React.Component<any, any>  {
             for(let col=0;col< cLen;col++) {
                 let _w = colums[col];
                 if(_cl <= left && left <= _cl + _w) {
-                    this.setState({
-                        regional_sel_by_title_state: 'x',
-                        regional_sel_by_title_index: col
-                    })
-                    console.info('选择顶部', left, top, col)
+                    if(this.state.regional_sel_by_title_state !== 'x' || this.state.regional_sel_by_title_index !== col) {
+                        this.setState({
+                            regional_sel_by_title_state: 'x',
+                            regional_sel_by_title_index: col
+                        });
+                        this.reDragSelAreaByTitle(left, _w);
+                        console.info('选择顶部', left, top, col)
+                    }
                     // this.reDrawCanvas();
                     // this.reDrawSelectArea();
                     break;
