@@ -63,6 +63,10 @@ let excelStateModel = {
     regional_sel_height:0,
     regional_sel_x_count:0, // 行网格数
     regional_sel_y_conut:0, // 列网格数
+    
+    // 通过工具栏选取区域
+    regional_sel_by_title_state: null, // 通过工具栏选择区域状态： x | y | null
+    regional_sel_by_title_index: null, // 通过工具栏选择区域下标： index | null
 
     // 扩展属性设置
     extended_attribute_font_color_state: false, //展示字体颜色扩展部分
@@ -77,6 +81,7 @@ let excelStateModel = {
 
     // 通过拖拽改变单元格宽高节流参数
     change_size_by_drag_throttling_params:[0,0]
+
 }
 
 export { excelStateModel }

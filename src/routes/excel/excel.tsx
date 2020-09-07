@@ -25,7 +25,6 @@ export interface Txt {
     x:number;
     y:number;
 }
-
 class Excel extends React.Component<any, any>  {
     excelRef:any;
     clientRect:DOMRect;
@@ -327,8 +326,13 @@ class Excel extends React.Component<any, any>  {
         })
         const ctx = this.excelRef;
         ctx.addEventListener('dblclick', (e:MouseEvent)=> {
+            let def = this.excelObject.setting_def;
             let _eX = e.clientX - this.clientRect.x;
             let _eY = e.clientY - this.clientRect.y;
+            if(def.columTitleDefWidth <= _eX && _eX <= 1000 && 0<= _eY && _eY <def.rowTitleHeight || 
+            0 <= _eX && _eX < def.columTitleDefWidth && def.rowTitleHeight < _eY && _eY <= 500 ) {
+                return;
+            }
             this.updateEditorDOM(_eX, _eY);
             this.initSelection();
             this.editorRef.current.setAttribute("contenteditable", "true");
@@ -581,55 +585,91 @@ class Excel extends React.Component<any, any>  {
         if(this.state.regional_sel_state === 0) {
             return;
         }
-        let ratio = this.excelObject.info.scalingRatio;
-        for(let row = 0;row < cLen;row++) {
-            currentTop = def.rowTitleHeight;
-            let width = colums[row]  ;
-            for(let col=0;col< rLen;col++) {
-                let height = rows[col] ;
-                currentTop = col > 0 ? setting.rowTops[col -1] : def.rowTitleHeight;
-                currentLeft = row > 0 ? setting.columnLefts[row -1] : def.columTitleDefWidth;
-                if(currentTop < top && (currentTop + height) >= top && currentLeft < left && (currentLeft + width) >= left) {
-                    // 缓存焦点优化绘制
-                    if(this.state.regional_sel_state === 2 && this.state.regional_cantch_before[0] === currentLeft && this.state.regional_cantch_before[1] === currentTop) {
-                        return;
-                    }else if(this.state.regional_sel_state === 2) {
-                        this.setState({
-                            regional_cantch_before:[currentLeft, currentTop]
-                        })
-                    }
-                    if(this.state.regional_sel_state === 1) {
-                        this.setState({
-                            // 输入框状态复位
-                            editor_width:0,
-                            editor_height:0,
-                            editor_top:0,
-                            editor_left:0,
-                            editor_text:"",
-                            editor_display:'none',
-                            // 选中区域定位
-                            regional_sel_start:[col, row],
-                            regional_sel_end:[col, row],
-                            regional_sel_l:currentLeft,
-                            regional_sel_t:currentTop,
-                            regional_sel_state:2,
-                            regional_sel_by_click_state:1,
-                            regional_cantch_before:[currentLeft, currentTop],
-                        })
-                    }else {
-                        this.setState({
-                            regional_sel_end:[col,row],
-                        });
-                    }
-                    //绘制矩形
-                    this.reDrawCanvas();
-                    //绘制选中区域
-                    this.reDrawSelectArea();
-                }else {
-                    // continue;
+        // let ratio = this.excelObject.info.scalingRatio;
+        if(def.columTitleDefWidth <= left && left <= 1000 && 0<= top && top <def.rowTitleHeight ) {
+            let _cl = def.columTitleDefWidth;
+            for(let col=0;col< cLen;col++) {
+                let _w = colums[col];
+                if(_cl <= left && left <= _cl + _w) {
+                    this.setState({
+                        regional_sel_by_title_state: 'x',
+                        regional_sel_by_title_index: col
+                    })
+                    console.info('选择顶部', left, top, col)
+                    // this.reDrawCanvas();
+                    // this.reDrawSelectArea();
+                    break;
                 }
+                _cl += _w;
+            
             }
+        }else if(0 <= left && left < def.columTitleDefWidth && def.rowTitleHeight < top && top <= 500){
+            let _cr = def.rowTitleHeight;
+            for(let row =0;row< rLen;row++) {
+                let _h = rows[row];
+                if(_cr <= top && top <= _cr + _h) {
+                    this.setState({
+                        regional_sel_by_title_state: 'y',
+                        regional_sel_by_title_index: row
+                    })
+                    console.info('选择左侧', left, top ,"-",  row)
+                    break;
+                }
+                _cr += _h;
+            
+            }
+        }else if(def.columTitleDefWidth<= left && left <= 1000 && def.rowTitleHeight < top && top <= 500){
+            for(let row = 0;row < cLen;row++) {
+                currentTop = def.rowTitleHeight;
+                let width = colums[row]  ;
+                for(let col=0;col< rLen;col++) {
+                    let height = rows[col] ;
+                    currentTop = col > 0 ? setting.rowTops[col -1] : def.rowTitleHeight;
+                    currentLeft = row > 0 ? setting.columnLefts[row -1] : def.columTitleDefWidth;
+                    if(currentTop < top && (currentTop + height) >= top && currentLeft < left && (currentLeft + width) >= left) {
+                        // 缓存焦点优化绘制
+                        if(this.state.regional_sel_state === 2 && this.state.regional_cantch_before[0] === currentLeft && this.state.regional_cantch_before[1] === currentTop) {
+                            return;
+                        }else if(this.state.regional_sel_state === 2) {
+                            this.setState({
+                                regional_cantch_before:[currentLeft, currentTop]
+                            })
+                        }
+                        if(this.state.regional_sel_state === 1) {
+                            this.setState({
+                                // 输入框状态复位
+                                editor_width:0,
+                                editor_height:0,
+                                editor_top:0,
+                                editor_left:0,
+                                editor_text:"",
+                                editor_display:'none',
+                                // 选中区域定位
+                                regional_sel_start:[col, row],
+                                regional_sel_end:[col, row],
+                                regional_sel_l:currentLeft,
+                                regional_sel_t:currentTop,
+                                regional_sel_state:2,
+                                regional_sel_by_click_state:1,
+                                regional_cantch_before:[currentLeft, currentTop],
+                            })
+                        }else {
+                            this.setState({
+                                regional_sel_end:[col,row],
+                            });
+                        }
+                        //绘制矩形
+                        this.reDrawCanvas();
+                        //绘制选中区域
+                        this.reDrawSelectArea();
+                    }else {
+               
+                    }
+                }
+            } 
         }
+        
+      
   
     }
 
@@ -684,9 +724,6 @@ class Excel extends React.Component<any, any>  {
                 extended_attribute_font_style:currentItem[3]['text']['fontStyle'], 
             })
         } 
-
-        
-
         let merge_col = state === 'merge' ? col_end :col_start;
         let merge_row = state === 'merge' ? row_end : row_start;
 
