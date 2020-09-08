@@ -20,6 +20,7 @@ import { excelItemModel } from './models/excel-item';
 import { excelDataModel } from './models/excel-data';
 
 import { drawMergeText, drawText} from './service/excel-draw-text';
+import { cpus } from 'os';
 export interface Txt {
     v:string;
     x:number;
@@ -129,7 +130,6 @@ class Excel extends React.Component<any, any>  {
             
             //绘制矩形
             ctx.fillStyle = "#E6e6e6";
-            // ctx.fillStyle = "#ffffff";
             ctx.fillRect(colLeft, rowTop, setting.column[i] * ratio,  def.rowTitleHeight * ratio) ;
             
             //绘制文本
@@ -192,11 +192,10 @@ class Excel extends React.Component<any, any>  {
             ctx.lineTo( def.columTitleDefWidth* ratio, rowTop);
             ctx.lineWidth = 1;
             ctx.strokeStyle = '#bcbcbc';
-            ctx.fillText(val++, def.columTitleDefWidth /2* ratio, rowTop + setting.row[i] * ratio - 3.5);
+            ctx.textBaseline = "middle";
+            ctx.fillText(val++, def.columTitleDefWidth /2* ratio, rowTop + setting.row[i] * ratio / 2);
             ctx.stroke();
-
             startHeight += setting.row[i];
-
             if( i === setting.row.length -1 || startHeight > 500) {
                 this.excelObject.info.height = startHeight * ratio;
             }
@@ -282,7 +281,6 @@ class Excel extends React.Component<any, any>  {
             if(!(this.excelData && this.excelData[col])) {
                 this.excelData[col] = [];
             }
-  
             let width = colums[col];
             ctx.lineWidth = 1;
             ctx.strokeStyle = "#ccc";
@@ -570,10 +568,37 @@ class Excel extends React.Component<any, any>  {
         this.updateExcelCanvas();
     }
 
-    reDragSelAreaByTitle(left:number, width:number) {
+    reDragSelAreaByTitle(index:number, width:number) {
+        let ctx = this.context;
+        let ratio = this.excelObject.info.scalingRatio;
+        let def = this.excelObject.setting_def;
+        let setting = this.excelObject.setting_custome;
+        let left = setting.columnLefts[index-1] || def.columTitleDefWidth;
+        let top = setting.rowTops[index -1] || def.rowTitleHeight;
+        ctx.fillStyle = '#ccc';
+        ctx.font = 'bold '+(11 * ratio)+'pt  微软雅黑';
+        ctx.textAlign = "center";
+        ctx.textBaseline = 'bottom';
         if(this.state.regional_sel_by_title_state === 'x') {
-            
+            ctx.fillRect(
+                left  * ratio + 0.5, 
+                 1, 
+                ( width- 0.5) * ratio,
+                (def.rowTitleHeight- 0.5) * ratio);
+            ctx.fillStyle = '#000';
+            ctx.fillText(String.fromCharCode((65 + index)),  left * ratio + setting.column[index] /2 * ratio, def.rowTitleHeight * ratio - 3.5 );
+        }else if(this.state.regional_sel_by_title_state === 'y') {
+            ctx.fillRect(
+                0, 
+                top+0.5, 
+                (def.columTitleDefWidth- 0.5) * ratio,
+                (setting.rowTops[index] - top - 0.5) * ratio);
+            ctx.fillStyle = '#000';
+            ctx.textBaseline = "middle";
+            let val = index+1;
+            ctx.fillText(val, def.columTitleDefWidth /2* ratio,top * ratio+ setting.row[index] * ratio /2);
         }
+        ctx.stroke();
 
     }
     // 更新区域选择
@@ -602,11 +627,18 @@ class Excel extends React.Component<any, any>  {
                             regional_sel_by_title_state: 'x',
                             regional_sel_by_title_index: col
                         });
-                        this.reDragSelAreaByTitle(left, _w);
-                        console.info('选择顶部', left, top, col)
+                        let _rowList = this.excelData && this.excelData[col];
+                        let len = _rowList && Array.isArray(_rowList) && _rowList.length;
+                        if(!!len) {
+                            this.setState({
+                                regional_sel_start:[0,col],
+                                regional_sel_end:[len-1, col],
+                            })
+                            this.reDrawCanvas();
+                            this.reDrawSelectArea();
+                            this.reDragSelAreaByTitle(col, _w);
+                        }
                     }
-                    // this.reDrawCanvas();
-                    // this.reDrawSelectArea();
                     break;
                 }
                 _cl += _w;
@@ -621,7 +653,16 @@ class Excel extends React.Component<any, any>  {
                         regional_sel_by_title_state: 'y',
                         regional_sel_by_title_index: row
                     })
-                    console.info('选择左侧', left, top ,"-",  row)
+                    let len = this.excelData && Array.isArray(this.excelData) && this.excelData.length;
+                    if(!!len) {
+                        this.setState({
+                            regional_sel_start:[row,0],
+                            regional_sel_end:[row,len-1],
+                        })
+                        this.reDrawCanvas();
+                        this.reDrawSelectArea();
+                        this.reDragSelAreaByTitle(row, _h);
+                    }
                     break;
                 }
                 _cr += _h;
@@ -665,6 +706,8 @@ class Excel extends React.Component<any, any>  {
                         }else {
                             this.setState({
                                 regional_sel_end:[col,row],
+                                regional_sel_by_title_state: null,
+                                regional_sel_by_title_index: null
                             });
                         }
                         //绘制矩形
@@ -978,6 +1021,7 @@ class Excel extends React.Component<any, any>  {
     setStyle(param:string, key:string, val:any) {
         let _start = this.state.regional_sel_start;
         let _end = this.state.regional_sel_end;  
+        console.log(_start, _end)
         let col_start = Math.min(_start[1],_end[1]);
         let col_end = Math.max(_start[1], _end[1]);
         let row_start = Math.min(_start[0], _end[0]);
@@ -1003,6 +1047,7 @@ class Excel extends React.Component<any, any>  {
         for(let j=row_start;j<=row_end;j++) {
             for(let i=col_start;i<=col_end;i++) {
                 let item = this.excelData[i];
+                console.log(item, item[j])
                 if( item[j][3][param][key] !== val) {
                     item[j][3][param][key] = val;
                     hasChangeState = true;
