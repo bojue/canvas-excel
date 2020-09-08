@@ -1351,6 +1351,8 @@ class Excel extends React.Component<any, any>  {
                             fontStyle: this.getInputItemStyle('text', 'fontStyle'),
                             fontWeight: this.getInputItemStyle('text', 'fontWeight'),
                             textAlign: this.getInputItemStyle('text', 'textAlign'),
+                            fontFamily: this.getInputItemStyle('text', 'fontFamily'),
+                            fontSize: this.getInputItemStyle('text', 'fontSize'),
                             background: this.getInputItemStyle('rect', 'fillStyle')
                         }}
                         onInput ={this.onInput.bind(this)}
