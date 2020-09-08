@@ -612,7 +612,7 @@ class Excel extends React.Component<any, any>  {
         }else if(this.state.regional_sel_by_title_state === 'y') {
             ctx.fillRect(
                 0, 
-                top+0.5, 
+                top * ratio+0.5, 
                 (def.columTitleDefWidth- 0.5) * ratio,
                 (setting.rowTops[index] - top - 0.5) * ratio);
             ctx.fillStyle = '#000';
