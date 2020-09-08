@@ -13,6 +13,7 @@ const F_R = require( './../../assets/f_r.svg');
 const BG = require( './../../assets/bg.svg');
 const F_Color = require( './../../assets/f_color.svg');
 const GITHUB = require( './../../assets/github.svg');
+const Down = require( './../../assets/down.svg');
 
 import { excelObjectModel } from "./models/excel-object";
 import { excelStateModel } from './models/excel-state';
@@ -39,6 +40,8 @@ class Excel extends React.Component<any, any>  {
         height: 500 + 'px'
     }
     txtCols:any[];
+    txtFamilys:any[];
+    txtSizes:any[];
     rectFillStylesCols:any[];
     constructor(props:any) {
         super(props);
@@ -69,6 +72,24 @@ class Excel extends React.Component<any, any>  {
             'rgb(251, 188, 4)',
             'rgb(255, 109, 1)',
             'rgb(234, 67, 53)',
+        ],
+        this.txtFamilys = [
+            "微软雅黑",
+            "楷体",
+            "黑体",
+            "宋体",
+            "仿宋",
+            "华文楷体",
+            "Agency FB"
+        ],
+        this.txtSizes = [
+            8,
+            10,
+            12,
+            14,
+            16,
+            18,
+            20
         ]
     }
 
@@ -710,8 +731,7 @@ class Excel extends React.Component<any, any>  {
                                 regional_sel_by_title_state: null,
                                 regional_sel_by_title_index: null
                             });
-                            console.log(this.state.regional_sel_start)
-                            console.log(this.state.regional_sel_end)
+
                         }
                         //绘制矩形
                         this.reDrawCanvas();
@@ -767,7 +787,6 @@ class Excel extends React.Component<any, any>  {
         this.setState({
             regional_sel:[_l,_t,_w,_h]
         });
-        console.log('regional_sel', this.state.regional_sel)
         let currentItem =  this.excelData[col_start][row_start];
         if(col_start > -1 && row_start > -1) {
             this.setState({
@@ -1024,13 +1043,12 @@ class Excel extends React.Component<any, any>  {
     setStyle(param:string, key:string, val:any) {
         let _start = this.state.regional_sel_start;
         let _end = this.state.regional_sel_end;  
-        console.log(_start, _end)
         let col_start = Math.min(_start[1],_end[1]);
         let col_end = Math.max(_start[1], _end[1]);
         let row_start = Math.min(_start[0], _end[0]);
         let row_end = Math.max(_start[0], _end[0]);
         let hasChangeState = false; // 性能优化点：如果当前区域内所有对象的属性未变化，则不需要渲染
-        if(key === 'color' || key === 'fillStyle') {
+        if(['color' ,'fillStyle','fontFamily','fontSize'].indexOf(key) > -1) {
             this.initExtendedAttribute(key, val)
         }else {
             switch (key) {
@@ -1044,13 +1062,13 @@ class Excel extends React.Component<any, any>  {
                         extended_attribute_font_style:val,
                     })
                     break;
+           
             }
         }
         if([col_start, col_end, row_start, row_end].indexOf(-1) > -1) return;
         for(let j=row_start;j<=row_end;j++) {
             for(let i=col_start;i<=col_end;i++) {
                 let item = this.excelData[i];
-                console.log(item, item[j])
                 if( item[j][3][param][key] !== val) {
                     item[j][3][param][key] = val;
                     hasChangeState = true;
@@ -1087,6 +1105,22 @@ class Excel extends React.Component<any, any>  {
                 })
             }
             break;
+            case 'fontFamily':{
+                this.setState({
+                    extended_attribute_font_family:val,
+                    extended_attribute_font_family_state: !this.state.extended_attribute_font_family_state,
+                })
+            }
+            break;
+            case 'fontSize':{
+                this.setState({
+                    extended_attribute_font_size:val,
+                    extended_attribute_font_size_state: !this.state.extended_attribute_font_size_state,
+ 
+                })
+            }
+            break;
+            
 
         }
      
@@ -1160,6 +1194,62 @@ class Excel extends React.Component<any, any>  {
     render() {
         return<div className="excel"> 
             <div className="setting">
+                <span className="item item-fz">
+                    <div className="f-family" style={{
+                        fontFamily:this.state.extended_attribute_font_family
+                    }}>
+                        <span className="name">
+                            <span className="val">
+                                {this.state.extended_attribute_font_family}
+                            </span>
+                        <img src={
+                            Down && Down.default
+                        } 
+                        onClick={this.extendedAttribute.bind(this, 'extended_attribute_font_family_state')}
+                        alt="字体" title="字体"/>
+                        
+                        </span>
+                        {/* extended_attribute_font_style_state */}
+                        {
+                            this.state.extended_attribute_font_family_state && 
+                            <span className="attr-familys">
+                                <div className="fams">
+                                { this.txtFamilys.map((family, ind) => {
+                                        return <span key={ind} onClick={this.setStyle.bind(this, 'text','fontFamily',family)} className="fams-item">
+                                                <span className="lab"
+                                                style={{fontFamily:family}}>{family}</span>
+                                            </span>
+                                    })}
+                                </div>  
+                            </span>
+                        }
+                    </div>
+                    <div className="f-size">
+                        <span className="name">
+                            <span className="val">
+                                {this.state.extended_attribute_font_size}
+                            </span>
+                        <img src={
+                            Down && Down.default
+                        } 
+                        onClick={this.extendedAttribute.bind(this, 'extended_attribute_font_size_state')}
+                        alt="字体大小" title="字体大小"/>
+                        </span>
+                        {
+                            this.state.extended_attribute_font_size_state && 
+                            <span className="attr-familys f-size">
+                                <div className="fams">
+                                { this.txtSizes.map((size, ind) => {
+                                        return <span key={ind} onClick={this.setStyle.bind(this, 'text','fontSize', size)} className="fams-item">
+                                                <span className="lab">{size}</span>
+                                            </span>
+                                    })}
+                                </div>  
+                            </span>
+                        }
+                  
+                    </div>
+                </span>
                 <span className="item">
                     <img onClick={
                         this.setStyle.bind(this, 'text','fontWeight',this.state.extended_attribute_font_weight === 'normal' ? 'bold' : 'normal')} 
