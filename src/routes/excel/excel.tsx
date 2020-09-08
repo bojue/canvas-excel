@@ -579,6 +579,7 @@ class Excel extends React.Component<any, any>  {
         ctx.font = 'bold '+(11 * ratio)+'pt  微软雅黑';
         ctx.textAlign = "center";
         ctx.textBaseline = 'bottom';
+  
         if(this.state.regional_sel_by_title_state === 'x') {
             ctx.fillRect(
                 left  * ratio + 0.5, 
@@ -709,6 +710,8 @@ class Excel extends React.Component<any, any>  {
                                 regional_sel_by_title_state: null,
                                 regional_sel_by_title_index: null
                             });
+                            console.log(this.state.regional_sel_start)
+                            console.log(this.state.regional_sel_end)
                         }
                         //绘制矩形
                         this.reDrawCanvas();
@@ -744,9 +747,8 @@ class Excel extends React.Component<any, any>  {
         let _w = (setting.columnLefts.length === (col_end + 1) ) ? 
         col_start === 0 ?
         setting.columnLefts[ setting.columnLefts.length-1] -  def.columTitleDefWidth :
-        setting.columnLefts[ setting.columnLefts.length -1] - setting.columnLefts[col_start  -1] :
-        setting.columnLefts[col_end] - (col_start > 0 ? setting.columnLefts[col_start-1] : def.columTitleDefWidth);
-
+        setting.columnLefts[ setting.columnLefts.length -1] - setting.columnLefts[col_start -1 ] :
+        setting.columnLefts[Math.min(col_end, setting.columnLefts.length -1)] - (col_start > 0 ? setting.columnLefts[col_start-1] : def.columTitleDefWidth);
 
         // 鼠标选中从下向上选中
         let row_start = Math.min(_start[0], _end[0]);
@@ -756,7 +758,7 @@ class Excel extends React.Component<any, any>  {
             row_start === 0 ?
             setting.rowTops[ setting.rowTops.length-1] -  def.rowTitleHeight :
             setting.rowTops[ setting.rowTops.length -1] - setting.rowTops[row_start  -1] :
-            setting.rowTops[row_end] - (row_start > 0 ? setting.rowTops[row_start-1] : def.rowTitleHeight);
+            setting.rowTops[Math.min(row_end, setting.rowTops.length-1)] - (row_start > 0 ? setting.rowTops[row_start-1] : def.rowTitleHeight);
         if(col_start === -1 || row_start === -1) return;
         ctx.lineWidth = 2 * ratio;
         ctx.strokeStyle = 'rgba(0, 102, 0, 0.8)';
@@ -765,6 +767,7 @@ class Excel extends React.Component<any, any>  {
         this.setState({
             regional_sel:[_l,_t,_w,_h]
         });
+        console.log('regional_sel', this.state.regional_sel)
         let currentItem =  this.excelData[col_start][row_start];
         if(col_start > -1 && row_start > -1) {
             this.setState({
