@@ -789,13 +789,22 @@ class Excel extends React.Component<any, any>  {
         });
         let currentItem =  this.excelData[col_start][row_start];
         if(col_start > -1 && row_start > -1) {
+            let {
+                color,
+                fontStyle,
+                fontWeight,
+                fontSize,
+                fontFamily
+            } = currentItem[3]['text'];
             this.setState({
                 editor_coordinate_x:col_start,
                 editor_coordinate_y:row_start,
                 editor_coordinate_val:currentItem[2],
-                extended_attribute_font_color:currentItem[3]['text']['color'], 
-                extended_attribute_font_weight:currentItem[3]['text']['fontWeight'], 
-                extended_attribute_font_style:currentItem[3]['text']['fontStyle'], 
+                extended_attribute_font_color:color,
+                extended_attribute_font_weight:fontWeight,
+                extended_attribute_font_style:fontStyle,
+                extended_attribute_font_size:fontSize,
+                extended_attribute_font_family:fontFamily
             })
         } 
         let merge_col = state === 'merge' ? col_end :col_start;
