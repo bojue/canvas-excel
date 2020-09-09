@@ -67,6 +67,7 @@ let excelStateModel = {
     // 通过工具栏选取区域
     regional_sel_by_title_state: null, // 通过工具栏选择区域状态： x | y | null
     regional_sel_by_title_index: null, // 通过工具栏选择区域下标： index | null
+    regional_sel_by_title_width: null,
 
     // 扩展属性设置
     extended_attribute_font_color_state: false, //展示字体颜色扩展部分

@@ -416,6 +416,7 @@ class Excel extends React.Component<any, any>  {
         }); 
     }
 
+
     dragChangeSize(e:any) {
         if(e.buttons !== 1 && e.type !== 'dragend') {
             return;
@@ -553,6 +554,7 @@ class Excel extends React.Component<any, any>  {
         if(this.state.editor_display === 'block') {
             this.updateEditorDOM(_eX, _eY, 'changeSize');
         }
+        // this.reDragSelAreaByTitle();
  
     }
 
@@ -589,7 +591,12 @@ class Excel extends React.Component<any, any>  {
         this.updateExcelCanvas();
     }
 
-    reDragSelAreaByTitle(index:number, width:number) {
+    reDragSelAreaByTitle(ind?:number, w?:number) {
+        let index = ind || this.state.sel_area_by_title_index;
+        let width = w || this.state.sel_area_by_title_width;
+        this.setState({
+            editor_display:'none',
+        })
         let ctx = this.context;
         let ratio = this.excelObject.info.scalingRatio;
         let def = this.excelObject.setting_def;
@@ -600,7 +607,6 @@ class Excel extends React.Component<any, any>  {
         ctx.font = 'bold '+(11 * ratio)+'pt  微软雅黑';
         ctx.textAlign = "center";
         ctx.textBaseline = 'bottom';
-  
         if(this.state.regional_sel_by_title_state === 'x') {
             ctx.fillRect(
                 left  * ratio + 0.5, 
@@ -647,7 +653,8 @@ class Excel extends React.Component<any, any>  {
                     if(this.state.regional_sel_by_title_state !== 'x' || this.state.regional_sel_by_title_index !== col) {
                         this.setState({
                             regional_sel_by_title_state: 'x',
-                            regional_sel_by_title_index: col
+                            regional_sel_by_title_index: col,
+                            regional_sel_by_title_width: _w
                         });
                         let _rowList = this.excelData && this.excelData[col];
                         let len = _rowList && Array.isArray(_rowList) && _rowList.length;
@@ -673,7 +680,8 @@ class Excel extends React.Component<any, any>  {
                 if(_cr <= top && top <= _cr + _h) {
                     this.setState({
                         regional_sel_by_title_state: 'y',
-                        regional_sel_by_title_index: row
+                        regional_sel_by_title_index: row,
+                        regional_sel_by_title_width: _h
                     })
                     let len = this.excelData && Array.isArray(this.excelData) && this.excelData.length;
                     if(!!len) {
@@ -729,7 +737,8 @@ class Excel extends React.Component<any, any>  {
                             this.setState({
                                 regional_sel_end:[col,row],
                                 regional_sel_by_title_state: null,
-                                regional_sel_by_title_index: null
+                                regional_sel_by_title_index: null,
+                                regional_sel_by_title_width: null
                             });
 
                         }
@@ -981,7 +990,7 @@ class Excel extends React.Component<any, any>  {
             editor_coordinate_x: state === 'changeSize' ? this.state.editor_coordinate_x: _c_x, 
             editor_coordinate_y:state === 'changeSize' ? this.state.editor_coordinate_y:_c_y
         })
-    
+        this.updateExcelCanvas();
     }
     upateTxtByEdited(dom:any) {
         let style = dom.style;
@@ -1173,9 +1182,14 @@ class Excel extends React.Component<any, any>  {
         })        
     }
 
-    updateInputVal() {  
+    updateInputVal() { 
+        this.excelData[this.state.editor_coordinate_x][this.state.editor_coordinate_y][2] = this.editorRef.current.innerHTML; 
         this.onInput();
-        this.excelData[this.state.editor_coordinate_x][this.state.editor_coordinate_y][2] = this.editorRef.current.innerHTML;
+    }
+
+    onFocus() {
+        // this.editorRef
+
     }
 
     updateExcelItemByInput(state:string) {
@@ -1364,6 +1378,7 @@ class Excel extends React.Component<any, any>  {
                             fontSize: this.getInputItemStyle('text', 'fontSize'),
                             background: this.getInputItemStyle('rect', 'fillStyle')
                         }}
+                        onFocus={this.onFocus.bind(this)}
                         onInput ={this.onInput.bind(this)}
                         onBlur={this.updateInputVal.bind(this)}
                         suppressContentEditableWarning = {true}
