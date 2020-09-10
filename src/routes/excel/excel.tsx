@@ -275,7 +275,7 @@ class Excel extends React.Component<any, any>  {
                                 this.excelData[col][row][3]['rect']['fillStyle']:
                                 "#fff"
                 ctx.fillRect(currentLeft* ratio, currentTop* ratio, width* ratio, height* ratio);
-                this.updateExcelDataByItem(col, row, [col, row, 1, 1], 'txt', str)
+                this.updateExcelDataByItem(col, row, [1, 1], 'txt', str)
                 drawText(ctx, this.excelData[col][row], col, row, str, ratio, currentLeft, currentTop, height, width);
                 currentTop += height;
             }
@@ -299,33 +299,50 @@ class Excel extends React.Component<any, any>  {
         let str = "";
         currentLeft = def.columTitleDefWidth;
         for(let col=0;col< cLen && currentLeft <= 1000;col++) {
-            if(!(this.excelData && this.excelData[col])) {
-                this.excelData[col] = [];
-            }
             let width = colums[col];
             ctx.lineWidth = 1;
             ctx.strokeStyle = "#ccc";
             currentTop = def.rowTitleHeight ;
             for(let row = 0;row <rLen && currentTop <= 500;row++) {
                 let height = rows[row];
-                if(this.excelData &&this.excelData[col] && this.excelData[col][row]){
-                    str = this.excelData &&this.excelData[col] && this.excelData[col][row] &&  this.excelData[col][row][2];
-                }else {
-                    this.excelData[col][row] = excelItemModel || [];
-                    str = (col+1)  +' - '+ (row+1);
+                let item = this.excelData[col][row];
+                if(!item) {
+                    continue;
+                };
+                let w_count = item[0][0];
+                let h_count = item[0][1];
+                let w = width;
+                let h = height;
+                if(w_count > 1) {
+                    w = this.getMergeRectSize(colums, col, w_count)
                 }
-                ctx.rect(currentLeft* ratio +0.5 , currentTop* ratio + 0.5, width* ratio, height* ratio);
-                ctx.fillStyle = this.excelData &&this.excelData[col] && this.excelData[col][row] ?
-                                this.excelData[col][row][3]['rect']['fillStyle']:
-                                "#fff"
-                ctx.fillRect(currentLeft* ratio, currentTop* ratio, width* ratio, height* ratio);
-                this.updateExcelDataByItem(col, row, [col, row, 1, 1], 'txt', str)
-                drawText(ctx, this.excelData[col][row], col, row, str, ratio, currentLeft, currentTop, height, width);
+                if(h_count > 1){
+                    h= this.getMergeRectSize(rows, row, h_count)
+                }
+                str = item[2];
+                if((item[0][0] !== 0 && item[0][1] !== 0)) {
+                    ctx.rect(currentLeft* ratio +0.5 , currentTop * ratio + 0.5, w* ratio, h* ratio);
+                    ctx.fillStyle = this.excelData[col][row][3]['rect']['fillStyle']
+                    ctx.fillRect(currentLeft* ratio, currentTop* ratio, w* ratio, h* ratio);
+                    if(str !== '' && str !== null) {
+                        drawText(ctx, item, col, row, str, ratio, currentLeft, currentTop, h, w);
+                    }
+                }
                 currentTop += height;
             }
             currentLeft += width;
         }
         ctx.stroke();
+    }
+
+    getMergeRectSize(widthArray:any[], start:number, width:number) {
+        let _w = 0;
+        if(width) {
+            for(let i=0;i<=width;i++) {
+                _w += widthArray[start + i]
+            }
+        }
+        return _w;
     }
 
     addLister() {
@@ -834,10 +851,35 @@ class Excel extends React.Component<any, any>  {
             this.excelData[row_start ][col_start][2] = this.inputRef.value;
         }
         // 绘制左上角起始单元格内容
-        drawMergeText(ctx, this.excelData[ col_start  ][row_start], merge_row, merge_col, _l + 0.5, _t + 0.5, setting, ratio);
+        drawMergeText(ctx, this.excelData[ col_start][row_start], merge_row, merge_col, _l + 0.5, _t + 0.5, setting, ratio);
         ctx.stroke();
-        this.inputRef.value = this.excelData[ col_start][ row_start ][2];
+        this.inputRef.value = this.excelData[ col_start][row_start ][2];
+        if(state === 'merge') {
+            this.excelData[col_start][row_start][0] = [col_end - col_start +1 , row_end - row_start + 1];
+            this.updateSelAreaItemsByMerge(
+                col_start,
+                row_start,
+                col_end,
+                row_end
+            );
+        }
     } 
+
+    updateSelAreaItemsByMerge(c_s:number, r_s:number, c_e:number, r_e: number) {
+        let datas =  this.excelData;
+        for(let i=c_s;i<=c_e;i++) {
+            for(let j=r_s;j<=r_e;j++) {
+                let item = datas[i][j];
+                if(i === c_s && j === r_s) {
+                    continue;
+                }else if(item && item[0]) {
+                    item[0][0] = 0;
+                    item[0][1] = 0;
+                    item[2] = "";
+                }
+            }
+        }
+    }
 
     updateChangeSizeButton(left:number, top:number, event:MouseEvent) {
         //当前选中下标

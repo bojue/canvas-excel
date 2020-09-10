@@ -80,7 +80,6 @@ let excelStateModel = {
     extended_attribute_font_style_state: false, // 展示填充色扩展部分
     extended_attribute_font_style:'#fff', //设置填充色
 
-
     // 通过拖拽改变单元格宽高节流参数
     change_size_by_drag_throttling_params:[0,0]
 
