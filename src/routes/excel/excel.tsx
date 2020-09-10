@@ -275,7 +275,7 @@ class Excel extends React.Component<any, any>  {
                                 this.excelData[col][row][3]['rect']['fillStyle']:
                                 "#fff"
                 ctx.fillRect(currentLeft* ratio, currentTop* ratio, width* ratio, height* ratio);
-                this.updateExcelDataByItem(col, row, [col, row, 1, 1], 'txt', str)
+                this.updateExcelDataByItem(col, row, [1, 1], 'txt', str)
                 drawText(ctx, this.excelData[col][row], col, row, str, ratio, currentLeft, currentTop, height, width);
                 currentTop += height;
             }
@@ -300,33 +300,50 @@ class Excel extends React.Component<any, any>  {
         let str = "";
         currentLeft = def.columTitleDefWidth;
         for(let col=0;col< cLen && currentLeft <= 1000;col++) {
-            if(!(this.excelData && this.excelData[col])) {
-                this.excelData[col] = [];
-            }
             let width = colums[col];
             ctx.lineWidth = 1;
             ctx.strokeStyle = "#ccc";
             currentTop = def.rowTitleHeight ;
             for(let row = 0;row <rLen && currentTop <= 500;row++) {
                 let height = rows[row];
-                if(this.excelData &&this.excelData[col] && this.excelData[col][row]){
-                    str = this.excelData &&this.excelData[col] && this.excelData[col][row] &&  this.excelData[col][row][2];
-                }else {
-                    this.excelData[col][row] = excelItemModel || [];
-                    str = (col+1)  +' - '+ (row+1);
+                let item = this.excelData[col][row];
+                if(!item) {
+                    continue;
+                };
+                let w_count = item[0][0];
+                let h_count = item[0][1];
+                let w = width;
+                let h = height;
+                if(w_count > 1) {
+                    w = this.getMergeRectSize(colums, col, w_count)
                 }
-                ctx.rect(currentLeft* ratio +0.5 , currentTop* ratio + 0.5, width* ratio, height* ratio);
-                ctx.fillStyle = this.excelData &&this.excelData[col] && this.excelData[col][row] ?
-                                this.excelData[col][row][3]['rect']['fillStyle']:
-                                "#fff"
-                ctx.fillRect(currentLeft* ratio, currentTop* ratio, width* ratio, height* ratio);
-                this.updateExcelDataByItem(col, row, [col, row, 1, 1], 'txt', str)
-                drawText(ctx, this.excelData[col][row], col, row, str, ratio, currentLeft, currentTop, height, width);
+                if(h_count > 1){
+                    h= this.getMergeRectSize(rows, row, h_count)
+                }
+                str = item[2];
+                if((item[0][0] !== 0 && item[0][1] !== 0)) {
+                    ctx.rect(currentLeft* ratio +0.5 , currentTop * ratio + 0.5, w* ratio, h* ratio);
+                    ctx.fillStyle = this.excelData[col][row][3]['rect']['fillStyle']
+                    ctx.fillRect(currentLeft* ratio, currentTop* ratio, w* ratio, h* ratio);
+                    if(str !== '' && str !== null) {
+                        drawText(ctx, item, col, row, str, ratio, currentLeft, currentTop, h, w);
+                    }
+                }
                 currentTop += height;
             }
             currentLeft += width;
         }
         ctx.stroke();
+    }
+
+    getMergeRectSize(widthArray:any[], start:number, width:number) {
+        let _w = 0;
+        if(width) {
+            for(let i=0;i<=width;i++) {
+                _w += widthArray[start + i]
+            }
+        }
+        return _w;
     }
 
     addLister() {
@@ -416,6 +433,7 @@ class Excel extends React.Component<any, any>  {
             })
         }); 
     }
+
 
     dragChangeSize(e:any) {
         if(e.buttons !== 1 && e.type !== 'dragend') {
@@ -553,6 +571,7 @@ class Excel extends React.Component<any, any>  {
         if(this.state.editor_display === 'block') {
             this.updateEditorDOM(_eX, _eY, 'changeSize');
         }
+        // this.reDragSelAreaByTitle();
  
     }
 
@@ -589,7 +608,12 @@ class Excel extends React.Component<any, any>  {
         this.updateExcelCanvas();
     }
 
-    reDragSelAreaByTitle(index:number, width:number) {
+    reDragSelAreaByTitle(ind?:number, w?:number) {
+        let index = ind || this.state.sel_area_by_title_index;
+        let width = w || this.state.sel_area_by_title_width;
+        this.setState({
+            editor_display:'none',
+        })
         let ctx = this.context;
         let ratio = this.excelObject.info.scalingRatio;
         let def = this.excelObject.setting_def;
@@ -600,7 +624,6 @@ class Excel extends React.Component<any, any>  {
         ctx.font = 'bold '+(11 * ratio)+'pt  微软雅黑';
         ctx.textAlign = "center";
         ctx.textBaseline = 'bottom';
-  
         if(this.state.regional_sel_by_title_state === 'x') {
             ctx.fillRect(
                 left  * ratio + 0.5, 
@@ -647,7 +670,8 @@ class Excel extends React.Component<any, any>  {
                     if(this.state.regional_sel_by_title_state !== 'x' || this.state.regional_sel_by_title_index !== col) {
                         this.setState({
                             regional_sel_by_title_state: 'x',
-                            regional_sel_by_title_index: col
+                            regional_sel_by_title_index: col,
+                            regional_sel_by_title_width: _w
                         });
                         let _rowList = this.excelData && this.excelData[col];
                         let len = _rowList && Array.isArray(_rowList) && _rowList.length;
@@ -673,7 +697,8 @@ class Excel extends React.Component<any, any>  {
                 if(_cr <= top && top <= _cr + _h) {
                     this.setState({
                         regional_sel_by_title_state: 'y',
-                        regional_sel_by_title_index: row
+                        regional_sel_by_title_index: row,
+                        regional_sel_by_title_width: _h
                     })
                     let len = this.excelData && Array.isArray(this.excelData) && this.excelData.length;
                     if(!!len) {
@@ -729,7 +754,8 @@ class Excel extends React.Component<any, any>  {
                             this.setState({
                                 regional_sel_end:[col,row],
                                 regional_sel_by_title_state: null,
-                                regional_sel_by_title_index: null
+                                regional_sel_by_title_index: null,
+                                regional_sel_by_title_width: null
                             });
 
                         }
@@ -789,13 +815,22 @@ class Excel extends React.Component<any, any>  {
         });
         let currentItem =  this.excelData[col_start][row_start];
         if(col_start > -1 && row_start > -1) {
+            let {
+                color,
+                fontStyle,
+                fontWeight,
+                fontSize,
+                fontFamily
+            } = currentItem[3]['text'];
             this.setState({
                 editor_coordinate_x:col_start,
                 editor_coordinate_y:row_start,
                 editor_coordinate_val:currentItem[2],
-                extended_attribute_font_color:currentItem[3]['text']['color'], 
-                extended_attribute_font_weight:currentItem[3]['text']['fontWeight'], 
-                extended_attribute_font_style:currentItem[3]['text']['fontStyle'], 
+                extended_attribute_font_color:color,
+                extended_attribute_font_weight:fontWeight,
+                extended_attribute_font_style:fontStyle,
+                extended_attribute_font_size:fontSize,
+                extended_attribute_font_family:fontFamily
             })
         } 
         let merge_col = state === 'merge' ? col_end :col_start;
@@ -816,10 +851,35 @@ class Excel extends React.Component<any, any>  {
             this.excelData[row_start ][col_start][2] = this.inputRef.value;
         }
         // 绘制左上角起始单元格内容
-        drawMergeText(ctx, this.excelData[ col_start  ][row_start], merge_row, merge_col, _l + 0.5, _t + 0.5, setting, ratio);
+        drawMergeText(ctx, this.excelData[ col_start][row_start], merge_row, merge_col, _l + 0.5, _t + 0.5, setting, ratio);
         ctx.stroke();
-        this.inputRef.value = this.excelData[ col_start][ row_start ][2];
+        this.inputRef.value = this.excelData[ col_start][row_start ][2];
+        if(state === 'merge') {
+            // this.excelData[col_start][row_start][0] = [col_end - col_start  , row_end - row_start ];
+            // this.updateSelAreaItemsByMerge(
+            //     col_start,
+            //     row_start,
+            //     col_end,
+            //     row_end
+            // );
+        }
     } 
+
+    updateSelAreaItemsByMerge(c_s:number, r_s:number, c_e:number, r_e: number) {
+        let datas =  this.excelData;
+        for(let i=c_s;i<=c_e;i++) {
+            for(let j=r_s;j<=r_e;j++) {
+                let item = datas[i][j];
+                if(i === c_s && j === r_s) {
+                    continue;
+                }else if(item && item[0]) {
+                    item[0][0] = 0;
+                    item[0][1] = 0;
+                    item[2] = "";
+                }
+            }
+        }
+    }
 
     updateChangeSizeButton(left:number, top:number, event:MouseEvent) {
         //当前选中下标
@@ -972,7 +1032,7 @@ class Excel extends React.Component<any, any>  {
             editor_coordinate_x: state === 'changeSize' ? this.state.editor_coordinate_x: _c_x, 
             editor_coordinate_y:state === 'changeSize' ? this.state.editor_coordinate_y:_c_y
         })
-    
+        this.updateExcelCanvas();
     }
     upateTxtByEdited(dom:any) {
         let style = dom.style;
@@ -1164,9 +1224,14 @@ class Excel extends React.Component<any, any>  {
         })        
     }
 
-    updateInputVal() {  
+    updateInputVal() { 
+        this.excelData[this.state.editor_coordinate_x][this.state.editor_coordinate_y][2] = this.editorRef.current.innerHTML; 
         this.onInput();
-        this.excelData[this.state.editor_coordinate_x][this.state.editor_coordinate_y][2] = this.editorRef.current.innerHTML;
+    }
+
+    onFocus() {
+        // this.editorRef
+
     }
 
     updateExcelItemByInput(state:string) {
@@ -1355,6 +1420,7 @@ class Excel extends React.Component<any, any>  {
                             fontSize: this.getInputItemStyle('text', 'fontSize'),
                             background: this.getInputItemStyle('rect', 'fillStyle')
                         }}
+                        onFocus={this.onFocus.bind(this)}
                         onInput ={this.onInput.bind(this)}
                         onBlur={this.updateInputVal.bind(this)}
                         suppressContentEditableWarning = {true}

@@ -1,8 +1,8 @@
 let excelItemModel =  [
     [
         // 合并单元格方案1:通过行列坐标位置定位
-        'start_colum',  //开始列
-        'start_row',    //开始行
+        // 'start_colum',  //开始列 ！重构已经删除-单元格合并
+        // 'start_row',    //开始行 !重构已经删除-单元格合并
         'end_colum',    //结束列
         'end_row',       //结束行,
 
