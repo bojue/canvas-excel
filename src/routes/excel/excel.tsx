@@ -483,6 +483,7 @@ class Excel extends React.Component<any, any>  {
         let index = -1;
         if(change_type === 'w') {
             index = current_index || this.excelObject.setting_custome.columnLefts.indexOf(_eX + 0.5);
+            console.log( this.excelObject.setting_custome.columnLefts,_eX )
         }else if(change_type === 'h') {
             index = current_index || this.excelObject.setting_custome.rowTops.indexOf(_eY)
         }
@@ -490,7 +491,7 @@ class Excel extends React.Component<any, any>  {
             if(change_type === 'w') {
                 let _left = this.excelObject.setting_custome.columnLefts[this.state.change_size_current_index -1] || this.excelObject.setting_def.columTitleDefWidth;
                 let _width = Math.max(_eX - _left, 2);
-                setting.column[this.state.change_size_current_index]  = Math.max(_eX - _left, 2)
+                setting.column[this.state.change_size_current_index]  = parseInt(Math.max(_eX - _left, 2) + '')
                 this.setState({
                     change_size_w:1,
                     change_size_h:500,
@@ -540,7 +541,7 @@ class Excel extends React.Component<any, any>  {
         let setting = this.excelObject.setting_custome;
         if(change_type === 'w') { 
             let _left = setting.columnLefts[this.state.change_size_current_index -1] || this.excelObject.setting_def.columTitleDefWidth;
-            setting.column[this.state.change_size_current_index]  = Math.max(_eX - _left, 2)
+            setting.column[this.state.change_size_current_index]  = parseInt(Math.max(_eX - _left, 2)+"")
             this.setState({
                 change_size_w:1,
                 change_size_h:500,
