@@ -855,13 +855,13 @@ class Excel extends React.Component<any, any>  {
         ctx.stroke();
         this.inputRef.value = this.excelData[ col_start][row_start ][2];
         if(state === 'merge') {
-            this.excelData[col_start][row_start][0] = [col_end - col_start  , row_end - row_start ];
-            this.updateSelAreaItemsByMerge(
-                col_start,
-                row_start,
-                col_end,
-                row_end
-            );
+            // this.excelData[col_start][row_start][0] = [col_end - col_start  , row_end - row_start ];
+            // this.updateSelAreaItemsByMerge(
+            //     col_start,
+            //     row_start,
+            //     col_end,
+            //     row_end
+            // );
         }
     } 
 
