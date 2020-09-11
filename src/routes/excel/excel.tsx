@@ -282,7 +282,7 @@ class Excel extends React.Component<any, any>  {
             currentLeft += width;
         }
         ctx.stroke();
-        console.log(this.excelData)
+
     }
 
     updateExcelCanvas() {
@@ -483,7 +483,7 @@ class Excel extends React.Component<any, any>  {
         let index = -1;
         console.log(ratio)
         if(change_type === 'w') {
-            index = current_index || this.excelObject.setting_custome.columnLefts.indexOf(_eX + (ratio === 1 ? 0 : 0 ) );
+            index = current_index || this.excelObject.setting_custome.columnLefts.indexOf(_eX + (ratio === 1 ? 0 : 0.5 ) );
 
             
             console.log( this.excelObject.setting_custome.columnLefts,_eX )
