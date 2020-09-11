@@ -481,12 +481,8 @@ class Excel extends React.Component<any, any>  {
         let ratio = this.excelObject.info.scalingRatio;
         let setting = this.excelObject.setting_custome;
         let index = -1;
-        console.log(ratio)
         if(change_type === 'w') {
             index = current_index || this.excelObject.setting_custome.columnLefts.indexOf(_eX + (ratio === 1 ? 0 : 0.5 ) );
-
-            
-            console.log( this.excelObject.setting_custome.columnLefts,_eX )
         }else if(change_type === 'h') {
             index = current_index || this.excelObject.setting_custome.rowTops.indexOf(_eY)
         }
