@@ -1475,7 +1475,7 @@ class Excel extends React.Component<any, any>  {
                     display:['w','h'].indexOf(this.state.mouse_event_type) > -1 && this.state.change_size_current_index> -1 && parseFloat(this.state.currentLabel_left) > 0 ?'block':'none'
                 }}>
                         <label className="lab">{this.state.changeSizeState === 'change_size_w' ? '宽度': '高度'}:</label>
-                        <span className="val">{this.state.currentLabel_val} 像素 </span>
+                        <span className="val">{parseInt(this.state.currentLabel_val + '')} 像素 </span>
                 </div>
 
                 {/* Excel画布 */}
