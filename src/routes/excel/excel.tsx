@@ -306,7 +306,7 @@ class Excel extends React.Component<any, any>  {
             currentTop = def.rowTitleHeight ;
             for(let row = 0;row <rLen && currentTop <= 500;row++) {
                 let height = rows[row];
-                let item = this.excelData[col][row];
+                let item = this.excelData[col] && this.excelData[col][row];
                 if(!item) {
                     continue;
                 };
