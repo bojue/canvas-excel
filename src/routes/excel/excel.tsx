@@ -609,7 +609,7 @@ class Excel extends React.Component<any, any>  {
     }
 
     reDragSelAreaByTitle(ind?:number, w?:number) {
-        let index = ind || this.state.sel_area_by_title_index;
+        let index = ind === 0 ? 0 : ind || this.state.sel_area_by_title_index;
         let width = w || this.state.sel_area_by_title_width;
         this.setState({
             editor_display:'none',
@@ -676,6 +676,7 @@ class Excel extends React.Component<any, any>  {
                         let _rowList = this.excelData && this.excelData[col];
                         let len = _rowList && Array.isArray(_rowList) && _rowList.length;
                         if(!!len) {
+                            console.log(col)
                             this.setState({
                                 regional_sel_start:[0,col],
                                 regional_sel_end:[len-1, col],
