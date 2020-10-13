@@ -339,7 +339,7 @@ class Excel extends React.Component<any, any>  {
     getMergeRectSize(widthArray:any[], start:number, width:number) {
         let _w = 0;
         if(width) {
-            for(let i=0;i<=width;i++) {
+            for(let i=0;i<width;i++) {
                 _w += widthArray[start + i]
             }
         }
@@ -676,7 +676,6 @@ class Excel extends React.Component<any, any>  {
                         let _rowList = this.excelData && this.excelData[col];
                         let len = _rowList && Array.isArray(_rowList) && _rowList.length;
                         if(!!len) {
-                            console.log(col)
                             this.setState({
                                 regional_sel_start:[0,col],
                                 regional_sel_end:[len-1, col],
@@ -856,13 +855,13 @@ class Excel extends React.Component<any, any>  {
         ctx.stroke();
         this.inputRef.value = this.excelData[ col_start][row_start ][2];
         if(state === 'merge') {
-            // this.excelData[col_start][row_start][0] = [col_end - col_start  , row_end - row_start ];
-            // this.updateSelAreaItemsByMerge(
-            //     col_start,
-            //     row_start,
-            //     col_end,
-            //     row_end
-            // );
+            this.excelData[col_start][row_start][0] = [col_end - col_start +1 , row_end - row_start + 1];
+            this.updateSelAreaItemsByMerge(
+                col_start,
+                row_start,
+                col_end,
+                row_end
+            );
         }
     } 
 
