@@ -665,7 +665,26 @@ class Excel extends React.Component<any, any>  {
         if(def.columTitleDefWidth <= left && left <= 1000 && 0<= top && top <def.rowTitleHeight ) {
             let _cl = def.columTitleDefWidth;
             for(let col=0;col< cLen;col++) {
+                // let item = this.excelData[col] && this.excelData[col][row];
                 let _w = colums[col];
+                // if(w_count > 1) {
+                //     w = this.getMergeRectSize(colums, col, w_count)
+                // }
+
+                // let item = this.excelData[col] && this.excelData[col][row];
+                // if(!item) {
+                //     continue;
+                // };
+                // let w_count = item[0][0];
+                // let h_count = item[0][1];
+                // let w = width;
+                // let h = height;
+                // if(w_count > 1) {
+                //     w = this.getMergeRectSize(colums, col, w_count)
+                // }
+                // if(h_count > 1){
+                //     h= this.getMergeRectSize(rows, row, h_count)
+                // }
                 if(_cl <= left && left <= _cl + _w) {
                     if(this.state.regional_sel_by_title_state !== 'x' || this.state.regional_sel_by_title_index !== col) {
                         this.setState({
