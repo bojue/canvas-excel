@@ -22,6 +22,7 @@ npm run build //构建生产包
 ## 截图
 
 ![DEMO](https://github.com/bojue/canvas-excel/raw/master/src/assets/demo.PNG)
+![DEMO](https://github.com/bojue/canvas-excel/raw/master/src/assets/merge.png)
 
 ## 实现功能
 
