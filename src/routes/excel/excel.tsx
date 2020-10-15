@@ -661,7 +661,7 @@ class Excel extends React.Component<any, any>  {
         if(this.state.regional_sel_state === 0) {
             return;
         }
-        // let ratio = this.excelObject.info.scalingRatio;
+        console.log("点击位置：", [left, top])
         if(def.columTitleDefWidth <= left && left <= 1000 && 0<= top && top <def.rowTitleHeight ) {
             let _cl = def.columTitleDefWidth;
             for(let col=0;col< cLen;col++) {
@@ -685,6 +685,7 @@ class Excel extends React.Component<any, any>  {
                 // if(h_count > 1){
                 //     h= this.getMergeRectSize(rows, row, h_count)
                 // }
+
                 if(_cl <= left && left <= _cl + _w) {
                     if(this.state.regional_sel_by_title_state !== 'x' || this.state.regional_sel_by_title_index !== col) {
                         this.setState({
@@ -867,7 +868,9 @@ class Excel extends React.Component<any, any>  {
             (setting.columnLefts[merge_col] - _l - 0.5) * ratio,
             (setting.rowTops[merge_row] - _t - 0.5) * ratio);
         if(state === 'merge') {
-            this.excelData[row_start ][col_start][2] = this.inputRef.value;
+            if( this.excelData &&  this.excelData[row_start] &&  this.excelData[row_start][col_start]) {
+                this.excelData[row_start ][col_start][2] = this.inputRef.value;
+            }
         }
         // 绘制左上角起始单元格内容
         drawMergeText(ctx, this.excelData[ col_start][row_start], merge_row, merge_col, _l + 0.5, _t + 0.5, setting, ratio);
