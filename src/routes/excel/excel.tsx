@@ -844,8 +844,6 @@ class Excel extends React.Component<any, any>  {
         drawMergeText(ctx, this.excelData[row_start][col_start], merge_row, merge_col, _l + 0.5, _t + 0.5, setting, ratio);
         ctx.stroke();
         this.inputRef.value = this.excelData[row_start][ col_start][2];
-
-        console.log(row_end, col_end)
     } 
 
     // 重新绘制区域选择
@@ -927,7 +925,7 @@ class Excel extends React.Component<any, any>  {
             }
         }
         // 绘制左上角起始单元格内容
-        drawMergeText(ctx, this.excelData[row_start][col_start], merge_row, merge_col, _l + 0.5, _t + 0.5, setting, ratio);
+        // drawMergeText(ctx, this.excelData[row_start][col_start], merge_row, merge_col, _l + 0.5, _t + 0.5, setting, ratio);
         ctx.stroke();
         this.inputRef.value = this.excelData[row_start][ col_start][2];
         if(state === 'merge') {
@@ -939,11 +937,10 @@ class Excel extends React.Component<any, any>  {
                 row_end
             );
         }
-
-        console.log(row_end, col_end)
     } 
 
     updateSelAreaItemsByMerge(c_s:number, r_s:number, c_e:number, r_e: number) {
+        console.log(c_s, c_e, r_s, r_e)
         let datas =  this.excelData;
         for(let i=c_s;i<=c_e;i++) {
             for(let j=r_s;j<=r_e;j++) {
@@ -1143,13 +1140,10 @@ class Excel extends React.Component<any, any>  {
     }
 
     merge() {
-        return false
         // 初始状态判断
         let _s = this.state.regional_sel_start;
         let _e = this.state.regional_sel_end;
         let _arr = [..._s,..._e];
-        if(_arr.indexOf(-1) > -1) return;
-
         const ctx = this.context;
         let ratio = this.excelObject.info.scalingRatio;
         ctx.beginPath();
@@ -1161,12 +1155,13 @@ class Excel extends React.Component<any, any>  {
         let cLen = colums.length;
         let currentLeft = def.columTitleDefWidth + 0.5;
         let currentTop = def.rowTitleHeight + 0.5;
-
         for(let row = 0;row < rLen;row++) {
             currentTop = def.rowTitleHeight+ 0.5;
             let width = colums[row];
+            if(width === undefined) continue;
             for(let col=0;col< cLen;col++) {
                 let height = rows[col];
+                if(height === undefined) continue;
                 if(col === _s[0] && row ===  _s[1]) {
                     ctx.lineWidth = 1;
                     ctx.strokeStyle = "#e0e0e0";
@@ -1180,7 +1175,6 @@ class Excel extends React.Component<any, any>  {
             }
             currentLeft += width;
         }
-        ctx.stroke();
         this.reDrawSelectArea('merge');
     }
 
