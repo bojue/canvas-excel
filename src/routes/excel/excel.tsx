@@ -25,7 +25,7 @@ import { drawMergeText, drawText} from './service/excel-draw-text';
 import { initExcelCanvas } from './service/excel-draw-canvas-init';
 
 //data
-import { txtCols, rectFillStylesCols, txtFamilys, txtSizes} from './service/init-data';
+import { txtCols, rectFillStylesCols, txtFamilys, txtSizes} from './models/excle-setting-data';
 
 export interface Txt {
     v:string;
@@ -497,9 +497,7 @@ class Excel extends React.Component<any, any>  {
         this.reDrawSelectArea();
         if(this.state.editor_display === 'block') {
             // this.updateEditorDOM(_eX, _eY, 'changeSize');
-        }
-        // this.reDragSelAreaByTitle();
- 
+        } 
     }
 
     initSelection() {
@@ -534,8 +532,6 @@ class Excel extends React.Component<any, any>  {
         this.drawBorder();
         this.updateExcelCanvas();
     }
-
-
 
     reDragSelAreaByTitle(ind?:number, w?:number) {
         let index = ind === 0 ? 0 : ind || this.state.sel_area_by_title_index;
@@ -601,15 +597,15 @@ class Excel extends React.Component<any, any>  {
                             regional_sel_by_title_index: col,
                             regional_sel_by_title_width: _w
                         });
-                        let _rowList = this.excelData && this.excelData[col];
-                        let len = _rowList && Array.isArray(_rowList) && _rowList.length;
+                        let _colList = this.excelData && this.excelData;
+                        let len = _colList && Array.isArray(_colList) && _colList.length;
                         if(!!len) {
                             this.setState({
                                 regional_sel_start:[0,col],
                                 regional_sel_end:[len-1, col],
                             })
                             this.reDrawCanvas();
-                            this.reDrawSelectArea();
+                            this.reDrawSelectAreaByTitle();
                             this.reDragSelAreaByTitle(col, _w);
                         }
                     }
@@ -628,7 +624,7 @@ class Excel extends React.Component<any, any>  {
                         regional_sel_by_title_index: row,
                         regional_sel_by_title_width: _h
                     })
-                    let len = this.excelData && Array.isArray(this.excelData) && this.excelData.length;
+                    let len = this.excelData && Array.isArray(this.excelData) && this.excelData[0] && this.excelData[0].length;
                     if(!!len) {
                         this.setState({
                             regional_sel_start:[row,0],
@@ -767,65 +763,90 @@ class Excel extends React.Component<any, any>  {
                
                     }
                 }
-
-
-            // for(let row = 0;row < cLen;row++) {
-            //     currentTop = def.rowTitleHeight;
-            //     let width = colums[row]  ;
-            //     for(let col=0;col< rLen;col++) {
-            //         let height = rows[col] ;
-            //         currentTop = col > 0 ? setting.rowTops[col -1] : def.rowTitleHeight;
-            //         currentLeft = row > 0 ? setting.columnLefts[row -1] : def.columTitleDefWidth;
-            //         if(currentTop < top && (currentTop + height) >= top && currentLeft < left && (currentLeft + width) >= left) {
-            //             // 缓存焦点优化绘制
-            //             if(this.state.regional_sel_state === 2 && this.state.regional_cantch_before[0] === currentLeft && this.state.regional_cantch_before[1] === currentTop) {
-            //                 return;
-            //             }else if(this.state.regional_sel_state === 2) {
-            //                 this.setState({
-            //                     regional_cantch_before:[currentLeft, currentTop]
-            //                 })
-            //             }
-            //             if(this.state.regional_sel_state === 1) {
-            //                 this.setState({
-            //                     // 输入框状态复位
-            //                     editor_width:0,
-            //                     editor_height:0,
-            //                     editor_top:0,
-            //                     editor_left:0,
-            //                     editor_text:"",
-            //                     editor_display:'none',
-            //                     // 选中区域定位
-            //                     regional_sel_start:[col, row],
-            //                     regional_sel_end:[col, row],
-            //                     regional_sel_l:currentLeft,
-            //                     regional_sel_t:currentTop,
-            //                     regional_sel_state:2,
-            //                     regional_sel_by_click_state:1,
-            //                     regional_cantch_before:[currentLeft, currentTop],
-            //                 })
-            //             }else {
-            //                 this.setState({
-            //                     regional_sel_end:[col,row],
-            //                     regional_sel_by_title_state: null,
-            //                     regional_sel_by_title_index: null,
-            //                     regional_sel_by_title_width: null
-            //                 });
-
-            //             }
-            //             //绘制矩形
-            //             this.reDrawCanvas();
-            //             //绘制选中区域
-            //             this.reDrawSelectArea();
-            //         }else {
-               
-            //         }
-            //     }
             } 
         }
-        
-      
-  
     }
+
+    // 重新绘制区域选择
+    reDrawSelectAreaByTitle() {
+        const ctx = this.context;
+        let ratio = this.excelObject.info.scalingRatio;
+        let def = this.excelObject.setting_def;
+        let setting = this.excelObject.setting_custome;
+
+        let _start = this.state.regional_sel_start;
+        let _end = this.state.regional_sel_end;  
+        ctx.beginPath();
+       
+        // 鼠标选中从右向左选中
+        let col_start = Math.min(_start[1],_end[1]);
+        let col_end = Math.max(_start[1], _end[1]);
+        let _l= col_start > 0 ? setting.columnLefts[col_start -1] :  def.columTitleDefWidth;
+        let _w = (setting.columnLefts.length === (col_end + 1) ) ? 
+        col_start === 0 ?
+        setting.columnLefts[ setting.columnLefts.length-1] -  def.columTitleDefWidth :
+        setting.columnLefts[ setting.columnLefts.length -1] - setting.columnLefts[col_start -1 ] :
+        setting.columnLefts[Math.min(col_end, setting.columnLefts.length -1)] - (col_start > 0 ? setting.columnLefts[col_start-1] : def.columTitleDefWidth);
+
+        // 鼠标选中从下向上选中
+        let row_start = Math.min(_start[0], _end[0]);
+        let row_end = Math.max(_start[0], _end[0]);
+        let _t=  row_start > 0 ? setting.rowTops[row_start -1] : def.rowTitleHeight;
+        let _h = (setting.rowTops.length === (row_end + 1) ) ? 
+            row_start === 0 ?
+            setting.rowTops[ setting.rowTops.length-1] -  def.rowTitleHeight :
+            setting.rowTops[ setting.rowTops.length -1] - setting.rowTops[row_start  -1] :
+            setting.rowTops[Math.min(row_end, setting.rowTops.length-1)] - (row_start > 0 ? setting.rowTops[row_start-1] : def.rowTitleHeight);
+        if(col_start === -1 || row_start === -1) return;
+        ctx.lineWidth = 2 * ratio;
+        ctx.strokeStyle = 'rgba(0, 102, 0, 0.8)';
+        ctx.fillStyle =  'rgba(0, 102, 0, 0.02)';
+        ctx.fillRect(_l * ratio, _t * ratio, _w * ratio, _h * ratio);
+        this.setState({
+            regional_sel:[_l,_t,_w,_h]
+        });
+        let currentItem =  this.excelData[row_start][col_start];
+        if(col_start > -1 && row_start > -1) {
+            let {
+                color,
+                fontStyle,
+                fontWeight,
+                fontSize,
+                fontFamily
+            } = currentItem[3]['text'];
+            this.setState({
+                editor_coordinate_x:col_start,
+                editor_coordinate_y:row_start,
+                editor_coordinate_val:currentItem[2],
+                extended_attribute_font_color:color,
+                extended_attribute_font_weight:fontWeight,
+                extended_attribute_font_style:fontStyle,
+                extended_attribute_font_size:fontSize,
+                extended_attribute_font_family:fontFamily
+            })
+        } 
+        let merge_col = col_start;
+        let merge_row = row_start ;
+
+        ctx.rect(_l * ratio, _t * ratio, _w * ratio, _h * ratio);
+        ctx.fillStyle =  'rgba(0, 102, 0, 0.04)';
+        ctx.fillRect(_l * ratio, _t * ratio, _w * ratio, _h * ratio);
+
+        // 选中区域的起始网格
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(
+            _l * ratio  + 0.5, 
+            _t * ratio + 0.5, 
+            (setting.columnLefts[merge_col] - _l - 0.5) * ratio,
+            (setting.rowTops[merge_row] - _t - 0.5) * ratio);
+
+        // 绘制左上角起始单元格内容
+        drawMergeText(ctx, this.excelData[row_start][col_start], merge_row, merge_col, _l + 0.5, _t + 0.5, setting, ratio);
+        ctx.stroke();
+        this.inputRef.value = this.excelData[row_start][ col_start][2];
+
+        console.log(row_end, col_end)
+    } 
 
     // 重新绘制区域选择
     reDrawSelectArea(state?:string | 'merge') {
@@ -918,6 +939,8 @@ class Excel extends React.Component<any, any>  {
                 row_end
             );
         }
+
+        console.log(row_end, col_end)
     } 
 
     updateSelAreaItemsByMerge(c_s:number, r_s:number, c_e:number, r_e: number) {
@@ -928,9 +951,16 @@ class Excel extends React.Component<any, any>  {
                 if(i === c_s && j === r_s) {
                     continue;
                 }else if(item && item[0]) {
-                    item[0][0] = 0;
-                    item[0][1] = 0;
-                    item[2] = "";
+                    [
+                        item[0][0],
+                        item[0][1],
+                        item[2]
+                    ] = [ 
+                        0, 
+                        0, 
+                        ""
+                    ]
+            
                 }
             }
         }
