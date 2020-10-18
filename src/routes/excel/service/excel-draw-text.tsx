@@ -42,9 +42,11 @@ let drawMergeText = (ctx:any, item:any,merge_row:number, merge_col:number, _l:nu
         _l * ratio + (setting.columnLefts[merge_col] - _l) * ratio /2 :
    ( setting.columnLefts[merge_col]  -3) * ratio;
     ctx.fillText(txtVal,l, _t * ratio +  (setting.rowTops[merge_row] -_t) * ratio/ 2);
+    ctx.stroke();
 }
 
 let getFillText = (lineWidth:number, txt:string, ctx:CanvasRenderingContext2D, textAlign:string) => {
+    if(txt === undefined || txt === null) return '';
     if(txt === null || txt === undefined) return txt;
     let len = txt.length;
     let count = 0;
