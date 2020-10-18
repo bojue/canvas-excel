@@ -21,6 +21,8 @@ import { excelItemModel } from './models/excel-item';
 import { excelDataModel } from './models/excel-data';
 
 import { drawMergeText, drawText} from './service/excel-draw-text';
+import { initExcelCanvas } from './service/excel-draw-canvas-init';
+
 import { cpus } from 'os';
 export interface Txt {
     v:string;
@@ -91,11 +93,6 @@ class Excel extends React.Component<any, any>  {
             18,
             20
         ]
-    }
-
-
-    updateExcelDataByItem(x:number, y:number,coordinate:any[],type:string, val:string, setting?:object ) {
-        this.excelData[x][y] = JSON.parse(JSON.stringify([coordinate, type, val, setting || this.excelData[x] && this.excelData[x][y] && this.excelData[x][y][3] || excelItemModel[3]]));
     }
     
     componentDidMount() {
@@ -240,50 +237,10 @@ class Excel extends React.Component<any, any>  {
 
     
     initExcelCanvas() {
-        const ratio = this.excelObject.info.scalingRatio;
-        const ctx = this.context;
-        ctx.beginPath();
-        let def = this.excelObject.setting_def;
-        let setting = this.excelObject.setting_custome;
-        let rows = setting.row;
-        let colums = setting.column;
-        let rLen = rows.length;
-        let cLen = colums.length;
-        let currentTop = def.rowTitleHeight;
-        let currentLeft = def.columTitleDefWidth;
-        let str = "";
-        currentLeft = def.columTitleDefWidth;
-        for(let col=0;col< cLen && currentLeft <= 1000;col++) {
-            if(!(this.excelData && this.excelData[col])) {
-                this.excelData[col] = [];
-            }
-  
-            let width = colums[col];
-            ctx.lineWidth = 1;
-            ctx.strokeStyle = "#ccc";
-            currentTop = def.rowTitleHeight ;
-            for(let row = 0;row <rLen && currentTop <= 500;row++) {
-                let height = rows[row];
-                if(this.excelData &&this.excelData[col] && this.excelData[col][row]){
-                    str = this.excelData &&this.excelData[col] && this.excelData[col][row] &&  this.excelData[col][row][2];
-                }else {
-                    this.excelData[col][row] = excelItemModel || [];
-                    str = (col+1)  +' - '+ (row+1);
-                }
-                ctx.rect(currentLeft* ratio +0.5 , currentTop* ratio + 0.5, width* ratio, height* ratio);
-                ctx.fillStyle = this.excelData &&this.excelData[col] && this.excelData[col][row] ?
-                                this.excelData[col][row][3]['rect']['fillStyle']:
-                                "#fff"
-                ctx.fillRect(currentLeft* ratio, currentTop* ratio, width* ratio, height* ratio);
-                this.updateExcelDataByItem(col, row, [1, 1], 'txt', str)
-                drawText(ctx, this.excelData[col][row], col, row, str, ratio, currentLeft, currentTop, height, width);
-                currentTop += height;
-            }
-            currentLeft += width;
-        }
-        ctx.stroke();
-
+        initExcelCanvas(this.context, this.excelObject, this.excelData, excelItemModel);
     }
+
+
 
     updateExcelCanvas() {
         const ratio = this.excelObject.info.scalingRatio;
