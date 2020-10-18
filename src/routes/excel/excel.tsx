@@ -20,10 +20,13 @@ import { excelStateModel } from './models/excel-state';
 import { excelItemModel } from './models/excel-item';
 import { excelDataModel } from './models/excel-data';
 
+//service
 import { drawMergeText, drawText} from './service/excel-draw-text';
 import { initExcelCanvas } from './service/excel-draw-canvas-init';
 
-import { cpus } from 'os';
+//data
+import { txtCols, rectFillStylesCols, txtFamilys, txtSizes} from './service/init-data';
+
 export interface Txt {
     v:string;
     x:number;
@@ -58,48 +61,17 @@ class Excel extends React.Component<any, any>  {
         this.state = excelStateModel;
         this.excelObject = excelObjectModel;
         this.excelData = excelDataModel;
-        this.txtCols = [
-            'rgb(0,0,0)',
-            'rgb(66, 133, 244)',
-            'rgb(70, 189, 198)',
-            'rgb(52, 168, 83)',
-            'rgb(251, 188, 4)',
-            'rgb(255, 109, 1)',
-            'rgb(234, 67, 53)',
-        ],
-        this.rectFillStylesCols = [
-            'rgb(255, 255, 255)',
-            'rgb(70, 189, 198)',
-            'rgb(52, 168, 83)',
-            'rgb(251, 188, 4)',
-            'rgb(255, 109, 1)',
-            'rgb(234, 67, 53)',
-        ],
-        this.txtFamilys = [
-            "微软雅黑",
-            "楷体",
-            "黑体",
-            "宋体",
-            "仿宋",
-            "华文楷体",
-            "Agency FB"
-        ],
-        this.txtSizes = [
-            8,
-            10,
-            12,
-            14,
-            16,
-            18,
-            20
-        ]
+        this.txtCols = txtCols;
+        this.rectFillStylesCols = rectFillStylesCols;
+        this.txtFamilys = txtFamilys;
+        this.txtSizes = txtSizes;
     }
     
     componentDidMount() {
         this.getExcelCanvas();
         this.drawBorder();
         this.addLister();
-        this.initExcelCanvas();
+        this.initExcelContent();
     }
     getExcelCanvas() {
         this.clientRect = this.excelRef.getBoundingClientRect();
@@ -236,11 +208,9 @@ class Excel extends React.Component<any, any>  {
     }
 
     
-    initExcelCanvas() {
+    initExcelContent() {
         initExcelCanvas(this.context, this.excelObject, this.excelData, excelItemModel);
     }
-
-
 
     updateExcelCanvas() {
         const ratio = this.excelObject.info.scalingRatio;
@@ -256,14 +226,14 @@ class Excel extends React.Component<any, any>  {
         let currentLeft = def.columTitleDefWidth;
         let str = "";
         currentLeft = def.columTitleDefWidth;
-        for(let col=0;col< cLen && currentLeft <= 1000;col++) {
-            let width = colums[col];
-            ctx.lineWidth = 1;
-            ctx.strokeStyle = "#ccc";
-            currentTop = def.rowTitleHeight ;
-            for(let row = 0;row <rLen && currentTop <= 500;row++) {
-                let height = rows[row];
-                let item = this.excelData[col] && this.excelData[col][row];
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = "#ccc";
+        for(let row = 0;row <rLen && currentTop <= 500;row++) {
+            let height = rows[row];
+            currentLeft = def.columTitleDefWidth;
+            for(let col=0;col< cLen && currentLeft <= 1000;col++) {
+                let width = colums[col];
+                let item = this.excelData[row] && this.excelData[row][col];
                 if(!item) {
                     continue;
                 };
@@ -280,15 +250,15 @@ class Excel extends React.Component<any, any>  {
                 str = item[2];
                 if((item[0][0] !== 0 && item[0][1] !== 0)) {
                     ctx.rect(currentLeft* ratio +0.5 , currentTop * ratio + 0.5, w* ratio, h* ratio);
-                    ctx.fillStyle = this.excelData[col][row][3]['rect']['fillStyle']
+                    ctx.fillStyle = this.excelData[row][col][3]['rect']['fillStyle']
                     ctx.fillRect(currentLeft* ratio, currentTop* ratio, w* ratio, h* ratio);
                     if(str !== '' && str !== null) {
                         drawText(ctx, item, col, row, str, ratio, currentLeft, currentTop, h, w);
                     }
                 }
-                currentTop += height;
+                currentLeft += width;
             }
-            currentLeft += width;
+            currentTop += height;
         }
         ctx.stroke();
     }
@@ -319,19 +289,19 @@ class Excel extends React.Component<any, any>  {
             }
         })
         const ctx = this.excelRef;
-        ctx.addEventListener('dblclick', (e:MouseEvent)=> {
-            let def = this.excelObject.setting_def;
-            let _eX = e.clientX - this.clientRect.x;
-            let _eY = e.clientY - this.clientRect.y;
-            if(def.columTitleDefWidth <= _eX && _eX <= 1000 && 0<= _eY && _eY <def.rowTitleHeight || 
-            0 <= _eX && _eX < def.columTitleDefWidth && def.rowTitleHeight < _eY && _eY <= 500 ) {
-                return;
-            }
-            this.updateEditorDOM(_eX, _eY);
-            this.initSelection();
-            this.editorRef.current.setAttribute("contenteditable", "true");
-            this.editorRef.current.focus();
-        }); 
+        // ctx.addEventListener('dblclick', (e:MouseEvent)=> {
+        //     let def = this.excelObject.setting_def;
+        //     let _eX = e.clientX - this.clientRect.x;
+        //     let _eY = e.clientY - this.clientRect.y;
+        //     if(def.columTitleDefWidth <= _eX && _eX <= 1000 && 0<= _eY && _eY <def.rowTitleHeight || 
+        //     0 <= _eX && _eX < def.columTitleDefWidth && def.rowTitleHeight < _eY && _eY <= 500 ) {
+        //         return;
+        //     }
+        //     this.updateEditorDOM(_eX, _eY);
+        //     this.initSelection();
+        //     this.editorRef.current.setAttribute("contenteditable", "true");
+        //     this.editorRef.current.focus();
+        // }); 
         ctx.addEventListener('click', (e:MouseEvent)=> {
             let _eX = e.clientX - this.clientRect.x;
             let _eY = e.clientY - this.clientRect.y;
@@ -526,7 +496,7 @@ class Excel extends React.Component<any, any>  {
         this.reDrawCanvas();
         this.reDrawSelectArea();
         if(this.state.editor_display === 'block') {
-            this.updateEditorDOM(_eX, _eY, 'changeSize');
+            // this.updateEditorDOM(_eX, _eY, 'changeSize');
         }
         // this.reDragSelAreaByTitle();
  
@@ -564,6 +534,8 @@ class Excel extends React.Component<any, any>  {
         this.drawBorder();
         this.updateExcelCanvas();
     }
+
+
 
     reDragSelAreaByTitle(ind?:number, w?:number) {
         let index = ind === 0 ? 0 : ind || this.state.sel_area_by_title_index;
@@ -618,31 +590,10 @@ class Excel extends React.Component<any, any>  {
         if(this.state.regional_sel_state === 0) {
             return;
         }
-        console.log("点击位置：", [left, top])
         if(def.columTitleDefWidth <= left && left <= 1000 && 0<= top && top <def.rowTitleHeight ) {
             let _cl = def.columTitleDefWidth;
             for(let col=0;col< cLen;col++) {
-                // let item = this.excelData[col] && this.excelData[col][row];
                 let _w = colums[col];
-                // if(w_count > 1) {
-                //     w = this.getMergeRectSize(colums, col, w_count)
-                // }
-
-                // let item = this.excelData[col] && this.excelData[col][row];
-                // if(!item) {
-                //     continue;
-                // };
-                // let w_count = item[0][0];
-                // let h_count = item[0][1];
-                // let w = width;
-                // let h = height;
-                // if(w_count > 1) {
-                //     w = this.getMergeRectSize(colums, col, w_count)
-                // }
-                // if(h_count > 1){
-                //     h= this.getMergeRectSize(rows, row, h_count)
-                // }
-
                 if(_cl <= left && left <= _cl + _w) {
                     if(this.state.regional_sel_by_title_state !== 'x' || this.state.regional_sel_by_title_index !== col) {
                         this.setState({
@@ -693,6 +644,78 @@ class Excel extends React.Component<any, any>  {
             
             }
         }else if(def.columTitleDefWidth<= left && left <= 1000 && def.rowTitleHeight < top && top <= 500){
+            // if(w_count > 1) {
+            //     w = this.getMergeRectSize(colums, col, w_count)
+            // }
+
+            // let item = this.excelData[col] && this.excelData[col][row];
+            // if(!item) {
+            //     continue;
+            // };
+            // let w_count = item[0][0];
+            // let h_count = item[0][1];
+            // let w = width;
+            // let h = height;
+            // if(w_count > 1) {
+            //     w = this.getMergeRectSize(colums, col, w_count)
+            // }
+            // if(h_count > 1){
+            //     h= this.getMergeRectSize(rows, row, h_count)
+            // }
+            for(let col=0;col< rLen;col++) {
+                let height = rows[col] ;
+                currentTop = col > 0 ? setting.rowTops[col -1] : def.rowTitleHeight;
+                for(let row = 0;row < cLen;row++) {
+                    let width = colums[row]  ;
+                    currentLeft = row > 0 ? setting.columnLefts[row -1] : def.columTitleDefWidth;
+                    if(currentTop < top && (currentTop + height) >= top && currentLeft < left && (currentLeft + width) >= left) {
+                        // 缓存焦点优化绘制
+                        if(this.state.regional_sel_state === 2 && this.state.regional_cantch_before[0] === currentLeft && this.state.regional_cantch_before[1] === currentTop) {
+                            return;
+                        }else if(this.state.regional_sel_state === 2) {
+                            this.setState({
+                                regional_cantch_before:[currentLeft, currentTop]
+                            })
+                        }
+                        if(this.state.regional_sel_state === 1) {
+                            this.setState({
+                                // 输入框状态复位
+                                editor_width:0,
+                                editor_height:0,
+                                editor_top:0,
+                                editor_left:0,
+                                editor_text:"",
+                                editor_display:'none',
+                                // 选中区域定位
+                                regional_sel_start:[col, row],
+                                regional_sel_end:[col, row],
+                                regional_sel_l:currentLeft,
+                                regional_sel_t:currentTop,
+                                regional_sel_state:2,
+                                regional_sel_by_click_state:1,
+                                regional_cantch_before:[currentLeft, currentTop],
+                            })
+                        }else {
+                            this.setState({
+                                regional_sel_end:[col,row],
+                                regional_sel_by_title_state: null,
+                                regional_sel_by_title_index: null,
+                                regional_sel_by_title_width: null
+                            });
+
+                        }
+                        //绘制矩形
+                        this.reDrawCanvas();
+                        //绘制选中区域
+                        this.reDrawSelectArea();
+                    }else {
+               
+                    }
+                }
+
+
+            }
+
             for(let row = 0;row < cLen;row++) {
                 currentTop = def.rowTitleHeight;
                 let width = colums[row]  ;
@@ -744,6 +767,59 @@ class Excel extends React.Component<any, any>  {
                
                     }
                 }
+
+
+            // for(let row = 0;row < cLen;row++) {
+            //     currentTop = def.rowTitleHeight;
+            //     let width = colums[row]  ;
+            //     for(let col=0;col< rLen;col++) {
+            //         let height = rows[col] ;
+            //         currentTop = col > 0 ? setting.rowTops[col -1] : def.rowTitleHeight;
+            //         currentLeft = row > 0 ? setting.columnLefts[row -1] : def.columTitleDefWidth;
+            //         if(currentTop < top && (currentTop + height) >= top && currentLeft < left && (currentLeft + width) >= left) {
+            //             // 缓存焦点优化绘制
+            //             if(this.state.regional_sel_state === 2 && this.state.regional_cantch_before[0] === currentLeft && this.state.regional_cantch_before[1] === currentTop) {
+            //                 return;
+            //             }else if(this.state.regional_sel_state === 2) {
+            //                 this.setState({
+            //                     regional_cantch_before:[currentLeft, currentTop]
+            //                 })
+            //             }
+            //             if(this.state.regional_sel_state === 1) {
+            //                 this.setState({
+            //                     // 输入框状态复位
+            //                     editor_width:0,
+            //                     editor_height:0,
+            //                     editor_top:0,
+            //                     editor_left:0,
+            //                     editor_text:"",
+            //                     editor_display:'none',
+            //                     // 选中区域定位
+            //                     regional_sel_start:[col, row],
+            //                     regional_sel_end:[col, row],
+            //                     regional_sel_l:currentLeft,
+            //                     regional_sel_t:currentTop,
+            //                     regional_sel_state:2,
+            //                     regional_sel_by_click_state:1,
+            //                     regional_cantch_before:[currentLeft, currentTop],
+            //                 })
+            //             }else {
+            //                 this.setState({
+            //                     regional_sel_end:[col,row],
+            //                     regional_sel_by_title_state: null,
+            //                     regional_sel_by_title_index: null,
+            //                     regional_sel_by_title_width: null
+            //                 });
+
+            //             }
+            //             //绘制矩形
+            //             this.reDrawCanvas();
+            //             //绘制选中区域
+            //             this.reDrawSelectArea();
+            //         }else {
+               
+            //         }
+            //     }
             } 
         }
         
@@ -790,7 +866,7 @@ class Excel extends React.Component<any, any>  {
         this.setState({
             regional_sel:[_l,_t,_w,_h]
         });
-        let currentItem =  this.excelData[col_start][row_start];
+        let currentItem =  this.excelData[row_start][col_start];
         if(col_start > -1 && row_start > -1) {
             let {
                 color,
@@ -830,11 +906,11 @@ class Excel extends React.Component<any, any>  {
             }
         }
         // 绘制左上角起始单元格内容
-        drawMergeText(ctx, this.excelData[ col_start][row_start], merge_row, merge_col, _l + 0.5, _t + 0.5, setting, ratio);
+        drawMergeText(ctx, this.excelData[row_start][col_start], merge_row, merge_col, _l + 0.5, _t + 0.5, setting, ratio);
         ctx.stroke();
-        this.inputRef.value = this.excelData[ col_start][row_start ][2];
+        this.inputRef.value = this.excelData[row_start][ col_start][2];
         if(state === 'merge') {
-            this.excelData[col_start][row_start][0] = [col_end - col_start +1 , row_end - row_start + 1];
+            this.excelData[row_start][col_start][0] = [col_end - col_start +1 , row_end - row_start + 1];
             this.updateSelAreaItemsByMerge(
                 col_start,
                 row_start,
@@ -1011,7 +1087,7 @@ class Excel extends React.Component<any, any>  {
             editor_coordinate_x: state === 'changeSize' ? this.state.editor_coordinate_x: _c_x, 
             editor_coordinate_y:state === 'changeSize' ? this.state.editor_coordinate_y:_c_y
         })
-        this.updateExcelCanvas();
+        // this.updateExcelCanvas();
     }
     upateTxtByEdited(dom:any) {
         let style = dom.style;
@@ -1037,6 +1113,7 @@ class Excel extends React.Component<any, any>  {
     }
 
     merge() {
+        return false
         // 初始状态判断
         let _s = this.state.regional_sel_start;
         let _e = this.state.regional_sel_end;
@@ -1116,8 +1193,8 @@ class Excel extends React.Component<any, any>  {
         }
 
         if(hasChangeState) {
-            this.updateExcelCanvas();
-            this.reDrawSelectArea();
+            // this.updateExcelCanvas();
+            // this.reDrawSelectArea();
         }
     }
 
