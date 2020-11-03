@@ -3,7 +3,6 @@ import { drawText} from './excel-draw-text';
 import { updateExcelDataByItem } from './excel-draw-item-text';
 
 let initExcelCanvas = function(context:any, excelObject:any, excelData:any, excelItemModel:any) {
-    const ratio = excelObject.info.scalingRatio;
     const ctx = context;
         ctx.beginPath();
     let def = excelObject.setting_def;
@@ -30,13 +29,13 @@ let initExcelCanvas = function(context:any, excelObject:any, excelData:any, exce
                 excelData[row][col] = excelItemModel || [];
             }
             let width = colums[col];
-            ctx.rect(currentLeft* ratio +0.5 , currentTop* ratio + 0.5, width* ratio, height* ratio);
+            ctx.rect(currentLeft +0.5 , currentTop + 0.5, width, height);
             ctx.fillStyle = excelData &&excelData[col] && excelData[col][row] ?
                             excelData[col][row][3]['rect']['fillStyle']:
                             "#fff"
-            ctx.fillRect(currentLeft* ratio, currentTop* ratio, width* ratio, height* ratio);
+            ctx.fillRect(currentLeft, currentTop, width, height);
             updateExcelDataByItem( excelData, excelItemModel, row, col, [1, 1], 'txt', str)
-            drawText(ctx, excelData[row][col], col, row, str, ratio, currentLeft, currentTop, height, width);
+            drawText(ctx, excelData[row][col], col, row, str, currentLeft, currentTop, height, width);
             currentLeft += width;
         }
         currentTop += height;   

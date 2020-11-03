@@ -1,7 +1,6 @@
 let excelObjectModel = {
     info:{
         title:"Excel",
-        scalingRatio: /macintosh|mac os x/i.test(navigator.userAgent) ? 2: 1,
         width:0,
         height:0,
         left:60,

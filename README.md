@@ -24,6 +24,13 @@ npm run build //构建生产包
 ![DEMO](https://github.com/bojue/canvas-excel/raw/master/src/assets/demo.PNG)
 ![DEMO](https://github.com/bojue/canvas-excel/raw/master/src/assets/merge.png)
 
+## !!!目前核心问题：操作输入过快会出现性能问题，导致页面卡死
+
+> 优化方案[还没有时间处理]：
+1. 没有处理节流优化
+2. 区域选择判断没有使用二分法
+
+
 ## 实现功能
 
 #### 工具栏

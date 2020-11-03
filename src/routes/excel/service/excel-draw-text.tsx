@@ -1,5 +1,5 @@
 // 绘制文本
-let drawText = (ctx:any, item:any, row:number, col:number, str:string, ratio:number, currentLeft:number, currentTop:number, height:number, width:number) => {
+let drawText = (ctx:any, item:any, row:number, col:number, str:string, currentLeft:number, currentTop:number, height:number, width:number) => {
     let setText = item[3]['text'];
     let {
         color,
@@ -10,20 +10,20 @@ let drawText = (ctx:any, item:any, row:number, col:number, str:string, ratio:num
     } = setText;
     ctx.fillStyle = color;
     let textAlign = item[3]['text']['textAlign'];
-    let txtVal = getFillText( (width - 3)* ratio,  str, ctx, textAlign);
+    let txtVal = getFillText( (width - 3),  str, ctx, textAlign);
     item[2] = str;
-    ctx.font = `${fontStyle} ${fontWeight}  ${fontSize * ratio }pt  ${fontFamily}`;
+    ctx.font = `${fontStyle} ${fontWeight}  ${fontSize }pt  ${fontFamily}`;
     ctx.textAlign =textAlign ;
     ctx.textBaseline = 'middle';
-    let textLeft = textAlign === 'left' ? (currentLeft + 3) * ratio :
-                     textAlign === 'right' ? (currentLeft + width -3) * ratio :
-                     (currentLeft + width /2 ) * ratio
-    ctx.fillText( txtVal, textLeft , currentTop * ratio+ height /2* ratio + 0.5);
+    let textLeft = textAlign === 'left' ? (currentLeft + 3)  :
+                     textAlign === 'right' ? (currentLeft + width -3)  :
+                     (currentLeft + width /2 ) 
+    ctx.fillText( txtVal, textLeft , currentTop + height /2 + 0.5);
 }
 
 
 // 绘制合并区域文本
-let drawMergeText = (ctx:any, item:any,merge_row:number, merge_col:number, _l:number, _t:number, setting:any, ratio:number)=> {
+let drawMergeText = (ctx:any, item:any,merge_row:number, merge_col:number, _l:number, _t:number, setting:any)=> {
     let setText = item[3]['text']
     let {
         color,
@@ -34,14 +34,14 @@ let drawMergeText = (ctx:any, item:any,merge_row:number, merge_col:number, _l:nu
     } = setText;
     ctx.fillStyle = color;
     let textAlign = item[3]['text']['textAlign'];
-    ctx.font = `${fontStyle  } ${fontWeight}  ${fontSize * ratio}pt  ${fontFamily}`;
-    let txtVal = getFillText(((setting.columnLefts[merge_col] - _l)  - 3)* ratio, item[2] , ctx, textAlign);
+    ctx.font = `${fontStyle  } ${fontWeight}  ${fontSize }pt  ${fontFamily}`;
+    let txtVal = getFillText(((setting.columnLefts[merge_col] - _l)  - 3), item[2] , ctx, textAlign);
     ctx.textAlign = textAlign ;
     ctx.textBaseline = 'middle';
-    let l =  textAlign === 'left' ?  (_l + 3) * ratio : textAlign === 'center' ?  
-        _l * ratio + (setting.columnLefts[merge_col] - _l) * ratio /2 :
-   ( setting.columnLefts[merge_col]  -3) * ratio;
-    ctx.fillText(txtVal,l, _t * ratio +  (setting.rowTops[merge_row] -_t) * ratio/ 2);
+    let l =  textAlign === 'left' ?  (_l + 3)  : textAlign === 'center' ?  
+        _l  + (setting.columnLefts[merge_col] - _l)  /2 :
+   ( setting.columnLefts[merge_col]  -3) ;
+    ctx.fillText(txtVal,l, _t  +  (setting.rowTops[merge_row] -_t) / 2);
     ctx.stroke();
 }
 
