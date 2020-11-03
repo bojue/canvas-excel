@@ -77,7 +77,7 @@ class Excel extends React.Component<any, any>  {
 
     initCanvasDOM() {
         var ctx = this.context        
-        var dpr =1 || window.devicePixelRatio || window.webkitDevicePixelRatio || window.mozDevicePixelRatio || 1;
+        var dpr = window.devicePixelRatio || window.webkitDevicePixelRatio || window.mozDevicePixelRatio || 1;
         var w = this.excelRef.width;
         var h = this.excelRef.height;
         this.excelRef.width = Math.round(w * dpr);
