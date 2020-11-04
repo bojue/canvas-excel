@@ -1519,7 +1519,7 @@ class Excel extends React.Component<any, any>  {
                         style={{
                             height:Math.min(parseFloat(this.state.regional_sel[3]), 500 - parseFloat(this.state.regional_sel[1]))||0,
                             top:parseFloat(this.state.regional_sel[1])||0,
-                            left:parseFloat(this.excelObject.setting_def.columTitleDefWidth ) -2 ||0}}></span>
+                            left:parseFloat(this.excelObject.setting_def.columTitleDefWidth ) -1 ||0}}></span>
                 </div>
 
                 {/* Excel下标工具栏拖拽组件*/}
