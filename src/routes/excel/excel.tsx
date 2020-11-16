@@ -77,7 +77,7 @@ class Excel extends React.Component<any, any>  {
 
     initCanvasDOM() {
         var ctx = this.context        
-        var dpr = window.devicePixelRatio || window.webkitDevicePixelRatio || window.mozDevicePixelRatio || 1;
+        var dpr =  window.devicePixelRatio || window.webkitDevicePixelRatio || window.mozDevicePixelRatio || 1;
         var w = this.excelRef.width;
         var h = this.excelRef.height;
         this.excelRef.width = Math.round(w * dpr);
@@ -133,7 +133,7 @@ class Excel extends React.Component<any, any>  {
             
             //绘制矩形
             ctx.fillStyle = "#E6e6e6";
-            ctx.fillRect(colLeft, rowTop, setting.column[i] ,  def.rowTitleHeight ) ;
+            ctx.fillRect(colLeft + 0.5, rowTop, setting.column[i] ,  def.rowTitleHeight ) ;
             
             //绘制文本
             ctx.fillStyle = '#000';
@@ -432,7 +432,7 @@ class Excel extends React.Component<any, any>  {
         let setting = this.excelObject.setting_custome;
         let index = -1;
         if(change_type === 'w') {
-            index = current_index || this.excelObject.setting_custome.columnLefts.indexOf(_eX );
+            index = current_index || this.excelObject.setting_custome.columnLefts.indexOf(_eX - 0.5);
         }else if(change_type === 'h') {
             index = current_index || this.excelObject.setting_custome.rowTops.indexOf(_eY)
         }
