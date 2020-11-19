@@ -2,11 +2,6 @@
 
 基于Canvas开发的Excle技术预研
 
-<h3 style="color:green">
- !!!页面输入卡死问题已经解决:垂直居中算法中 while 循环递归
-</h3>
-
-
 ## DEMO
 
 [在线预览](https://bojue.github.io/canvas-excel)
