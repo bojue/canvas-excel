@@ -47,10 +47,11 @@ let drawMergeText = (ctx:any, item:any,merge_row:number, merge_col:number, _l:nu
 
 let getFillText = (lineWidth:number, txt:string, ctx:CanvasRenderingContext2D, textAlign:string) => {
     if(txt === undefined || txt === null) return '';
-    if(txt === null || txt === undefined) return txt;
+    if(!txt) return txt;
     let len = txt.length;
     let count = 0;
-    let width = 0;        
+    let width = 0;
+
     switch(textAlign) {
         case 'left':
             count = 0;
@@ -85,7 +86,7 @@ let getFillText = (lineWidth:number, txt:string, ctx:CanvasRenderingContext2D, t
             count = 0;
             let indexL = 0;
             let indexR = 0;
-            let current = parseInt(len / 2 +'' );
+            let current = Math.max(parseInt(len / 2 +'' ), 1); // !!!默认文本居中算法计算,页面循环调用卡死bug修复
             let  fontWidth = ctx.measureText(txt[current]).width;
             let bool = width + fontWidth >= lineWidth;
             if(!bool) {
@@ -94,6 +95,7 @@ let getFillText = (lineWidth:number, txt:string, ctx:CanvasRenderingContext2D, t
                 indexR= current+1;
                 indexL = current -1;
             }
+
             while( (indexL >= 0 || indexR <= len +1) && !bool) {
                 if(indexL >=0 ) {
                     fontWidth = ctx.measureText(txt[indexL]).width;

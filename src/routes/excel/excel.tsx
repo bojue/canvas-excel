@@ -78,7 +78,7 @@ class Excel extends React.Component<any, any>  {
 
     initCanvasDOM() {
         let ctx = this.context        
-        let dpr =  window.devicePixelRatio || window.webkitDevicePixelRatio || window.mozDevicePixelRatio || 1;
+        let dpr = window.devicePixelRatio || window.webkitDevicePixelRatio || window.mozDevicePixelRatio || 1;
         this.dpr = dpr;
         let w = this.excelRef.width;
         let h = this.excelRef.height;
@@ -833,7 +833,7 @@ class Excel extends React.Component<any, any>  {
         let merge_row = row_start ;
 
         ctx.rect(_l , _t , _w , _h );
-        ctx.fillStyle =  'rgba(0, 102, 0, 0.04)';
+        ctx.fillStyle = 'red' || 'rgba(0, 102, 0, 0.04)';
         ctx.fillRect(_l , _t , _w , _h );
 
         // 选中区域的起始网格
@@ -1294,8 +1294,10 @@ class Excel extends React.Component<any, any>  {
         let target =  e.target as HTMLTextAreaElement;
         if(this.excelData[this.state.editor_coordinate_x] 
         && this.excelData[this.state.editor_coordinate_y][this.state.editor_coordinate_x] ){
-            this.excelData[this.state.editor_coordinate_y][this.state.editor_coordinate_x][2] = target.value || target.innerHTML;
+            this.excelData[this.state.editor_coordinate_y][this.state.editor_coordinate_x][2] = target.value || target.innerHTML || "";
         }
+
+        console.log("red", target.value)
         this.setState({
             editor_coordinate_val:this.excelData[this.state.editor_coordinate_y][this.state.editor_coordinate_x][2]
         })
@@ -1304,12 +1306,13 @@ class Excel extends React.Component<any, any>  {
 
     onInput() {
         this.setState({
-            editor_coordinate_val: this.editorRef.current.innerHTML
+            editor_coordinate_val: this.editorRef.current.innerHTML || ""
         })        
     }
 
     updateInputVal() { 
-        this.excelData[this.state.editor_coordinate_y][this.state.editor_coordinate_x][2] = this.editorRef.current.innerHTML; 
+        console.log(this.excelData[this.state.editor_coordinate_y][this.state.editor_coordinate_x])
+        this.excelData[this.state.editor_coordinate_y][this.state.editor_coordinate_x][2] = this.editorRef.current.innerHTML || ""; 
         this.onInput();
     }
 
@@ -1328,15 +1331,14 @@ class Excel extends React.Component<any, any>  {
         ctx.lineWidth = 12 ;
         ctx.fillStyle = '#fff';
         ctx.fillRect(
-            _l , 
-            _t , 
-            (setting.columnLefts[this.state.editor_coordinate_x] - _l) ,
-            (setting.rowTops[this.state.editor_coordinate_y] -_t));
+            _l + 1, 
+            _t + 1, 
+            (setting.columnLefts[this.state.editor_coordinate_x] - _l - 1) ,
+            (setting.rowTops[this.state.editor_coordinate_y] -_t - 1));
         ctx.fillStyle = '#fff';
 
         // 绘制左上角起始单元格内容
         drawMergeText(ctx, this.excelData[this.state.editor_coordinate_y][this.state.editor_coordinate_x], this.state.editor_coordinate_y, this.state.editor_coordinate_x, _l, _t, setting)
-        ctx.stroke();
     }
 
     render() {

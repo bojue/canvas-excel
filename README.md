@@ -2,13 +2,18 @@
 
 基于Canvas开发的Excle技术预研
 
+<h3 style="color:green">
+ !!!页面输入卡死问题已经解决:垂直居中算法中 while 循环递归
+</h3>
+
+
 ## DEMO
 
 [在线预览](https://bojue.github.io/canvas-excel)
 
 ## 运行
 
-```
+```javaScript
 git clone https://github.com/bojue/canvas-excel.git
 
 npm install 
@@ -19,12 +24,16 @@ npm run build //构建生产包
 
 ```
 
+## 浏览器打开
+
+```javaScript
+http://localhost:4000/
+```
+
 ## 截图
 
 ![DEMO](https://github.com/bojue/canvas-excel/raw/master/src/assets/demo.PNG)
 ![DEMO](https://github.com/bojue/canvas-excel/raw/master/src/assets/merge.png)
-
-## !!!目前核心问题：操作输入过快会出现性能问题，导致页面卡死
 
 > 优化方案[还没有时间处理]：
 1. 没有处理节流优化
