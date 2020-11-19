@@ -1296,8 +1296,6 @@ class Excel extends React.Component<any, any>  {
         && this.excelData[this.state.editor_coordinate_y][this.state.editor_coordinate_x] ){
             this.excelData[this.state.editor_coordinate_y][this.state.editor_coordinate_x][2] = target.value || target.innerHTML || "";
         }
-
-        console.log("red", target.value)
         this.setState({
             editor_coordinate_val:this.excelData[this.state.editor_coordinate_y][this.state.editor_coordinate_x][2]
         })
@@ -1311,7 +1309,6 @@ class Excel extends React.Component<any, any>  {
     }
 
     updateInputVal() { 
-        console.log(this.excelData[this.state.editor_coordinate_y][this.state.editor_coordinate_x])
         this.excelData[this.state.editor_coordinate_y][this.state.editor_coordinate_x][2] = this.editorRef.current.innerHTML || ""; 
         this.onInput();
     }
@@ -1333,8 +1330,8 @@ class Excel extends React.Component<any, any>  {
         ctx.fillRect(
             _l + 1, 
             _t + 1, 
-            (setting.columnLefts[this.state.editor_coordinate_x] - _l - 1) ,
-            (setting.rowTops[this.state.editor_coordinate_y] -_t - 1));
+            (setting.columnLefts[this.state.editor_coordinate_x] - _l - 2) ,
+            (setting.rowTops[this.state.editor_coordinate_y] -_t - 2));
         ctx.fillStyle = '#fff';
 
         // 绘制左上角起始单元格内容
