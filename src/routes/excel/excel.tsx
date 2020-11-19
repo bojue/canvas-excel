@@ -833,7 +833,7 @@ class Excel extends React.Component<any, any>  {
         let merge_row = row_start ;
 
         ctx.rect(_l , _t , _w , _h );
-        ctx.fillStyle = 'red' || 'rgba(0, 102, 0, 0.04)';
+        ctx.fillStyle = 'rgba(0, 102, 0, 0.04)';
         ctx.fillRect(_l , _t , _w , _h );
 
         // 选中区域的起始网格
