@@ -916,7 +916,7 @@ class Excel extends React.Component<any, any>  {
         ctx.fillRect(_l , _t , _w , _h );
 
         // 选中区域的起始网格
-        ctx.fillStyle = '#ffc'|| '#fff';
+        ctx.fillStyle = '#fff';
         console.log(this.excelData[row_start ][col_start])
 
         // 计算左上角单元格大小，涉及到合并单元格的情况
