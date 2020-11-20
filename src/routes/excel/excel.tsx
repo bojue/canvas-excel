@@ -916,12 +916,19 @@ class Excel extends React.Component<any, any>  {
         ctx.fillRect(_l , _t , _w , _h );
 
         // 选中区域的起始网格
-        ctx.fillStyle = '#fff';
+        ctx.fillStyle = '#ffc'|| '#fff';
+        console.log(this.excelData[row_start ][col_start])
+
+        // 计算左上角单元格大小，涉及到合并单元格的情况
+        let coordinate = this.excelData[row_start ][col_start][0];
+        let _x = coordinate[0] -1;
+        let _y = coordinate[1] -1;
+
         ctx.fillRect(
             _l   + 0.5, 
             _t  + 0.5, 
-            (setting.columnLefts[merge_col] - _l - 0.5) ,
-            (setting.rowTops[merge_row] - _t - 0.5));
+            (setting.columnLefts[merge_col +  _x ] - _l - 0.5) ,
+            (setting.rowTops[merge_row + _y] - _t - 0.5));
         if(state === 'merge') {
             if( this.excelData &&  this.excelData[row_start] &&  this.excelData[row_start][col_start]) {
                 this.excelData[row_start ][col_start][2] = this.inputRef.value || "";
@@ -929,7 +936,7 @@ class Excel extends React.Component<any, any>  {
         }
         // 绘制左上角起始单元格内容
         if( this.excelData[row_start][col_start] &&  this.excelData[row_start][col_start][2]) {
-            drawMergeText(ctx, this.excelData[row_start][col_start], merge_row, merge_col, _l + 0.5, _t + 0.5, setting);
+            drawMergeText(ctx, this.excelData[row_start][col_start], merge_row + _y, merge_col + _x, _l + 0.5, _t + 0.5, setting);
         } 
 
         this.inputRef.value = this.excelData[row_start][ col_start][2];
@@ -944,6 +951,11 @@ class Excel extends React.Component<any, any>  {
         }
         ctx.stroke();
     } 
+
+
+    getWidthByCount() {
+        
+    }
 
     updateSelAreaItemsByMerge(c_s:number, r_s:number, c_e:number, r_e: number) {
         let datas =  this.excelData;
@@ -1327,15 +1339,18 @@ class Excel extends React.Component<any, any>  {
         ctx.beginPath();
         ctx.lineWidth = 12 ;
         ctx.fillStyle = '#fff';
+        let coordinate = this.excelData[this.state.editor_coordinate_y ][this.state.editor_coordinate_x][0];
+        let _x = coordinate[0] -1;
+        let _y = coordinate[1] -1;
         ctx.fillRect(
             _l + 1, 
             _t + 1, 
-            (setting.columnLefts[this.state.editor_coordinate_x] - _l - 2) ,
-            (setting.rowTops[this.state.editor_coordinate_y] -_t - 2));
+            (setting.columnLefts[this.state.editor_coordinate_x + _x] - _l - 2) ,
+            (setting.rowTops[this.state.editor_coordinate_y  + _y] -_t - 2));
         ctx.fillStyle = '#fff';
 
         // 绘制左上角起始单元格内容
-        drawMergeText(ctx, this.excelData[this.state.editor_coordinate_y][this.state.editor_coordinate_x], this.state.editor_coordinate_y, this.state.editor_coordinate_x, _l, _t, setting)
+        drawMergeText(ctx, this.excelData[this.state.editor_coordinate_y][this.state.editor_coordinate_x], this.state.editor_coordinate_y + _y, this.state.editor_coordinate_x + _x, _l, _t, setting)
     }
 
     render() {

@@ -2,7 +2,7 @@
 
 基于Canvas开发的Excle技术预研
 
-## DEMO
+### DEMO
 
 [在线预览](https://bojue.github.io/canvas-excel)
 
@@ -19,13 +19,13 @@ npm run build //构建生产包
 
 ```
 
-## 浏览器打开
+### 浏览器打开
 
 ```javaScript
 http://localhost:4000/
 ```
 
-## 截图
+### 截图
 
 ![DEMO](https://github.com/bojue/canvas-excel/raw/master/src/assets/demo.PNG)
 ![DEMO](https://github.com/bojue/canvas-excel/raw/master/src/assets/merge.png)
@@ -35,7 +35,7 @@ http://localhost:4000/
 2. 区域选择判断没有使用二分法
 
 
-## 实现功能
+### 实现功能
 
 #### 工具栏
 
@@ -58,7 +58,7 @@ http://localhost:4000/
 - 按行,列选择单元格
 - 合并单元格交互
 
-## 优化方法
+### 优化方法
 
 - 局部渲染
 - 节流
@@ -68,7 +68,7 @@ http://localhost:4000/
 
 [优化方案简单记录](https://github.com/bojue/canvas-excel/issues/5)
 
-## TODO
+### TODO
 
 - 单元格文字上下边界处理
 - 合并单元(仅完成交互,待完成状态存储，渲染，优化)
