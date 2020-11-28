@@ -858,11 +858,112 @@ class Excel extends React.Component<any, any>  {
 
         let _start = this.state.regional_sel_start;
         let _end = this.state.regional_sel_end;  
+    
         ctx.beginPath();
-       
+
+        // 鼠标选中从下向上选中
+        let row_start = Math.min(_start[0], _end[0]);
+        let row_end = Math.max(_start[0], _end[0]);
         // 鼠标选中从右向左选中
         let col_start = Math.min(_start[1],_end[1]);
         let col_end = Math.max(_start[1], _end[1]);
+
+        // 当前开始触发对象
+        let currItem = this.excelData[row_start][col_start];
+        let currIndexs = currItem[0];
+    
+        // 点击选择合并区域列处理
+        if(col_start === col_end) {
+            col_end = col_start + currIndexs[0] -1;
+        }
+        // 点击选择合并区域行处理
+        if(row_start === row_end) {
+            row_end = row_start + currIndexs[1] -1;
+        }
+        // 容错处理
+        if(!currItem) return ;
+
+        // 当前结束对象
+        let currEndItem = this.excelData[row_end][col_end];
+        let currEndIndexs = currEndItem[0];
+
+        // 开始点坐标计算
+        if(!currIndexs[0] && !currIndexs[1]) {
+            // 计算开始列
+            if(!currIndexs[1]) {
+                col_start -= 1
+            }
+            let find_col_start_bool = false;
+            let nextColItem = this.excelData[row_start ][col_start-1];
+            let nextColIndexs = nextColItem[0];
+            while(!currIndexs[1] && !find_col_start_bool) {
+                currItem = this.excelData[row_start][col_start];
+                currIndexs = currItem[0];
+                nextColItem = this.excelData[row_start][col_start-1];
+                nextColIndexs = nextColItem[0];
+                if(currIndexs[1] === 0 && nextColIndexs[1] === 1 || col_start === 0) {
+                    find_col_start_bool = true;
+                }else if(currIndexs[1] === 0) {
+                    col_start -= 1;
+                }
+            }
+          
+            // 计算开始行
+            let find_row_start_bool = false;
+            let nextRowItem = this.excelData[row_start -1][col_start];
+            let nextRowIndexs = nextRowItem[0];
+            while(!currIndexs[0] && !find_row_start_bool) {
+                currItem = this.excelData[row_start][col_start];
+                currIndexs = currItem[0];
+                nextRowItem = this.excelData[row_start -1][col_start];
+                nextRowIndexs = nextRowItem[0];
+                if(currIndexs[0] === 0 && nextRowIndexs[0] === 1 || row_start === 0) {
+                    find_row_start_bool = true;
+                }else if(currIndexs[0] === 0) {
+                    row_start -= 1;
+                }
+            }
+        }
+
+        // 结束点坐标计算
+        if(!currEndIndexs[0] && !currEndIndexs[1]) {
+            // 计算结束列
+
+            let find_col_end_bool = false;
+            currEndItem = this.excelData[row_end ][col_end];
+            let nextEndColItem = this.excelData[row_end ][col_end];
+            let nextEndColIndexs = nextEndColItem[0];
+            while(!currEndIndexs[1] && !find_col_end_bool) {
+                currEndItem = this.excelData[row_end][col_end];
+                currEndIndexs = currEndItem[0];
+                nextEndColItem = this.excelData[row_end][col_end+1];
+                nextEndColIndexs = nextEndColItem[0];
+                if(currEndIndexs[1] === 0 && nextEndColIndexs[1] === 1) {
+                    find_col_end_bool = true;
+                }else if(currEndIndexs[1] === 0) {
+                    col_end += 1;
+                }
+            }
+          
+            // 计算结束行
+            currEndItem = this.excelData[row_end][col_end];
+            currEndIndexs = currEndItem[0];
+            let find_row_end_bool = false;
+            let nextEndRowItem = this.excelData[row_end +1][col_end];
+            let nextEndRowIndexs = nextEndRowItem[0];
+
+            while(!currEndIndexs[0] && !find_row_end_bool) {
+                currEndItem = this.excelData[row_end][col_end];
+                currEndIndexs = currEndItem[0];
+                nextEndRowItem = this.excelData[row_end +1][col_end];
+                nextEndRowIndexs = nextEndRowItem[0];
+                if(currEndIndexs[0] === 0 && nextEndRowIndexs[0] > 0) {
+                    find_row_end_bool = true;
+                }else if(currEndIndexs[0] === 0) {
+                    row_end += 1;
+                }
+            }
+        }
 
         let _l= col_start > 0 ? setting.columnLefts[col_start -1] :  def.columTitleDefWidth;
         let _w = (setting.columnLefts.length === (col_end + 1) ) ? 
@@ -871,9 +972,8 @@ class Excel extends React.Component<any, any>  {
         setting.columnLefts[ setting.columnLefts.length -1] - setting.columnLefts[col_start -1 ] :
         setting.columnLefts[Math.min(col_end, setting.columnLefts.length -1)] - (col_start > 0 ? setting.columnLefts[col_start-1] : def.columTitleDefWidth);
 
-        // 鼠标选中从下向上选中
-        let row_start = Math.min(_start[0], _end[0]);
-        let row_end = Math.max(_start[0], _end[0]);
+
+     
         let _t=  row_start > 0 ? setting.rowTops[row_start -1] : def.rowTitleHeight;
         let _h = (setting.rowTops.length === (row_end + 1) ) ? 
             row_start === 0 ?
@@ -884,6 +984,7 @@ class Excel extends React.Component<any, any>  {
         ctx.lineWidth = 2 ;
         ctx.strokeStyle = 'rgba(0, 102, 0, 0.8)';
         ctx.fillStyle =  'rgba(0, 102, 0, 0.02)';
+
         ctx.fillRect(_l , _t , _w , _h );
         this.setState({
             regional_sel:[_l,_t,_w,_h]

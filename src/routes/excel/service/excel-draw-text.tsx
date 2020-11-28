@@ -46,7 +46,6 @@ let drawMergeText = (ctx:any, item:any,merge_row:number, merge_col:number, _l:nu
 }
 
 let getFillText = (lineWidth:number, txt:string, ctx:CanvasRenderingContext2D, textAlign:string) => {
-    console.log(lineWidth)
     if(txt === undefined || txt === null) return '';
     if(!txt) return txt;
     let len = txt.length;
