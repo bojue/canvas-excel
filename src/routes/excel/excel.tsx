@@ -917,7 +917,6 @@ class Excel extends React.Component<any, any>  {
 
         // 选中区域的起始网格
         ctx.fillStyle = '#fff';
-        console.log(this.excelData[row_start ][col_start])
 
         // 计算左上角单元格大小，涉及到合并单元格的情况
         let coordinate = this.excelData[row_start ][col_start][0];
@@ -1350,7 +1349,10 @@ class Excel extends React.Component<any, any>  {
         ctx.fillStyle = '#fff';
 
         // 绘制左上角起始单元格内容
-        drawMergeText(ctx, this.excelData[this.state.editor_coordinate_y][this.state.editor_coordinate_x], this.state.editor_coordinate_y + _y, this.state.editor_coordinate_x + _x, _l, _t, setting)
+        drawMergeText(ctx, this.excelData[this.state.editor_coordinate_y][this.state.editor_coordinate_x], 
+            this.state.editor_coordinate_y + _y, 
+            this.state.editor_coordinate_x + _x, 
+            _l + 1, _t, setting)
     }
 
     render() {
