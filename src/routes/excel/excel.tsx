@@ -885,7 +885,18 @@ class Excel extends React.Component<any, any>  {
 
         // 当前结束对象
         let currEndItem = this.excelData[row_end][col_end];
+
         let currEndIndexs = currEndItem[0];
+        if(currEndIndexs[0] > 1) {
+            row_end = row_end + currEndIndexs[0] -1;
+            currEndItem = this.excelData[row_end][col_end];
+            currEndIndexs = currEndItem[0];
+        }
+        if(currEndIndexs[1] > 1) {
+            col_end = col_end + currEndIndexs[1] -1;
+            currEndItem = this.excelData[row_end][col_end];
+            currEndIndexs = currEndItem[0];
+        }
 
         // 开始点坐标计算
         if(!currIndexs[0] && !currIndexs[1]) {
