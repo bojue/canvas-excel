@@ -976,6 +976,29 @@ class Excel extends React.Component<any, any>  {
             }
         }
 
+        // 计算bottom兼容合并区域
+        for(let i= col_start;i< col_end;i++) {
+            let item = this.excelData[row_end][i];
+            let indexs = item && item[0];
+            let bottomItem = this.excelData[row_end+1][i];
+            let bottomIndexs = bottomItem && bottomItem[0];
+            while(!indexs[0] && !indexs[1] && !bottomIndexs[0] && !bottomIndexs[1]) {
+                row_end += 1;
+                item = this.excelData[row_end][i];
+                indexs = item && item[0];
+                bottomItem = this.excelData[row_end+1][i];
+                bottomIndexs = bottomItem && bottomItem[0];
+            }
+        }
+
+        // 
+        console.log('------->')
+        console.log("开始点", [col_start, row_start]);
+        console.log("结束点", [col_end, row_end])
+
+
+
+
         let _l= col_start > 0 ? setting.columnLefts[col_start -1] :  def.columTitleDefWidth;
         let _w = (setting.columnLefts.length === (col_end + 1) ) ? 
         col_start === 0 ?
@@ -983,8 +1006,6 @@ class Excel extends React.Component<any, any>  {
         setting.columnLefts[ setting.columnLefts.length -1] - setting.columnLefts[col_start -1 ] :
         setting.columnLefts[Math.min(col_end, setting.columnLefts.length -1)] - (col_start > 0 ? setting.columnLefts[col_start-1] : def.columTitleDefWidth);
 
-
-     
         let _t=  row_start > 0 ? setting.rowTops[row_start -1] : def.rowTitleHeight;
         let _h = (setting.rowTops.length === (row_end + 1) ) ? 
             row_start === 0 ?
@@ -1601,7 +1622,7 @@ class Excel extends React.Component<any, any>  {
             </div>
             <div className="current">
                 <div className="item">
-                    <span className="current_coordinate"> {(String.fromCharCode(65 +this.state.editor_coordinate_x ))}{this.state.editor_coordinate_y}</span>
+                    <span className="current_coordinate"> {(String.fromCharCode(65 +this.state.editor_coordinate_x ))}{this.state.editor_coordinate_y + 1}</span>
                 </div>
                 <div className="item">
                     <input type="val" 
