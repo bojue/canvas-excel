@@ -1039,16 +1039,7 @@ class Excel extends React.Component<any, any>  {
                 }
             }    
         }
-       
-
-        // 
-        console.log('------->')
-        console.log("开始点", [col_start, row_start]);
-        console.log("结束点", [col_end, row_end])
-
-
-
-
+    
         let _l= col_start > 0 ? setting.columnLefts[col_start -1] :  def.columTitleDefWidth;
         let _w = (setting.columnLefts.length === (col_end + 1) ) ? 
         col_start === 0 ?
@@ -1271,38 +1262,39 @@ class Excel extends React.Component<any, any>  {
         }
         let def = this.excelObject.setting_def;
         let setting = this.excelObject.setting_custome;
-        let cols = setting.column;
-        let rows = setting.row;
+        let cols = setting.columnLefts;
+        let rows = setting.rowTops;
         let _l = def.columTitleDefWidth;
         let _t = def.rowTitleHeight;
         let _w = 0;
         let _h = 0;
-        let _c_x = 0;
-        let _c_y = 0;
+        let _c_x = 0; // click事件x下标
+        let _c_y = 0; // click事件y下标
         for(let i=0; i<cols.length;i++) {
             let col = cols[i];
             if(state === 'changeSize' && i === this.state.editor_coordinate_x) {
                 _w = col;
                 break;
-            }else if(_l<= left &&  left < _l+ col){
-                _w = col;
+            }else if(col<= left &&  left < cols[i+1]){
+                _w = cols[i+1] - col;
                 _c_x = i;
+                _l = col;
                 break;
             } 
-            _l += col;
         }
         for(let i=0; i<rows.length;i++) {
             let row = rows[i];
             if(state === 'changeSize' && i === this.state.editor_coordinate_y) {
                 _h = row;
                 break;
-            }else if(_t <= top && top < _t+ row){
-                _h = row;
+            }else if(row <= top && top <  rows[i+1]){
+                _h = rows[i+1] - row;
                 _c_y = i;
+                _t = row;
                 break;
             }
-            _t += row;
         }
+
         this.setState({
             editor_text:"",
             editor_display:'block',
@@ -1310,10 +1302,10 @@ class Excel extends React.Component<any, any>  {
             editor_height:_h ,
             editor_top:_t ,
             editor_left:_l,
-            editor_coordinate_x: state === 'changeSize' ? this.state.editor_coordinate_x: _c_x, 
-            editor_coordinate_y:state === 'changeSize' ? this.state.editor_coordinate_y:_c_y
+            editor_coordinate_x: state === 'changeSize' ? this.state.editor_coordinate_x: 3, 
+            editor_coordinate_y:state === 'changeSize' ? this.state.editor_coordinate_y:3
         })
-        // this.updateExcelCanvas();
+      
     }
     upateTxtByEdited(dom:any) {
         let style = dom.style;
