@@ -976,7 +976,24 @@ class Excel extends React.Component<any, any>  {
             }
         }
 
-        // 计算bottom兼容合并区域
+        // 计算top包含合并区域
+        if(row_start > 0) {
+            for(let i= col_start;i< col_end;i++) {
+                let item = this.excelData[row_start][i];
+                let indexs = item && item[0];
+                let topItem = this.excelData[row_start-1][i];
+                let topIndexs = topItem && topItem[0];
+                while(!indexs[0] && !indexs[1] && !topIndexs[0] && !topIndexs[1] && row_start > 0) {
+                    row_start -= 1;
+                    item = this.excelData[row_start][i];
+                    indexs = item && item[0];
+                    topItem = this.excelData[row_start-1][i];
+                    topIndexs = topItem && topItem[0];
+                }
+            }
+        }
+     
+        // 计算bottom包含合并区域
         for(let i= col_start;i< col_end;i++) {
             let item = this.excelData[row_end][i];
             let indexs = item && item[0];
@@ -990,6 +1007,39 @@ class Excel extends React.Component<any, any>  {
                 bottomIndexs = bottomItem && bottomItem[0];
             }
         }
+        
+        // 计算right包含合并区域
+        for(let i= row_start;i< row_end;i++) {
+            let item = this.excelData[i][col_end];
+            let indexs = item && item[0];
+            let rightItem = this.excelData[i][col_end+1 ];
+            let rightIndexs = rightItem && rightItem[0];
+            while(!indexs[0] && !indexs[1] && !rightIndexs[0] && !rightIndexs[1]) {
+                col_end += 1;
+                item = this.excelData[i][col_end];
+                indexs = item && item[0];
+                rightItem = this.excelData[i][col_end + 1];
+                rightIndexs = rightItem && rightItem[0];
+            }
+        }
+
+        // 计算left包含合并区域
+        if(col_start > 0) {
+            for(let i= row_start;i< row_end;i++) {
+                let item = this.excelData[i][col_start];
+                let indexs = item && item[0];
+                let rightItem = this.excelData[i][col_start-1 ];
+                let rightIndexs = rightItem && rightItem[0];
+                while(!indexs[0] && !indexs[1] && !rightIndexs[0] && !rightIndexs[1] && col_start > 0) {
+                    col_start -= 1;
+                    item = this.excelData[i][col_start];
+                    indexs = item && item[0];
+                    rightItem = this.excelData[i][col_start + 1];
+                    rightIndexs = rightItem && rightItem[0];
+                }
+            }    
+        }
+       
 
         // 
         console.log('------->')
