@@ -889,7 +889,6 @@ class Excel extends React.Component<any, any>  {
         let currEndIndexs = currEndItem[0];
         if(currEndIndexs[0] > 1) {
             row_end = row_end + currEndIndexs[0] -1;
-            console.log(this.excelData[row_end], this.excelData[row_end][col_end])
             currEndItem = this.excelData[row_end][col_end];
 
             currEndIndexs = currEndItem[0];
@@ -910,7 +909,7 @@ class Excel extends React.Component<any, any>  {
             if(col_start > 0) {
                 let nextColItem = this.excelData[row_start ][col_start-1];
                 let nextColIndexs = nextColItem[0];
-                while(!currIndexs[1] && !find_col_start_bool) {
+                while(!currIndexs[1] && !find_col_start_bool && col_start) {
                     currItem = this.excelData[row_start][col_start];
                     currIndexs = currItem[0];
                     nextColItem = this.excelData[row_start][col_start-1];
@@ -929,7 +928,7 @@ class Excel extends React.Component<any, any>  {
             if(row_start > 0) {
                 let nextRowItem = this.excelData[row_start -1][col_start];
                 let nextRowIndexs = nextRowItem[0];
-                while(!currIndexs[0] && !find_row_start_bool) {
+                while(!currIndexs[0] && !find_row_start_bool && row_start) {
                     currItem = this.excelData[row_start][col_start];
                     currIndexs = currItem[0];
                     nextRowItem = this.excelData[row_start -1][col_start];
@@ -997,7 +996,8 @@ class Excel extends React.Component<any, any>  {
                     row_start -= 1;
                     item = this.excelData[row_start][i];
                     indexs = item && item[0];
-                    topItem = this.excelData[row_start-1][i];
+                    topItem = this.excelData[row_start-1] && this.excelData[row_start-1][i];
+                    if(!topItem) break;
                     topIndexs = topItem && topItem[0];
                 }
             }
@@ -1008,7 +1008,8 @@ class Excel extends React.Component<any, any>  {
         for(let i= col_start;i< col_end;i++) {
             let item = this.excelData[row_end][i];
             let indexs = item && item[0];
-            let bottomItem = this.excelData[row_end+1][i];
+            let bottomItem = this.excelData[row_end+1] &&  this.excelData[row_end+1][i];
+            if(!bottomItem) break;
             let bottomIndexs = bottomItem && bottomItem[0];
             while(!indexs[0] && !indexs[1] && !bottomIndexs[0] && !bottomIndexs[1]) {
                 row_end += 1;
@@ -1024,6 +1025,7 @@ class Excel extends React.Component<any, any>  {
             let item = this.excelData[i][col_end];
             let indexs = item && item[0];
             let rightItem = this.excelData[i][col_end+1 ];
+            if(!rightItem) break;
             let rightIndexs = rightItem && rightItem[0];
             while(!indexs[0] && !indexs[1] && !rightIndexs[0] && !rightIndexs[1]) {
                 col_end += 1;
