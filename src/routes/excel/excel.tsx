@@ -889,7 +889,9 @@ class Excel extends React.Component<any, any>  {
         let currEndIndexs = currEndItem[0];
         if(currEndIndexs[0] > 1) {
             row_end = row_end + currEndIndexs[0] -1;
+            console.log(this.excelData[row_end], this.excelData[row_end][col_end])
             currEndItem = this.excelData[row_end][col_end];
+
             currEndIndexs = currEndItem[0];
         }
         if(currEndIndexs[1] > 1) {
@@ -905,35 +907,41 @@ class Excel extends React.Component<any, any>  {
                 col_start -= 1
             }
             let find_col_start_bool = false;
-            let nextColItem = this.excelData[row_start ][col_start-1];
-            let nextColIndexs = nextColItem[0];
-            while(!currIndexs[1] && !find_col_start_bool) {
-                currItem = this.excelData[row_start][col_start];
-                currIndexs = currItem[0];
-                nextColItem = this.excelData[row_start][col_start-1];
-                nextColIndexs = nextColItem[0];
-                if(currIndexs[1] === 0 && nextColIndexs[1] === 1 || col_start === 0) {
-                    find_col_start_bool = true;
-                }else if(currIndexs[1] === 0) {
-                    col_start -= 1;
+            if(col_start > 0) {
+                let nextColItem = this.excelData[row_start ][col_start-1];
+                let nextColIndexs = nextColItem[0];
+                while(!currIndexs[1] && !find_col_start_bool) {
+                    currItem = this.excelData[row_start][col_start];
+                    currIndexs = currItem[0];
+                    nextColItem = this.excelData[row_start][col_start-1];
+                    nextColIndexs = nextColItem[0];
+                    if(currIndexs[1] === 0 && nextColIndexs[1] === 1 || col_start === 0) {
+                        find_col_start_bool = true;
+                    }else if(currIndexs[1] === 0) {
+                        col_start -= 1;
+                    }
                 }
             }
+     
           
             // 计算开始行
             let find_row_start_bool = false;
-            let nextRowItem = this.excelData[row_start -1][col_start];
-            let nextRowIndexs = nextRowItem[0];
-            while(!currIndexs[0] && !find_row_start_bool) {
-                currItem = this.excelData[row_start][col_start];
-                currIndexs = currItem[0];
-                nextRowItem = this.excelData[row_start -1][col_start];
-                nextRowIndexs = nextRowItem[0];
-                if(currIndexs[0] === 0 && nextRowIndexs[0] === 1 || row_start === 0) {
-                    find_row_start_bool = true;
-                }else if(currIndexs[0] === 0) {
-                    row_start -= 1;
+            if(row_start > 0) {
+                let nextRowItem = this.excelData[row_start -1][col_start];
+                let nextRowIndexs = nextRowItem[0];
+                while(!currIndexs[0] && !find_row_start_bool) {
+                    currItem = this.excelData[row_start][col_start];
+                    currIndexs = currItem[0];
+                    nextRowItem = this.excelData[row_start -1][col_start];
+                    nextRowIndexs = nextRowItem[0];
+                    if(currIndexs[0] === 0 && nextRowIndexs[0] === 1 || row_start === 0) {
+                        find_row_start_bool = true;
+                    }else if(currIndexs[0] === 0) {
+                        row_start -= 1;
+                    }
                 }
             }
+         
         }
 
         // 结束点坐标计算
