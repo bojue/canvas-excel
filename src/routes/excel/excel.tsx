@@ -1057,7 +1057,10 @@ class Excel extends React.Component<any, any>  {
         ctx.lineWidth = 2 ;
         ctx.strokeStyle = 'rgba(0, 102, 0, 0.8)';
         ctx.fillStyle =  'rgba(0, 102, 0, 0.02)';
-
+        if(state === 'merge') {
+            ctx.fillStyle = '#fff';
+            ctx.clearRect(_l , _t , _w , _h );
+        }
         ctx.fillRect(_l , _t , _w , _h );
         this.setState({
             regional_sel:[_l,_t,_w,_h]
@@ -1277,6 +1280,7 @@ class Excel extends React.Component<any, any>  {
                 break;
             }else if(col<= left &&  left < cols[i+1]){
                 _w = cols[i+1] - col;
+                console.log(cols[i+1] - col, cols[i+1] ,col)
                 _c_x = i;
                 _l = col;
                 break;
@@ -1288,13 +1292,12 @@ class Excel extends React.Component<any, any>  {
                 _h = row;
                 break;
             }else if(row <= top && top <  rows[i+1]){
-                _h = rows[i+1] - row;
+                _h = row[i+1] - row;
                 _c_y = i;
                 _t = row;
                 break;
             }
         }
-
         this.setState({
             editor_text:"",
             editor_display:'block',
@@ -1305,7 +1308,7 @@ class Excel extends React.Component<any, any>  {
             editor_coordinate_x: state === 'changeSize' ? this.state.editor_coordinate_x: 3, 
             editor_coordinate_y:state === 'changeSize' ? this.state.editor_coordinate_y:3
         })
-      
+        // this.updateExcelCanvas();
     }
     upateTxtByEdited(dom:any) {
         let style = dom.style;
@@ -1331,10 +1334,18 @@ class Excel extends React.Component<any, any>  {
     }
 
     merge() {
-        // 初始状态判断
+
+        // 合并状态判断
         let _s = this.state.regional_sel_start;
         let _e = this.state.regional_sel_end;
         let _arr = [..._s,..._e];
+        let currentItem = this.excelData[_s[0]][_s[1]];
+        if(!currentItem) return;
+        let arr = currentItem[0];
+        if(arr[0] === (_e[1] - _s[1] + 1)  && arr[1] === (_e[0] - _s[0] + 1) ) {
+            return ;
+        }
+
         const ctx = this.context;
         ctx.beginPath();
         let def = this.excelObject.setting_def;
