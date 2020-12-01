@@ -976,20 +976,20 @@ class Excel extends React.Component<any, any>  {
             }
         }
 
+        TODO: // 左下角向上存在bug
+
         // 计算top包含合并区域
-        if(row_start > 0) {
-            for(let i= col_start;i< col_end;i++) {
-                let item = this.excelData[row_start][i];
-                let indexs = item && item[0];
-                let topItem = this.excelData[row_start-1][i];
-                let topIndexs = topItem && topItem[0];
-                while(!indexs[0] && !indexs[1] && !topIndexs[0] && !topIndexs[1] && row_start > 0) {
-                    row_start -= 1;
-                    item = this.excelData[row_start][i];
-                    indexs = item && item[0];
-                    topItem = this.excelData[row_start-1][i];
-                    topIndexs = topItem && topItem[0];
-                }
+        for(let i= col_start;i< col_end;i++) {
+            let item = this.excelData[row_start][i];
+            let indexs = item && item[0];
+            let topItem = this.excelData[row_start-1][i];
+            let topIndexs = topItem && topItem[0];
+            while(!indexs[0] && !indexs[1] && !topIndexs[0] && !topIndexs[1]) {
+                row_start -= 1;
+                item = this.excelData[row_start][i];
+                indexs = item && item[0];
+                topItem = this.excelData[row_start-1][i];
+                topIndexs = topItem && topItem[0];
             }
         }
      
