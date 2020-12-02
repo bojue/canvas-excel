@@ -318,6 +318,9 @@ class Excel extends React.Component<any, any>  {
         })
         const ctx = this.excelRef;
         ctx.addEventListener('dblclick', (e:MouseEvent)=> {
+
+            return;
+            TODO: // bug修复
             let def = this.excelObject.setting_def;
             let _eX = e.clientX - this.clientRect.x;
             let _eY = e.clientY - this.clientRect.y;
