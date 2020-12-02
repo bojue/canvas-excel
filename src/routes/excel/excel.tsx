@@ -1317,8 +1317,8 @@ class Excel extends React.Component<any, any>  {
             editor_height:_h ,
             editor_top:_t ,
             editor_left:_l,
-            editor_coordinate_x: state === 'changeSize' ? this.state.editor_coordinate_x: _c_x,
-            editor_coordinate_y:state === 'changeSize' ? this.state.editor_coordinate_y:_c_y
+            editor_coordinate_x: state === 'changeSize' ? this.state.editor_coordinate_x: _c_x +1,
+            editor_coordinate_y:state === 'changeSize' ? this.state.editor_coordinate_y:_c_y + 1
         })
         // this.updateExcelCanvas();
     }
