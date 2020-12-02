@@ -318,9 +318,6 @@ class Excel extends React.Component<any, any>  {
         })
         const ctx = this.excelRef;
         ctx.addEventListener('dblclick', (e:MouseEvent)=> {
-
-            return;
-            TODO: // bug修复
             let def = this.excelObject.setting_def;
             let _eX = e.clientX - this.clientRect.x;
             let _eY = e.clientY - this.clientRect.y;
@@ -1296,7 +1293,6 @@ class Excel extends React.Component<any, any>  {
                 break;
             }else if(col<= left &&  left < cols[i+1]){
                 _w = cols[i+1] - col;
-                console.log(cols[i+1] - col, cols[i+1] ,col)
                 _c_x = i;
                 _l = col;
                 break;
@@ -1308,12 +1304,13 @@ class Excel extends React.Component<any, any>  {
                 _h = row;
                 break;
             }else if(row <= top && top <  rows[i+1]){
-                _h = row[i+1] - row;
+                _h = rows[i+1] - row;
                 _c_y = i;
                 _t = row;
                 break;
             }
         }
+        console.log(_t, _h)
         this.setState({
             editor_text:"",
             editor_display:'block',
