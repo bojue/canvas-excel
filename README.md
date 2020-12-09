@@ -2,8 +2,6 @@
 
 基于Canvas开发的Excle技术预研
 
-### 预览
-
 [在线预览](https://bojue.github.io/canvas-excel)
 
 
