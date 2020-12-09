@@ -4,9 +4,6 @@
 
 [在线预览](https://bojue.github.io/canvas-excel)
 
-
-### 截图
-
 ![DEMO](https://github.com/bojue/canvas-excel/raw/master/src/assets/demo.PNG)
 
 
