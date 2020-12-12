@@ -4,6 +4,7 @@ import "./style/e-current.scss";
 import "./style/e-content.scss";
 
 const Merge = require( './../../assets/merge.svg');
+const UnMerge = require( './../../assets/unmerge.svg');
 const F_Blod = require( './../../assets/f_b.svg');
 const F_Ltalic = require( './../../assets/f_i.svg');
 const F_Under = require( './../../assets/f_ul.svg');
@@ -1297,13 +1298,6 @@ class Excel extends React.Component<any, any>  {
         _t = this.state.editor_coordinate_y > 0 ?
             rows[this.state.editor_coordinate_y-1]:
             def.rowTitleHeight;
-
-        console.log(_l, _t);
-
-        console.log('点击坐标', this.state.editor_coordinate_x, this.state.editor_coordinate_y );
-        console.log(' item[0]',  item[0])
-        console.log("w", _w, 'h', _h, 't', _t)
-
         this.setState({
             editor_text:"",
             editor_display:'block',
@@ -1340,7 +1334,6 @@ class Excel extends React.Component<any, any>  {
     }
 
     merge() {
-
         // 合并状态判断
         let _s = this.state.regional_sel_start;
         let _e = this.state.regional_sel_end;
@@ -1383,6 +1376,52 @@ class Excel extends React.Component<any, any>  {
             currentLeft += width;
         }
         this.reDrawSelectArea('merge');
+    }
+
+    unMerge() {
+        // 状态判断
+        let _start = this.state.regional_sel_start;
+        let _end = this.state.regional_sel_end;
+        let col_start = Math.min(_start[1],_end[1]);
+        let row_start = Math.min(_start[0], _end[0]);
+        let row_end = Math.max(_start[0], _end[0]);
+        let col_end = Math.max(_start[1], _end[1]);
+        let startItem = this.excelData[row_start][col_start];
+        if(!startItem) return;
+        for(let i=col_start;i<=col_end;i++) {
+            for(let j=row_start;j<=row_end;j++) {
+                let item =  this.excelData[j] && this.excelData[j][i];
+                if(item) {
+                    item[0] = [1,1];
+                }
+            }
+        }
+        let def = this.excelObject.setting_def;
+        let setting = this.excelObject.setting_custome;
+        let cols = setting.columnLefts;
+        let rows = setting.rowTops;
+        let _l,_t,_w,_h = 0;
+        _w = cols[col_start + 1] - cols[col_start];
+        _l = col_start > 0 ?
+            cols[col_start-1] :  
+            def.columTitleDefWidth;
+        _h = rows[row_start + 1] - rows[row_start];
+        _t = row_start > 0 ?
+            rows[row_start-1]:
+            def.rowTitleHeight;
+        console.log(_l, _t, _w, _h)
+        this.setState({
+            mouse_state:'m_up',
+            mouse_event_type:'init',
+            change_size_current_index:-1,
+            editor_coordinate_x:col_start,
+            editor_coordinate_y:row_start,
+            regional_sel:[_l, _t, _w, _h]
+        })
+
+        console.log(this.state)
+        this.reDrawCanvas();
+      
     }
 
 
@@ -1672,6 +1711,7 @@ class Excel extends React.Component<any, any>  {
                 </span>
                 <span className="item">
                     <img onClick={this.merge.bind(this)} src={ Merge && Merge.default} alt="" title="合并"/>
+                    <img onClick={this.unMerge.bind(this)} src={ UnMerge && UnMerge.default} alt="" title="取消合并"/>
                 </span>
                 <span className="github">
                     <a href="https://github.com/bojue/canvas-excel" target="_black">
