@@ -1409,18 +1409,18 @@ class Excel extends React.Component<any, any>  {
         _t = row_start > 0 ?
             rows[row_start-1]:
             def.rowTitleHeight;
-        console.log(_l, _t, _w, _h)
         this.setState({
             mouse_state:'m_up',
             mouse_event_type:'init',
             change_size_current_index:-1,
             editor_coordinate_x:col_start,
             editor_coordinate_y:row_start,
+            regional_sel_start:[row_start, col_start],
+            regional_sel_end:[row_start, col_start],
             regional_sel:[_l, _t, _w, _h]
         })
-
-        console.log(this.state)
         this.reDrawCanvas();
+        this.reDrawSelectArea();
       
     }
 
