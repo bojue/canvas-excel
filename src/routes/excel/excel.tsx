@@ -435,9 +435,9 @@ class Excel extends React.Component<any, any>  {
         let setting = this.excelObject.setting_custome;
         let index = -1;
         if(change_type === 'w') {
-            index = current_index || this.excelObject.setting_custome.columnLefts.indexOf(_eX - ( this.dpr === 1 ? 0 : 0.5));
+            index = current_index || this.excelObject.setting_custome.columnLefts.indexOf(_eX - ( this.dpr === 1 ? 0: 0));
         }else if(change_type === 'h') {
-            index = current_index || this.excelObject.setting_custome.rowTops.indexOf(_eY)
+            index = current_index || this.excelObject.setting_custome.rowTops.indexOf(_eY - ( this.dpr === 1 ? 0 : 0))
         }
         if(index > -1) {
             if(change_type === 'w') {
