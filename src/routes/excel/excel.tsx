@@ -435,7 +435,7 @@ class Excel extends React.Component<any, any>  {
         let setting = this.excelObject.setting_custome;
         let index = -1;
         if(change_type === 'w') {
-            index = current_index || this.excelObject.setting_custome.columnLefts.indexOf(_eX - ( this.dpr === 1 ? 0: 0));
+            index = current_index || this.excelObject.setting_custome.columnLefts.indexOf(_eX - ( this.dpr === 1 ? 0: 0.5)) ;
         }else if(change_type === 'h') {
             index = current_index || this.excelObject.setting_custome.rowTops.indexOf(_eY - ( this.dpr === 1 ? 0 : 0))
         }
@@ -810,7 +810,11 @@ class Excel extends React.Component<any, any>  {
         this.setState({
             regional_sel:[_l,_t,_w,_h]
         });
+    
         let currentItem =  this.excelData[row_start][col_start];
+        if(!currentItem || row_end === -1 || row_start === -1) {
+            return
+        }
         if(col_start > -1 && row_start > -1) {
             let {
                 color,
@@ -870,6 +874,9 @@ class Excel extends React.Component<any, any>  {
         let col_end = Math.max(_start[1], _end[1]);
 
         // 当前开始触发对象
+        if(col_start === -1 || row_end === -1) {
+            return;
+        }
         let currItem = this.excelData[row_start][col_start];
         let currIndexs = currItem[0];
     
