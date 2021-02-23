@@ -1,7 +1,7 @@
 import * as React from 'react';
-import "./style/e-setting.scss";
-import "./style/e-current.scss";
-import "./style/e-content.scss";
+import "./style/sheet-setting.scss";
+import "./style/sheet-current.scss";
+import "./style/sheet-content.scss";
 
 import * as REQ_IMG from './require-img-source';
 
