@@ -3,18 +3,7 @@ import "./style/e-setting.scss";
 import "./style/e-current.scss";
 import "./style/e-content.scss";
 
-const Merge = require( './../../assets/merge.svg');
-const UnMerge = require( './../../assets/unmerge.svg');
-const F_Blod = require( './../../assets/f_b.svg');
-const F_Ltalic = require( './../../assets/f_i.svg');
-const F_Under = require( './../../assets/f_ul.svg');
-const F_C = require( './../../assets/f_c.svg');
-const F_L = require( './../../assets/f_l.svg');
-const F_R = require( './../../assets/f_r.svg');
-const BG = require( './../../assets/bg.svg');
-const F_Color = require( './../../assets/f_color.svg');
-const GITHUB = require( './../../assets/github.svg');
-const Down = require( './../../assets/down.svg');
+import * as REQ_IMG from './require-img-source';
 
 import { excelObjectModel } from "./models/excel-object";
 import { excelStateModel } from './models/excel-state';
@@ -1605,7 +1594,7 @@ class Excel extends React.Component<any, any>  {
                                 {this.state.extended_attribute_font_family}
                             </span>
                         <img src={
-                            Down && Down.default
+                            REQ_IMG.Down!.default
                         } 
                         onClick={this.extendedAttribute.bind(this, 'extended_attribute_font_family_state')}
                         alt="字体" title="字体"/>
@@ -1632,7 +1621,7 @@ class Excel extends React.Component<any, any>  {
                                 {this.state.extended_attribute_font_size}
                             </span>
                         <img src={
-                            Down && Down.default
+                            REQ_IMG.Down!.default
                         } 
                         onClick={this.extendedAttribute.bind(this, 'extended_attribute_font_size_state')}
                         alt="字体大小" title="字体大小"/>
@@ -1655,7 +1644,7 @@ class Excel extends React.Component<any, any>  {
                 <span className="item">
                     <img onClick={
                         this.setStyle.bind(this, 'text','fontWeight',this.state.extended_attribute_font_weight === 'normal' ? 'bold' : 'normal')} 
-                        src={ F_Blod && F_Blod.default} 
+                        src={ REQ_IMG.F_Blod!.default} 
                         className = {
                             this.state.extended_attribute_font_weight === 'bold' ? 'active': ''
                         }
@@ -1666,14 +1655,14 @@ class Excel extends React.Component<any, any>  {
                         className = {
                             this.state.extended_attribute_font_style === 'italic' ? 'active': ''
                         }
-                        src={ F_Ltalic && F_Ltalic.default} 
+                        src={ REQ_IMG.F_Ltalic!.default} 
                         alt="" 
                         title="斜体"/>
                 </span>
                 
                 <span className="item">
                     <span className="extend-attribute">
-                        <img onClick={this.extendedAttribute.bind(this, 'extended_attribute_font_color_state')} src={ F_Color && F_Color.default} alt="" title="字体颜色"/>
+                        <img onClick={this.extendedAttribute.bind(this, 'extended_attribute_font_color_state')} src={  REQ_IMG.F_Color!.default} alt="" title="字体颜色"/>
                         <span className="color" style={{
                             background:this.state.extended_attribute_font_color
                         }}></span>
@@ -1692,7 +1681,7 @@ class Excel extends React.Component<any, any>  {
                         }
                     </span>
                     <span className="extend-attribute">
-                        <img onClick={this.extendedAttribute.bind(this, 'extended_attribute_rect_fillstyle_state')} src={ BG && BG.default} alt="" title="字体颜色"/>
+                        <img onClick={this.extendedAttribute.bind(this, 'extended_attribute_rect_fillstyle_state')} src={ REQ_IMG.BG!.default} alt="" title="字体颜色"/>
                         <span className="color" style={{
                             background:this.state.extended_attribute_rect_fillstyle
                         }}></span>
@@ -1712,17 +1701,17 @@ class Excel extends React.Component<any, any>  {
                     </span>
                 </span>
                 <span className="item">
-                    <img src={ F_L && F_L.default} alt="" title="居左" onClick={this.setStyle.bind(this, 'text', 'textAlign', 'left')}/>
-                    <img src={ F_C && F_C.default} alt="" title="居中" onClick={this.setStyle.bind(this, 'text', 'textAlign', 'center')}/>
-                    <img src={ F_R && F_R.default} alt="" title="居右" onClick={this.setStyle.bind(this, 'text', 'textAlign', 'right')}/>
+                    <img src={ REQ_IMG.F_L!.default} alt="" title="居左" onClick={this.setStyle.bind(this, 'text', 'textAlign', 'left')}/>
+                    <img src={ REQ_IMG.F_C!.default} alt="" title="居中" onClick={this.setStyle.bind(this, 'text', 'textAlign', 'center')}/>
+                    <img src={ REQ_IMG.F_R!.default} alt="" title="居右" onClick={this.setStyle.bind(this, 'text', 'textAlign', 'right')}/>
                 </span>
                 <span className="item">
-                    <img onClick={this.merge.bind(this)} src={ Merge && Merge.default} alt="" title="合并"/>
-                    <img onClick={this.unMerge.bind(this)} src={ UnMerge && UnMerge.default} alt="" title="取消合并"/>
+                    <img onClick={this.merge.bind(this)} src={ REQ_IMG.Merge!.default} alt="" title="合并"/>
+                    <img onClick={this.unMerge.bind(this)} src={ REQ_IMG.UnMerge!.default} alt="" title="取消合并"/>
                 </span>
                 <span className="github">
                     <a href="https://github.com/bojue/canvas-excel" target="_black">
-                         <img src={GITHUB && GITHUB.default} alt=""/>
+                         <img src={REQ_IMG.GITHUB!.default} alt=""/>
                     </a>
                 </span>
             </div>
