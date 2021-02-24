@@ -15,8 +15,9 @@ import { drawMergeText, drawText} from '../service/excel-draw-text';
 import { initExcelCanvas } from '../service/excel-draw-canvas-init';
 
 //data
-import { txtCols, rectFillStylesCols, txtFamilys, txtSizes} from '../models/excle-setting-data';
+import { txtCols, rectFillStylesCols, txtSizes} from '../models/excle-setting-data';
 import SheetEditorBarComponent from './sheet-edior-bar/sheet-editor-bar';
+import SheetSettingAreaComponent from './sheet-setting-area/sheet-function-area';
 
 
 declare global { interface Window { 
@@ -39,10 +40,10 @@ class Excel extends React.Component<any, any>  {
     inputRef:any;
     editorRef:any;
     txtCols:any[];
-    txtFamilys:any[];
     txtSizes:any[];
     dpr:number;
     rectFillStylesCols:any[];
+    
     constructor(props:any) {
         super(props);
         this.initData();
@@ -58,9 +59,12 @@ class Excel extends React.Component<any, any>  {
         this.excelData = excelDataModel;
         this.txtCols = txtCols;
         this.rectFillStylesCols = rectFillStylesCols;
-        this.txtFamilys = txtFamilys;
         this.txtSizes = txtSizes;
-        this.sheetEditorChangeValue = this.sheetEditorChangeValue.bind(this)
+
+        // 绑定子组件事件
+        this.sheetEditorChangeValue = this.sheetEditorChangeValue.bind(this);
+        this.setStyle = this.setStyle.bind(this);
+        this.extendedAttribute = this.extendedAttribute.bind(this);
     }
     
     componentDidMount() {
@@ -1535,18 +1539,6 @@ class Excel extends React.Component<any, any>  {
         return val ;
     }
 
-    // changeEidorVal(target:Event) {
-    //     console.log(this.excelData)
-    //     // if(this.excelData[this.state.editor_coordinate_x] 
-    //     //     && this.excelData[this.state.editor_coordinate_y][this.state.editor_coordinate_x] ){
-    //     //     this.excelData[this.state.editor_coordinate_y][this.state.editor_coordinate_x][2] =target;
-    //     // }
-    //     // this.setState({
-    //     //     editor_coordinate_val:this.excelData[this.state.editor_coordinate_y][this.state.editor_coordinate_x][2]
-    //     // })
-    //     // this.test()
-    // }
-
     sheetEditorChangeValue(value:string) {
         if(this.excelData[this.state.editor_coordinate_x] 
             && this.excelData[this.state.editor_coordinate_y][this.state.editor_coordinate_x] ){
@@ -1603,144 +1595,27 @@ class Excel extends React.Component<any, any>  {
 
     render() {
         return<div className="excel"> 
-            <div className="setting">
-                <span className="item item-fz">
-                    <div className="f-family" style={{
-                        fontFamily:this.state.extended_attribute_font_family
-                    }}>
-                        <span className="name">
-                            <span className="val">
-                                {this.state.extended_attribute_font_family}
-                            </span>
-                        <img src={
-                            REQ_IMG.Down!.default
-                        } 
-                        onClick={this.extendedAttribute.bind(this, 'extended_attribute_font_family_state')}
-                        alt="字体" title="字体"/>
-                        
-                        </span>
-                        {/* extended_attribute_font_style_state */}
-                        {
-                            this.state.extended_attribute_font_family_state && 
-                            <span className="attr-familys">
-                                <div className="fams">
-                                { this.txtFamilys.map((family, ind) => {
-                                        return <span key={ind} onClick={this.setStyle.bind(this, 'text','fontFamily',family)} className="fams-item">
-                                                <span className="lab"
-                                                style={{fontFamily:family}}>{family}</span>
-                                            </span>
-                                    })}
-                                </div>  
-                            </span>
-                        }
-                    </div>
-                    <div className="f-size">
-                        <span className="name">
-                            <span className="val">
-                                {this.state.extended_attribute_font_size}
-                            </span>
-                        <img src={
-                            REQ_IMG.Down!.default
-                        } 
-                        onClick={this.extendedAttribute.bind(this, 'extended_attribute_font_size_state')}
-                        alt="字体大小" title="字体大小"/>
-                        </span>
-                        {
-                            this.state.extended_attribute_font_size_state && 
-                            <span className="attr-familys f-size">
-                                <div className="fams">
-                                { this.txtSizes.map((size, ind) => {
-                                        return <span key={ind} onClick={this.setStyle.bind(this, 'text','fontSize', size)} className="fams-item">
-                                                <span className="lab">{size}</span>
-                                            </span>
-                                    })}
-                                </div>  
-                            </span>
-                        }
-                  
-                    </div>
-                </span>
-                <span className="item">
-                    <img onClick={
-                        this.setStyle.bind(this, 'text','fontWeight',this.state.extended_attribute_font_weight === 'normal' ? 'bold' : 'normal')} 
-                        src={ REQ_IMG.F_Blod!.default} 
-                        className = {
-                            this.state.extended_attribute_font_weight === 'bold' ? 'active': ''
-                        }
-                        alt="" 
-                        title="粗体"/>
-                    <img onClick={
-                        this.setStyle.bind(this, 'text','fontStyle', this.state.extended_attribute_font_style === 'normal' ? 'italic': 'normal')} 
-                        className = {
-                            this.state.extended_attribute_font_style === 'italic' ? 'active': ''
-                        }
-                        src={ REQ_IMG.F_Ltalic!.default} 
-                        alt="" 
-                        title="斜体"/>
-                </span>
-                
-                <span className="item">
-                    <span className="extend-attribute">
-                        <img onClick={this.extendedAttribute.bind(this, 'extended_attribute_font_color_state')} src={  REQ_IMG.F_Color!.default} alt="" title="字体颜色"/>
-                        <span className="color" style={{
-                            background:this.state.extended_attribute_font_color
-                        }}></span>
-                        {
-                            this.state.extended_attribute_font_color_state && 
-                            <span className="attr-cols">
-                                <span className="item col">
-                                    <div className="cols">
-                                    { this.txtCols.map((col, ind) => {
-                                            return <span key={ind} onClick={this.setStyle.bind(this, 'text','color',col)} className="col-item"
-                                                style={{background:col}}></span>
-                                        })}
-                                    </div>
-                                </span>       
-                            </span>
-                        }
-                    </span>
-                    <span className="extend-attribute">
-                        <img onClick={this.extendedAttribute.bind(this, 'extended_attribute_rect_fillstyle_state')} src={ REQ_IMG.BG!.default} alt="" title="字体颜色"/>
-                        <span className="color" style={{
-                            background:this.state.extended_attribute_rect_fillstyle
-                        }}></span>
-                        {
-                            this.state.extended_attribute_rect_fillstyle_state && 
-                            <span className="attr-cols fillstyles">
-                                <span className="item col">
-                                    <div className="cols">
-                                    { this.rectFillStylesCols.map((col, ind) => {
-                                            return <span key={ind} onClick={this.setStyle.bind(this, 'rect','fillStyle',col) } className="col-item"
-                                                style={{background:col}}></span>
-                                        })}
-                                    </div>
-                                </span>       
-                            </span>
-                        }
-                    </span>
-                </span>
-                <span className="item">
-                    <img src={ REQ_IMG.F_L!.default} alt="" title="居左" onClick={this.setStyle.bind(this, 'text', 'textAlign', 'left')}/>
-                    <img src={ REQ_IMG.F_C!.default} alt="" title="居中" onClick={this.setStyle.bind(this, 'text', 'textAlign', 'center')}/>
-                    <img src={ REQ_IMG.F_R!.default} alt="" title="居右" onClick={this.setStyle.bind(this, 'text', 'textAlign', 'right')}/>
-                </span>
-                <span className="item">
-                    <img onClick={this.merge.bind(this)} src={ REQ_IMG.Merge!.default} alt="" title="合并"/>
-                    <img onClick={this.unMerge.bind(this)} src={ REQ_IMG.UnMerge!.default} alt="" title="取消合并"/>
-                </span>
-                <span className="github">
-                    <a href="https://github.com/bojue/canvas-excel" target="_black">
-                         <img src={REQ_IMG.GITHUB!.default} alt=""/>
-                    </a>
-                </span>
-            </div>
+
+            {/* 设置栏 */}
+            <SheetSettingAreaComponent
+                family = { this.state.extended_attribute_font_family }
+                family_state = { this.state.extended_attribute_font_family_state }
+                font_size = { this.state.extended_attribute_font_size }
+                font_size_state = { this.state.extended_attribute_font_size_state}
+                font_weight = { this.state.extended_attribute_font_weight }
+                font_style = { this.state.extended_attribute_font_style }
+                imgs = { REQ_IMG }
+                changeStyle = { this.setStyle }
+                changeAttribute = { this.extendedAttribute }/>
+
+            {/* 编辑栏 */}
             <SheetEditorBarComponent
-                changeValue = { this.sheetEditorChangeValue }
                 ref = { this.inputRef }
                 val = { this.state.editor_coordinate_val }
                 x = { this.state.editor_coordinate_x }
                 y = { this.state.editor_coordinate_y }
-            />
+                changeValue = { this.sheetEditorChangeValue }/>
+
             <div className="excel_body">
                 {/* 输入编辑组件 */}
                 <div className="editor_content" >

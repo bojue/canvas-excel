@@ -9,7 +9,6 @@ class SheetEditorBarComponent extends React.Component<any, any>  {
     inputRef:any;
     constructor(props:any) {
         super(props)
-        console.log(props)
         this.initData();
     }
 
