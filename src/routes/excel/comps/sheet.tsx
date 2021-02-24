@@ -1,31 +1,35 @@
 import * as React from 'react';
-import "./style/sheet-setting.scss";
-import "./style/sheet-current.scss";
-import "./style/sheet-content.scss";
+import "./../style/sheet-setting.scss";
+import "./../style/sheet-editor-bar.scss";
+import "./../style/sheet-content.scss";
 
-import * as REQ_IMG from './require-img-source';
+import * as REQ_IMG from './../resources/import-for-imgs';
 
-import { excelObjectModel } from "./models/excel-object";
-import { excelStateModel } from './models/excel-state';
-import { excelItemModel } from './models/excel-item';
-import { excelDataModel } from './models/excel-data';
+import { excelObjectModel } from "../models/excel-object";
+import { excelStateModel } from '../models/excel-state';
+import { excelItemModel } from '../models/excel-item';
+import { excelDataModel } from '../models/excel-data';
 
 //service
-import { drawMergeText, drawText} from './service/excel-draw-text';
-import { initExcelCanvas } from './service/excel-draw-canvas-init';
+import { drawMergeText, drawText} from '../service/excel-draw-text';
+import { initExcelCanvas } from '../service/excel-draw-canvas-init';
 
 //data
-import { txtCols, rectFillStylesCols, txtFamilys, txtSizes} from './models/excle-setting-data';
+import { txtCols, rectFillStylesCols, txtFamilys, txtSizes} from '../models/excle-setting-data';
+import SheetEditorBarComponent from './sheet-edior-bar/sheet-editor-bar';
+
+
 declare global { interface Window { 
     webkitDevicePixelRatio:any,
     mozDevicePixelRatio:any
-  } }
+}}
 
 export interface Txt {
     v:string;
     x:number;
     y:number;
 }
+
 class Excel extends React.Component<any, any>  {
     excelRef:any;
     clientRect:DOMRect;
@@ -56,6 +60,7 @@ class Excel extends React.Component<any, any>  {
         this.rectFillStylesCols = rectFillStylesCols;
         this.txtFamilys = txtFamilys;
         this.txtSizes = txtSizes;
+        this.sheetEditorChangeValue = this.sheetEditorChangeValue.bind(this)
     }
     
     componentDidMount() {
@@ -841,7 +846,8 @@ class Excel extends React.Component<any, any>  {
         // 绘制左上角起始单元格内容
         drawMergeText(ctx, this.excelData[row_start][col_start], merge_row, merge_col, _l + 0.5, _t + 0.5, setting);
         ctx.stroke();
-        this.inputRef.value = this.excelData[row_start][ col_start][2];
+        console.log(this.inputRef)
+        // this.inputRef.value = this.excelData[row_start][ col_start][2];
     } 
 
     // 重新绘制区域选择
@@ -1117,15 +1123,16 @@ class Excel extends React.Component<any, any>  {
             (setting.rowTops[merge_row + _y] - _t - 0.5));
         if(state === 'merge') {
             if( this.excelData &&  this.excelData[row_start] &&  this.excelData[row_start][col_start]) {
-                this.excelData[row_start ][col_start][2] = this.inputRef.value || "";
+                // this.excelData[row_start ][col_start][2] = this.inputRef.value || "";
             }
         }
         // 绘制左上角起始单元格内容
         if( this.excelData[row_start][col_start] &&  this.excelData[row_start][col_start][2]) {
             drawMergeText(ctx, this.excelData[row_start][col_start], merge_row + _y, merge_col + _x, _l + 0.5, _t + 0.5, setting);
         } 
+        console.log(this.inputRef)
 
-        this.inputRef.value = this.excelData[row_start][ col_start][2];
+        // this.inputRef.value = this.excelData[row_start][ col_start][2];
         if(state === 'merge') {
             this.excelData[row_start][col_start][0] = [col_end - col_start +1 , row_end - row_start + 1];
             this.updateSelAreaItemsByMerge(
@@ -1528,17 +1535,29 @@ class Excel extends React.Component<any, any>  {
         return val ;
     }
 
-    onChange(e:Event) {
-        let target =  e.target as HTMLTextAreaElement;
+    // changeEidorVal(target:Event) {
+    //     console.log(this.excelData)
+    //     // if(this.excelData[this.state.editor_coordinate_x] 
+    //     //     && this.excelData[this.state.editor_coordinate_y][this.state.editor_coordinate_x] ){
+    //     //     this.excelData[this.state.editor_coordinate_y][this.state.editor_coordinate_x][2] =target;
+    //     // }
+    //     // this.setState({
+    //     //     editor_coordinate_val:this.excelData[this.state.editor_coordinate_y][this.state.editor_coordinate_x][2]
+    //     // })
+    //     // this.test()
+    // }
+
+    sheetEditorChangeValue(value:string) {
         if(this.excelData[this.state.editor_coordinate_x] 
-        && this.excelData[this.state.editor_coordinate_y][this.state.editor_coordinate_x] ){
-            this.excelData[this.state.editor_coordinate_y][this.state.editor_coordinate_x][2] = target.value || target.innerHTML || "";
+            && this.excelData[this.state.editor_coordinate_y][this.state.editor_coordinate_x] ){
+            this.excelData[this.state.editor_coordinate_y][this.state.editor_coordinate_x][2] = value;
         }
         this.setState({
-            editor_coordinate_val:this.excelData[this.state.editor_coordinate_y][this.state.editor_coordinate_x][2]
+            editor_coordinate_val:value
         })
         this.updateExcelItemByInput('merge');
     }
+
 
     onInput() {
         this.setState({
@@ -1715,17 +1734,13 @@ class Excel extends React.Component<any, any>  {
                     </a>
                 </span>
             </div>
-            <div className="current">
-                <div className="item">
-                    <span className="current_coordinate"> {(String.fromCharCode(65 +this.state.editor_coordinate_x ))}{this.state.editor_coordinate_y + 1}</span>
-                </div>
-                <div className="item">
-                    <input type="val" 
-                        onChange ={this.onChange.bind(this)}
-                        ref={input => this.inputRef = input} 
-                        value={ this.state.editor_coordinate_val }/>
-                </div>
-            </div>
+            <SheetEditorBarComponent
+                changeValue = { this.sheetEditorChangeValue }
+                ref = { this.inputRef }
+                val = { this.state.editor_coordinate_val }
+                x = { this.state.editor_coordinate_x }
+                y = { this.state.editor_coordinate_y }
+            />
             <div className="excel_body">
                 {/* 输入编辑组件 */}
                 <div className="editor_content" >
