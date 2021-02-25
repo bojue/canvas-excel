@@ -39,10 +39,8 @@ class Excel extends React.Component<any, any>  {
     currentLabelDOMRef:any;
     inputRef:any;
     editorRef:any;
-    txtCols:any[];
     txtSizes:any[];
     dpr:number;
-    rectFillStylesCols:any[];
     
     constructor(props:any) {
         super(props);
@@ -57,14 +55,13 @@ class Excel extends React.Component<any, any>  {
         this.state = excelStateModel;
         this.excelObject = excelObjectModel;
         this.excelData = excelDataModel;
-        this.txtCols = txtCols;
-        this.rectFillStylesCols = rectFillStylesCols;
         this.txtSizes = txtSizes;
 
         // 绑定子组件事件
         this.sheetEditorChangeValue = this.sheetEditorChangeValue.bind(this);
         this.setStyle = this.setStyle.bind(this);
         this.extendedAttribute = this.extendedAttribute.bind(this);
+        this.changeMergeState = this.changeMergeState.bind(this);
     }
     
     componentDidMount() {
@@ -850,7 +847,6 @@ class Excel extends React.Component<any, any>  {
         // 绘制左上角起始单元格内容
         drawMergeText(ctx, this.excelData[row_start][col_start], merge_row, merge_col, _l + 0.5, _t + 0.5, setting);
         ctx.stroke();
-        console.log(this.inputRef)
         // this.inputRef.value = this.excelData[row_start][ col_start][2];
     } 
 
@@ -1340,6 +1336,13 @@ class Excel extends React.Component<any, any>  {
         dom.innerText = "";
     }
 
+    changeMergeState(state:string) {
+        if(state === 'merge') {
+            this.merge()
+        }else {
+            this.unMerge();
+        }
+    }
     merge() {
         // 合并状态判断
         let _s = this.state.regional_sel_start;
@@ -1604,10 +1607,15 @@ class Excel extends React.Component<any, any>  {
                 font_size_state = { this.state.extended_attribute_font_size_state}
                 font_weight = { this.state.extended_attribute_font_weight }
                 font_style = { this.state.extended_attribute_font_style }
+                font_color = { this.state.extended_attribute_font_color } 
+                font_color_state = { this.state.extended_attribute_font_color_state}
+                rect_fillstyle = {this.state.extended_attribute_rect_fillstyle }
+                rect_fillstyle_state = {this.state.extended_attribute_rect_fillstyle_state }
                 imgs = { REQ_IMG }
                 changeStyle = { this.setStyle }
-                changeAttribute = { this.extendedAttribute }/>
-
+                changeAttribute = { this.extendedAttribute }
+                changeMergeState = { this.changeMergeState }/>
+            
             {/* 编辑栏 */}
             <SheetEditorBarComponent
                 ref = { this.inputRef }

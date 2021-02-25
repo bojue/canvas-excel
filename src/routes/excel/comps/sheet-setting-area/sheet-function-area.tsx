@@ -1,10 +1,14 @@
 import * as React from 'react';
-import { txtFamilys ,txtSizes} from '../../models/excle-setting-data';
+import { GitHubComponent } from '../../../../commount/components/github/github';
+import { txtFamilys ,txtSizes, txtCols, rectFillStylesCols } from '../../models/excle-setting-data';
 
 class SheetSettingAreaComponent extends React.Component<any, any>  {
     inputRef:any;
     txtFamilys:any[];
     txtSizes:any[];
+    txtCols:any[];
+    rectFillStylesCols:any[];
+    
     constructor(props:any) {
         super(props)
 
@@ -15,10 +19,16 @@ class SheetSettingAreaComponent extends React.Component<any, any>  {
         this.inputRef =  React.createRef();
         this.txtFamilys = txtFamilys;
         this.txtSizes = txtSizes;
+        this.txtCols = txtCols;
+        this.rectFillStylesCols = rectFillStylesCols;
     }
 
     componentDidMount() {
 
+    }
+
+    mergeFun(state:string) {
+        this.props.changeMergeState(state);
     }
 
     changeStyle(style:string, parames:string, val:string) {
@@ -109,19 +119,19 @@ class SheetSettingAreaComponent extends React.Component<any, any>  {
                 title="斜体"/>
         </span>
         
-        {/* <span className="item">
+        <span className="item">
             <span className="extend-attribute">
-                <img onClick={this.extendedAttribute.bind(this, 'extended_attribute_font_color_state')} src={  REQ_IMG.F_Color!.default} alt="" title="字体颜色"/>
+                <img onClick={this.extendedAttribute.bind(this, 'extended_attribute_font_color_state')} src={   this.props.imgs.F_Color!.default} alt="" title="字体颜色"/>
                 <span className="color" style={{
-                    background:this.state.extended_attribute_font_color
+                    background:this.props.font_color
                 }}></span>
                 {
-                    this.state.extended_attribute_font_color_state && 
+                    this.props.font_color_state && 
                     <span className="attr-cols">
                         <span className="item col">
                             <div className="cols">
                             { this.txtCols.map((col, ind) => {
-                                    return <span key={ind} onClick={this.setStyle.bind(this, 'text','color',col)} className="col-item"
+                                    return <span key={ind} onClick={this.changeStyle.bind(this, 'text','color',col)} className="col-item"
                                         style={{background:col}}></span>
                                 })}
                             </div>
@@ -130,17 +140,17 @@ class SheetSettingAreaComponent extends React.Component<any, any>  {
                 }
             </span>
             <span className="extend-attribute">
-                <img onClick={this.extendedAttribute.bind(this, 'extended_attribute_rect_fillstyle_state')} src={ REQ_IMG.BG!.default} alt="" title="字体颜色"/>
+                <img onClick={this.extendedAttribute.bind(this, 'extended_attribute_rect_fillstyle_state')} src={  this.props.imgs.BG!.default} alt="" title="字体颜色"/>
                 <span className="color" style={{
-                    background:this.state.extended_attribute_rect_fillstyle
+                    background:this.props.rect_fillstyle
                 }}></span>
                 {
-                    this.state.extended_attribute_rect_fillstyle_state && 
+                    this.props.rect_fillstyle_state && 
                     <span className="attr-cols fillstyles">
                         <span className="item col">
                             <div className="cols">
                             { this.rectFillStylesCols.map((col, ind) => {
-                                    return <span key={ind} onClick={this.setStyle.bind(this, 'rect','fillStyle',col) } className="col-item"
+                                    return <span key={ind} onClick={this.changeStyle.bind(this, 'rect','fillStyle',col) } className="col-item"
                                         style={{background:col}}></span>
                                 })}
                             </div>
@@ -148,21 +158,17 @@ class SheetSettingAreaComponent extends React.Component<any, any>  {
                     </span>
                 }
             </span>
-        </span> */}
+        </span>
         <span className="item">
             <img src={ this.props.imgs.F_L!.default} alt="" title="居左" onClick={this.changeStyle.bind(this, 'text', 'textAlign', 'left')}/>
             <img src={ this.props.imgs.F_C!.default} alt="" title="居中" onClick={this.changeStyle.bind(this, 'text', 'textAlign', 'center')}/>
             <img src={ this.props.imgs.F_R!.default} alt="" title="居右" onClick={this.changeStyle.bind(this, 'text', 'textAlign', 'right')}/>
         </span>
-        {/* <span className="item">
-            <img onClick={this.merge.bind(this)} src={ REQ_IMG.Merge!.default} alt="" title="合并"/>
-            <img onClick={this.unMerge.bind(this)} src={ REQ_IMG.UnMerge!.default} alt="" title="取消合并"/>
-        </span> */}
-        <span className="github">
-            <a href="https://github.com/bojue/canvas-excel" target="_black">
-                 <img src={ this.props.imgs.GITHUB!.default} alt=""/>
-            </a>
+        <span className="item">
+            <img onClick={this.mergeFun.bind(this, 'merge')} src={ this.props.imgs.Merge!.default} alt="" title="合并"/>
+            <img onClick={this.mergeFun.bind(this, 'unmerge')} src={ this.props.imgs.UnMerge!.default} alt="" title="取消合并"/>
         </span>
+        <GitHubComponent/>
     </div>
     }
 }
