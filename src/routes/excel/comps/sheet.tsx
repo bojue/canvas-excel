@@ -2,9 +2,7 @@ import * as React from 'react';
 import "./../style/sheet-setting.scss";
 import "./../style/sheet-editor-bar.scss";
 import "./../style/sheet-content.scss";
-
 import * as REQ_IMG from './../resources/import-for-imgs';
-
 import { excelObjectModel } from "../models/excel-object";
 import { excelStateModel } from '../models/excel-state';
 import { excelItemModel } from '../models/excel-item';
@@ -56,12 +54,6 @@ class Excel extends React.Component<any, any>  {
         this.excelObject = excelObjectModel;
         this.excelData = excelDataModel;
         this.txtSizes = txtSizes;
-
-        // 绑定子组件事件
-        this.sheetEditorChangeValue = this.sheetEditorChangeValue.bind(this);
-        this.setStyle = this.setStyle.bind(this);
-        this.extendedAttribute = this.extendedAttribute.bind(this);
-        this.changeMergeState = this.changeMergeState.bind(this);
     }
     
     componentDidMount() {
@@ -260,10 +252,6 @@ class Excel extends React.Component<any, any>  {
                 if(w_count> 1 || h_count > 1) { 
                     w =  lefs[col + w_count] - lefs[col];
                     h = 0;
-                    // h = tops[row + h_count] - tops[row];
-                    // for(let r=0; r < w_count;r++) {
-                    //     w += colums[r+ col];
-                    // }
                     for(let c=0; c < h_count;c++) {
                         h += rows[c+ row] ;
                     }
@@ -382,7 +370,6 @@ class Excel extends React.Component<any, any>  {
             })
         }); 
     }
-
 
     dragChangeSize(e:any) {
         if(e.buttons !== 1 && e.type !== 'dragend') {
@@ -860,7 +847,6 @@ class Excel extends React.Component<any, any>  {
         let _end = this.state.regional_sel_end;  
     
         ctx.beginPath();
-
         // 鼠标选中从下向上选中
         let row_start = Math.min(_start[0], _end[0]);
         let row_end = Math.max(_start[0], _end[0]);
@@ -902,160 +888,25 @@ class Excel extends React.Component<any, any>  {
             currEndIndexs = currEndItem[0];
         }
 
-        // 开始点坐标计算
-        if(!currIndexs[0] && !currIndexs[1]) {
-            // 计算开始列
-            if(!currIndexs[1]) {
-                col_start -= 1
-            }
-            let find_col_start_bool = false;
-            if(col_start > 0) {
-                let nextColItem = this.excelData[row_start ][col_start-1];
-                let nextColIndexs = nextColItem[0];
-                while(!currIndexs[1] && !find_col_start_bool && col_start) {
-                    currItem = this.excelData[row_start][col_start];
-                    currIndexs = currItem[0];
-                    nextColItem = this.excelData[row_start][col_start-1];
-                    nextColIndexs = nextColItem[0];
-                    if(currIndexs[1] === 0 && nextColIndexs[1] === 1 || col_start === 0) {
-                        find_col_start_bool = true;
-                    }else if(currIndexs[1] === 0) {
-                        col_start -= 1;
-                    }
-                }
-            }
-     
-          
-            // 计算开始行
-            let find_row_start_bool = false;
-            if(row_start > 0) {
-                let nextRowItem = this.excelData[row_start -1][col_start];
-                let nextRowIndexs = nextRowItem[0];
-                while(!currIndexs[0] && !find_row_start_bool && row_start) {
-                    currItem = this.excelData[row_start][col_start];
-                    currIndexs = currItem[0];
-                    nextRowItem = this.excelData[row_start -1][col_start];
-                    nextRowIndexs = nextRowItem[0];
-                    if(currIndexs[0] === 0 && nextRowIndexs[0] === 1 || row_start === 0) {
-                        find_row_start_bool = true;
-                    }else if(currIndexs[0] === 0) {
-                        row_start -= 1;
-                    }
-                }
-            }
-         
-        }
-
-        // 结束点坐标计算
-        if(!currEndIndexs[0] && !currEndIndexs[1]) {
-            // 计算结束列
-
-            let find_col_end_bool = false;
-            currEndItem = this.excelData[row_end ][col_end];
-            let nextEndColItem = this.excelData[row_end ][col_end];
-            let nextEndColIndexs = nextEndColItem[0];
-            while(!currEndIndexs[1] && !find_col_end_bool) {
-                currEndItem = this.excelData[row_end][col_end];
-                currEndIndexs = currEndItem[0];
-                nextEndColItem = this.excelData[row_end][col_end+1];
-                nextEndColIndexs = nextEndColItem[0];
-                if(currEndIndexs[1] === 0 && nextEndColIndexs[1] === 1) {
-                    find_col_end_bool = true;
-                }else if(currEndIndexs[1] === 0) {
-                    col_end += 1;
-                }
-            }
-          
-            // 计算结束行
-            currEndItem = this.excelData[row_end][col_end];
-            currEndIndexs = currEndItem[0];
-            let find_row_end_bool = false;
-            let nextEndRowItem = this.excelData[row_end +1][col_end];
-            let nextEndRowIndexs = nextEndRowItem[0];
-
-            while(!currEndIndexs[0] && !find_row_end_bool) {
-                currEndItem = this.excelData[row_end][col_end];
-                currEndIndexs = currEndItem[0];
-                nextEndRowItem = this.excelData[row_end +1][col_end];
-                nextEndRowIndexs = nextEndRowItem[0];
-                if(currEndIndexs[0] === 0 && nextEndRowIndexs[0] > 0) {
-                    find_row_end_bool = true;
-                }else if(currEndIndexs[0] === 0) {
-                    row_end += 1;
-                }
+        if(!currItem[0][0] && !currItem[0][1]) {
+            console.log(row_start, col_start)
+            console.log("currIndexs", currIndexs)
+            console.log('currEndIndexs', currEndIndexs);
+            console.log(this.excelObject.config.merge);
+            let len = this.excelObject.config.merge.length;
+            for(let i=0;i<len;i++) {
+                let item = this.excelObject.config.merge[i];
+                console.log(item)
             }
         }
 
-        TODO: // 左下角向上存在bug
-
-        // 计算top包含合并区域
-        if(row_start > 0) {
-            for(let i= col_start;i< col_end;i++) {
-                let item = this.excelData[row_start][i];
-                let indexs = item && item[0];
-                let topItem = this.excelData[row_start-1][i];
-                let topIndexs = topItem && topItem[0];
-                while(!indexs[0] && !indexs[1] && !topIndexs[0] && !topIndexs[1]) {
-                    row_start -= 1;
-                    item = this.excelData[row_start][i];
-                    indexs = item && item[0];
-                    topItem = this.excelData[row_start-1] && this.excelData[row_start-1][i];
-                    if(!topItem) break;
-                    topIndexs = topItem && topItem[0];
-                }
-            }
+        if(state === 'merge') {
+            let mergeObj = [row_start, row_end - row_start, col_start, col_end - col_start];
+            this.excelObject.config.merge.push(mergeObj);
+            console.log("合并单元格记录-------->")
+            console.log(this.excelObject.config.merge);
         }
 
-     
-        // 计算bottom包含合并区域
-        for(let i= col_start;i< col_end;i++) {
-            let item = this.excelData[row_end][i];
-            let indexs = item && item[0];
-            let bottomItem = this.excelData[row_end+1] &&  this.excelData[row_end+1][i];
-            if(!bottomItem) break;
-            let bottomIndexs = bottomItem && bottomItem[0];
-            while(!indexs[0] && !indexs[1] && !bottomIndexs[0] && !bottomIndexs[1]) {
-                row_end += 1;
-                item = this.excelData[row_end][i];
-                indexs = item && item[0];
-                bottomItem = this.excelData[row_end+1][i];
-                bottomIndexs = bottomItem && bottomItem[0];
-            }
-        }
-        
-        // 计算right包含合并区域
-        for(let i= row_start;i< row_end;i++) {
-            let item = this.excelData[i][col_end];
-            let indexs = item && item[0];
-            let rightItem = this.excelData[i][col_end+1 ];
-            if(!rightItem) break;
-            let rightIndexs = rightItem && rightItem[0];
-            while(!indexs[0] && !indexs[1] && !rightIndexs[0] && !rightIndexs[1]) {
-                col_end += 1;
-                item = this.excelData[i][col_end];
-                indexs = item && item[0];
-                rightItem = this.excelData[i][col_end + 1];
-                rightIndexs = rightItem && rightItem[0];
-            }
-        }
-
-        // 计算left包含合并区域
-        if(col_start > 0) {
-            for(let i= row_start;i< row_end;i++) {
-                let item = this.excelData[i][col_start];
-                let indexs = item && item[0];
-                let rightItem = this.excelData[i][col_start-1 ];
-                let rightIndexs = rightItem && rightItem[0];
-                while(!indexs[0] && !indexs[1] && !rightIndexs[0] && !rightIndexs[1] && col_start > 0) {
-                    col_start -= 1;
-                    item = this.excelData[i][col_start];
-                    indexs = item && item[0];
-                    rightItem = this.excelData[i][col_start + 1];
-                    rightIndexs = rightItem && rightItem[0];
-                }
-            }    
-        }
-    
         let _l= col_start > 0 ? setting.columnLefts[col_start -1] :  def.columTitleDefWidth;
         let _w = (setting.columnLefts.length === (col_end + 1) ) ? 
         col_start === 0 ?
@@ -1130,7 +981,6 @@ class Excel extends React.Component<any, any>  {
         if( this.excelData[row_start][col_start] &&  this.excelData[row_start][col_start][2]) {
             drawMergeText(ctx, this.excelData[row_start][col_start], merge_row + _y, merge_col + _x, _l + 0.5, _t + 0.5, setting);
         } 
-        console.log(this.inputRef)
 
         // this.inputRef.value = this.excelData[row_start][ col_start][2];
         if(state === 'merge') {
@@ -1145,14 +995,8 @@ class Excel extends React.Component<any, any>  {
         ctx.stroke();
     } 
 
-
-    getWidthByCount() {
-        
-    }
-
     updateSelAreaItemsByMerge(c_s:number, r_s:number, c_e:number, r_e: number) {
-        let datas =  this.excelData;
-       
+        let datas = this.excelData;
         for(let j=r_s;j<=r_e;j++) {
             for(let i=c_s;i<=c_e;i++) {
                 let item = datas[j][i];
@@ -1168,7 +1012,6 @@ class Excel extends React.Component<any, any>  {
                         0, 
                         ""
                     ]
-            
                 }
             }
         }
@@ -1336,7 +1179,7 @@ class Excel extends React.Component<any, any>  {
         dom.innerText = "";
     }
 
-    changeMergeState(state:string) {
+    changeMergeState = (state:string) => {
         if(state === 'merge') {
             this.merge()
         }else {
@@ -1353,37 +1196,6 @@ class Excel extends React.Component<any, any>  {
         let arr = currentItem[0];
         if(arr[0] === (_e[1] - _s[1] + 1)  && arr[1] === (_e[0] - _s[0] + 1) ) {
             return ;
-        }
-
-        const ctx = this.context;
-        ctx.beginPath();
-        let def = this.excelObject.setting_def;
-        let setting = this.excelObject.setting_custome;
-        let rows = setting.row;
-        let colums = setting.column;
-        let rLen = rows.length;
-        let cLen = colums.length;
-        let currentLeft = def.columTitleDefWidth + 0.5;
-        let currentTop = def.rowTitleHeight + 0.5;
-        for(let row = 0;row < rLen;row++) {
-            currentTop = def.rowTitleHeight+ 0.5;
-            let width = colums[row];
-            if(width === undefined) continue;
-            for(let col=0;col< cLen;col++) {
-                let height = rows[col];
-                if(height === undefined) continue;
-                if(col === _s[0] && row ===  _s[1]) {
-                    ctx.lineWidth = 1;
-                    ctx.strokeStyle = "#e0e0e0";
-                    let _w = this.getMergeVal(_s[1],_e[1], colums);
-                    let _h = this.getMergeVal(_s[0],_e[0], rows);
-                    ctx.rect(currentLeft , currentTop ,  _w, _h );
-                    ctx.fillStyle = "#fff";
-                    ctx.fillRect(currentLeft, currentTop , _w,_h);
-                }
-                currentTop += height;
-            }
-            currentLeft += width;
         }
         this.reDrawSelectArea('merge');
     }
@@ -1436,7 +1248,7 @@ class Excel extends React.Component<any, any>  {
 
 
     // 属性设置
-    setStyle(param:string, key:string, val:any) {
+    setStyle = (param:string, key:string, val:any) =>  {
         let _start = this.state.regional_sel_start;
         let _end = this.state.regional_sel_end;  
         let col_start = Math.min(_start[1],_end[1]);
@@ -1479,7 +1291,7 @@ class Excel extends React.Component<any, any>  {
     }
 
     // 扩展属性
-    extendedAttribute(stateParma:string) {
+    extendedAttribute = (stateParma:string) =>  {
         this.setState({
             [stateParma]: !this.state[stateParma]
         })
@@ -1542,7 +1354,7 @@ class Excel extends React.Component<any, any>  {
         return val ;
     }
 
-    sheetEditorChangeValue(value:string) {
+    sheetEditorChangeValue = (value:string) => {
         if(this.excelData[this.state.editor_coordinate_x] 
             && this.excelData[this.state.editor_coordinate_y][this.state.editor_coordinate_x] ){
             this.excelData[this.state.editor_coordinate_y][this.state.editor_coordinate_x][2] = value;

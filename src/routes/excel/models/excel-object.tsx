@@ -6,7 +6,9 @@ let excelObjectModel = {
         left:60,
         top:25
     },
-
+    config: {
+        merge:[]
+    },
     // 选择的区域
     selection_board: {
         width:0,
