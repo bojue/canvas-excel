@@ -52,6 +52,7 @@ ExcelDataItem = [
             'fillStyle':"#fff"
         }
     }
+]
 ```
 
 > 待优化方案
@@ -95,13 +96,19 @@ ExcelDataItem = [
 
 [优化方案简单记录](https://github.com/bojue/canvas-excel/issues/5)
 
-### TODO
+## TODO
 
 - 单元格文字上下边界处理
 - 局部渲染进一步优化
 - X,Y页面滚动
 - 单元格输入框光标位置（重构出来的bug）
 
+## Doing
 
+- 重构-excel组件化（Donging）
+- 重构-引入状态管理 
+
+
+目前组件化根据excel的功能布局拆分，多层级需要引入状态管理的内容
 
 

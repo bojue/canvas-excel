@@ -4,6 +4,7 @@
   "private": true,
   "homepage": "D:\\workspace\\canvas-excel\\dist",
   "dependencies": {
+    "@reduxjs/toolkit": "^1.5.0",
     "@types/react-dom": "^16.9.8",
     "cra-template": "1.0.3",
     "html-webpack-plugin": "^4.3.0",
@@ -11,6 +12,7 @@
     "react-dom": "^16.13.1",
     "react-router-dom": "^5.2.0",
     "react-scripts-ts": "3.1.0",
+    "redux": "^4.0.5",
     "remove-drag-ghosting": "^1.0.4",
     "tapable": "^1.1.3",
     "tslint": "^6.1.2",
