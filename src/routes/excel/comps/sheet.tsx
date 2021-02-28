@@ -888,23 +888,78 @@ class Excel extends React.Component<any, any>  {
             currEndIndexs = currEndItem[0];
         }
 
-        if(!currItem[0][0] && !currItem[0][1]) {
-            console.log(row_start, col_start)
-            console.log("currIndexs", currIndexs)
-            console.log('currEndIndexs', currEndIndexs);
-            console.log(this.excelObject.config.merge);
+        // 区域选择合并单元格计算优化
+        let itemTL = currItem; // 左上角单元格
+        let itemRB = currEndItem; // 右下角单元格
+        let itemTR = this.excelData[row_start][col_end]; // 右上角单元格
+        let itemLB = this.excelData[row_end][col_start] // 左下角单元格
+        if(!itemTL[0][0]) {
             let len = this.excelObject.config.merge.length;
             for(let i=0;i<len;i++) {
                 let item = this.excelObject.config.merge[i];
-                console.log(item)
+                let _t = item[0];
+                let _h = item[1] 
+                let _l = item[2];
+                let _w = item[3];
+                
+                // 左上角单元格
+                if(row_start >= _t && row_start <= _t + _h && col_start >= _l && col_start <= _l + _w) {
+                    row_start = _t;
+                    col_start = _l;
+                } 
             }
+            this.setState({
+                regional_sel_start: [row_start, col_start]
+            })
+        } 
+
+        if( !itemRB[0][0]) {
+            console.log('itemRB', itemRB)
+            let len = this.excelObject.config.merge.length;
+            for(let i=0;i<len;i++) {
+                let item = this.excelObject.config.merge[i];
+                let _t = item[0];
+                let _h = item[1] 
+                let _l = item[2];
+                let _w = item[3];
+                
+                // 左上角单元格
+                if(row_start >= _t && row_start <= _t + _h && col_start >= _l && col_start <= _l + _w) {
+                    row_start = _t;
+                    col_start = _l;
+                } 
+            }
+            this.setState({
+                regional_sel_end: [row_end, col_end]
+            })
+        }
+        if(!itemTR[0][0] || !itemLB[0][0]) {
+            let len = this.excelObject.config.merge.length;
+            for(let i=0;i<len;i++) {
+                let item = this.excelObject.config.merge[i];
+                let _t = item[0];
+                let _h = item[1] 
+                let _l = item[2];
+                let _w = item[3];
+                if(row_end >= _t && row_end <= _t + _h && _l <= col_start && _l + _w >= col_start) {
+                    row_end = _t + _h;
+                    col_start = _l;
+                }
+                if(row_start >= _t && row_start <= _t + _h && _l >= col_start && _l + _w >= col_end){
+                    row_start = _t;
+                    col_end = _l + _w;
+                }
+            }
+            this.setState({
+                regional_sel_start: [row_start, col_start],
+                regional_sel_end: [row_end, col_end]
+            })
+            console.log('this.state.regional_sel_start', this.state.regional_sel_start, this.state.regional_sel_end)
         }
 
         if(state === 'merge') {
             let mergeObj = [row_start, row_end - row_start, col_start, col_end - col_start];
             this.excelObject.config.merge.push(mergeObj);
-            console.log("合并单元格记录-------->")
-            console.log(this.excelObject.config.merge);
         }
 
         let _l= col_start > 0 ? setting.columnLefts[col_start -1] :  def.columTitleDefWidth;
