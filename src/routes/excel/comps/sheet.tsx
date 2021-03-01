@@ -1293,7 +1293,7 @@ class Excel extends React.Component<any, any>  {
             editor_coordinate_x:col_start,
             editor_coordinate_y:row_start,
             regional_sel_start:[row_start, col_start],
-            regional_sel_end:[row_start, col_start],
+            regional_sel_end:[row_end, col_end],
             regional_sel:[_l, _t, _w, _h]
         })
         this.reDrawCanvas();
