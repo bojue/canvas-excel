@@ -56,6 +56,7 @@ let excelStateModel = {
     regional_sel_by_click_state:0,// 点击选中状态
     regional_sel_l:0,  // 选中区域left
     regional_sel_t:0, // 选中区域top
+    regional_sel_begin:[-1,-1], // 开始定位坐标
     regional_sel_start:[-1, -1], // 开始坐标
     regional_sel_end:[-1,1], //结束坐标
     regional_cantch_before:[0, 0], // 焦点区域位置缓存

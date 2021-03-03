@@ -608,6 +608,7 @@ class Excel extends React.Component<any, any>  {
                         let len = _colList && Array.isArray(_colList) && _colList.length;
                         if(!!len) {
                             this.setState({
+                                regional_sel_begin:[0, col],
                                 regional_sel_start:[0,col],
                                 regional_sel_end:[len-1, col],
                             })
@@ -634,6 +635,7 @@ class Excel extends React.Component<any, any>  {
                     let len = this.excelData && Array.isArray(this.excelData) && this.excelData[0] && this.excelData[0].length;
                     if(!!len) {
                         this.setState({
+                            regional_sel_begin:[row, 0],
                             regional_sel_start:[row,0],
                             regional_sel_end:[row,len-1],
                         })
@@ -674,6 +676,7 @@ class Excel extends React.Component<any, any>  {
                                 // 选中区域定位
                                 regional_sel_start:[col, row],
                                 regional_sel_end:[col, row],
+                                regional_sel_begin:[col, row],
                                 regional_sel_l:currentLeft,
                                 regional_sel_t:currentTop,
                                 regional_sel_state:2,
@@ -845,6 +848,7 @@ class Excel extends React.Component<any, any>  {
 
         let _start = this.state.regional_sel_start;
         let _end = this.state.regional_sel_end;  
+        let _begin = this.state.regional_sel_begin;
     
         ctx.beginPath();
         // 鼠标选中从下向上选中
@@ -893,6 +897,8 @@ class Excel extends React.Component<any, any>  {
         let itemRB = currEndItem; // 右下角单元格
         let itemTR = this.excelData[row_start][col_end]; // 右上角单元格
         let itemLB = this.excelData[row_end][col_start] // 左下角单元格
+        console.log('\nregional_sel_begin' ,this.state.regional_sel_begin)
+        // 计算左上角
         if(!itemTL[0][0]) {
             let len = this.excelObject.config.merge.length;
             for(let i=0;i<len;i++) {
@@ -912,9 +918,8 @@ class Excel extends React.Component<any, any>  {
                 regional_sel_start: [row_start, col_start]
             })
         } 
-
+        // 计算右下角
         if( !itemRB[0][0]) {
-            console.log('itemRB', itemRB)
             let len = this.excelObject.config.merge.length;
             for(let i=0;i<len;i++) {
                 let item = this.excelObject.config.merge[i];
@@ -923,17 +928,39 @@ class Excel extends React.Component<any, any>  {
                 let _l = item[2];
                 let _w = item[3];
                 
-                // 左上角单元格
-                if(row_start >= _t && row_start <= _t + _h && col_start >= _l && col_start <= _l + _w) {
-                    row_start = _t;
-                    col_start = _l;
+                // 右下角单元格
+                if(row_end >= _t && row_end <= _t + _h && col_end >= _l && col_end <= _l + _w) {
+                    row_end = _t + _h;
+                    col_end = _l + _w;
                 } 
             }
             this.setState({
+                regional_sel_start: [row_end, col_end]
+            })
+        }
+        // 计算右上角
+        if(!itemTR[0][0]) {
+            let len = this.excelObject.config.merge.length;
+            for(let i=0;i<len;i++) {
+                let item = this.excelObject.config.merge[i];
+                let _t = item[0];
+                let _h = item[1] 
+                let _l = item[2];
+                let _w = item[3];
+                if(row_start >= _t && row_start <= _t + _h && _l <= col_end && _l + _w >= col_end) {
+                    col_end = _l + _w;
+                }
+                if(row_start >= _t && row_start <= _t + _h && _l >= col_start && _l + _w >= col_end){
+                    row_start = _t;
+                }
+            }
+            this.setState({
+                regional_sel_start: [row_start, col_start],
                 regional_sel_end: [row_end, col_end]
             })
         }
-        if(!itemTR[0][0] || !itemLB[0][0]) {
+
+        if(!itemLB[0][0]) {
             let len = this.excelObject.config.merge.length;
             for(let i=0;i<len;i++) {
                 let item = this.excelObject.config.merge[i];
@@ -942,19 +969,14 @@ class Excel extends React.Component<any, any>  {
                 let _l = item[2];
                 let _w = item[3];
                 if(row_end >= _t && row_end <= _t + _h && _l <= col_start && _l + _w >= col_start) {
-                    row_end = _t + _h;
                     col_start = _l;
-                }
-                if(row_start >= _t && row_start <= _t + _h && _l >= col_start && _l + _w >= col_end){
-                    row_start = _t;
-                    col_end = _l + _w;
+                    row_end = _t +_h;
                 }
             }
             this.setState({
                 regional_sel_start: [row_start, col_start],
                 regional_sel_end: [row_end, col_end]
             })
-            console.log('this.state.regional_sel_start', this.state.regional_sel_start, this.state.regional_sel_end)
         }
 
         if(state === 'merge') {
