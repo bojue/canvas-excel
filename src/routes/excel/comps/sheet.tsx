@@ -11,6 +11,11 @@ import { excelDataModel } from '../models/excel-data';
 //service
 import { drawMergeText, drawText} from '../service/excel-draw-text';
 import { initExcelCanvas } from '../service/excel-draw-canvas-init';
+import { saveToLocal, loadFromLocal, exportToFile, importFromFile, exportToCSV } from '../service/excel-persistence';
+import { HistoryManager } from '../service/excel-history';
+import { copyRegion, pasteToRegion, getClipboard } from '../service/excel-clipboard';
+import { insertRow, deleteRow, insertColumn, deleteColumn } from '../service/excel-rowcol';
+import { clampScroll, normalizeViewport, toLogicalX, toLogicalY, getFrozenX, getFrozenY } from '../service/excel-viewport';
 
 //data
 import { txtCols, rectFillStylesCols, txtSizes} from '../models/excle-setting-data';
@@ -37,8 +42,12 @@ class Excel extends React.Component<any, any>  {
     currentLabelDOMRef:any;
     inputRef:any;
     editorRef:any;
+    importInputRef:any;
+    history:HistoryManager;
+    cutSourceRange:any; // 剪切时记录的源区域，粘贴后清空
     txtSizes:any[];
     dpr:number;
+    viewHeight:number; // 视口高度(自适应)
     
     constructor(props:any) {
         super(props);
@@ -50,26 +59,64 @@ class Excel extends React.Component<any, any>  {
         this.editorRef = React.createRef();
         this.currentLabelDOMRef = React.createRef();
         this.inputRef = React.createRef();
+        this.importInputRef = React.createRef();
+        this.history = new HistoryManager(50);
         this.state = excelStateModel;
         this.excelObject = excelObjectModel;
+        this.excelObject.viewport = normalizeViewport(this.excelObject.viewport);
+        // 归一化视口(兼容旧存档无 viewport 字段)
+        this.excelObject.viewport = normalizeViewport(this.excelObject.viewport);
         this.excelData = excelDataModel;
         this.txtSizes = txtSizes;
     }
     
     componentDidMount() {
+        this.calculateViewHeight();
         this.initCanvasDOM();
         this.getExcelCanvas();
         this.drawBorder();
         this.addLister();
         this.initExcelContent();
+        window.addEventListener('resize', this.handleResize);
+    }
+
+    componentWillUnmount() {
+        window.removeEventListener('resize', this.handleResize);
+    }
+
+    calculateViewHeight = () => {
+        // 计算视口高度：窗口高度 - 顶部工具栏(编辑栏约53px) - 留白
+        const toolbarHeight = 53; // 编辑栏高度
+        const margin = 20; // 底部留白
+        this.viewHeight = Math.max(300, window.innerHeight - toolbarHeight - margin);
+    }
+
+    handleResize = () => {
+        this.calculateViewHeight();
+        this.updateCanvasSize();
+        this.reDrawCanvas();
+        this.reDrawSelectArea();
+    }
+
+    updateCanvasSize() {
+        let ctx = this.context;
+        let dpr = this.dpr;
+        let w = 1400;
+        let h = this.viewHeight;
+        this.excelRef.width = Math.round(w * dpr);
+        this.excelRef.height = Math.round(h * dpr);
+        this.excelRef.style.width = w + 'px';
+        this.excelRef.style.height = h + 'px';
+        ctx.scale(dpr, dpr);
+        this.getExcelCanvas();
     }
 
     initCanvasDOM() {
-        let ctx = this.context        
+        let ctx = this.context
         let dpr = window.devicePixelRatio || window.webkitDevicePixelRatio || window.mozDevicePixelRatio || 1;
         this.dpr = dpr;
-        let w = this.excelRef.width;
-        let h = this.excelRef.height;
+        let w = 1400;
+        let h = this.viewHeight;
         this.excelRef.width = Math.round(w * dpr);
         this.excelRef.height = Math.round(h * dpr);
         this.excelRef.style.width = w + 'px';
@@ -141,10 +188,10 @@ class Excel extends React.Component<any, any>  {
             ctx.strokeStyle = '#b9b9b9';
             ctx.stroke();
             startLeft += setting.column[i];
-            if( i === setting.column.length -1 || startLeft > 1000) {
+            if( i === setting.column.length -1 || startLeft > 1400) {
                 this.excelObject.info.width = startLeft ;
             }
-            if(startLeft > 1000) {
+            if(startLeft > 1400) {
                 break;
             }
         }
@@ -189,11 +236,11 @@ class Excel extends React.Component<any, any>  {
             ctx.fillText(val++, def.columTitleDefWidth /2, rowTop + setting.row[i]  / 2);
             ctx.stroke();
             startHeight += setting.row[i];
-            if( i === setting.row.length -1 || startHeight > 500) {
+            if( i === setting.row.length -1 || startHeight > this.viewHeight) {
                 this.excelObject.info.height = startHeight ;
             }
 
-            if(startHeight > 500) {
+            if(startHeight > this.viewHeight) {
                 break;
             }
         }
@@ -212,7 +259,7 @@ class Excel extends React.Component<any, any>  {
 
     
     initExcelContent() {
-        initExcelCanvas(this.context, this.excelObject, this.excelData, excelItemModel);
+        initExcelCanvas(this.context, this.excelObject, this.excelData, excelItemModel, this.viewHeight);
     }
 
     updateExcelCanvas() {
@@ -231,10 +278,10 @@ class Excel extends React.Component<any, any>  {
         let str = "";
         ctx.lineWidth = 1;
         ctx.strokeStyle = "#ccc";
-        for(let row = 0;row <rLen && currentTop <= 500;row++) {
+        for(let row = 0;row <rLen && currentTop <= this.viewHeight;row++) {
             let height = rows[row];
             currentLeft = def.columTitleDefWidth;
-            for(let col=0;col < cLen && currentLeft <= 1000;col++) {
+            for(let col=0;col < cLen && currentLeft <= 1400;col++) {
                 let width = colums[col];
                 let item = this.excelData[row] && this.excelData[row][col];
                 if(!item) {
@@ -274,7 +321,8 @@ class Excel extends React.Component<any, any>  {
             }
             currentTop += height;
         }
-        ctx.stroke();
+        ctx.restore();
+        ctx.stroke();
     }
 
     getCurrentLeft(col:number) {
@@ -288,6 +336,75 @@ class Excel extends React.Component<any, any>  {
     addLister() {
         window.addEventListener('resize', ()=> {
             this.getExcelCanvas();
+        })
+        // 键盘快捷键：撤销/重做/复制/剪切/粘贴/删除/导航
+        document.addEventListener('keydown', (e:KeyboardEvent) => {
+            const editing = this.state.editor_display === 'block';
+            const key = e.key.toLowerCase();
+            const mod = e.ctrlKey || e.metaKey;
+
+            // 编辑单元格中：仅处理 Enter 提交、Esc 取消，其余交给浏览器
+            if(editing) {
+                if(key === 'enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    this.commitEditAndMove('down');
+                } else if(key === 'escape') {
+                    e.preventDefault();
+                    this.cancelEdit();
+                } else if(key === 'tab') {
+                    e.preventDefault();
+                    this.commitEditAndMove(e.shiftKey ? 'left' : 'right');
+                }
+                return;
+            }
+
+            // ---- 非编辑状态 ----
+
+            // 方向键导航（支持 Shift 扩展选区）
+            if(['arrowup','arrowdown','arrowleft','arrowright'].indexOf(key) > -1) {
+                e.preventDefault();
+                const dirMap:any = { arrowup:'up', arrowdown:'down', arrowleft:'left', arrowright:'right' };
+                this.moveSelection(dirMap[key], e.shiftKey);
+                return;
+            }
+
+            // Enter 进入编辑；Tab 横向移动
+            if(!mod && key === 'enter') {
+                e.preventDefault();
+                this.enterEditCurrentCell();
+                return;
+            }
+            if(!mod && key === 'tab') {
+                e.preventDefault();
+                this.moveSelection(e.shiftKey ? 'left' : 'right');
+                return;
+            }
+
+            // Delete / Backspace 清空选区内容
+            if(!mod && (key === 'delete' || key === 'backspace')) {
+                e.preventDefault();
+                this.clearSelection();
+                return;
+            }
+
+            if(!mod) return;
+
+            if(key === 'z' && !e.shiftKey) {
+                e.preventDefault();
+                this.undo();
+            } else if((key === 'z' && e.shiftKey) || key === 'y') {
+                e.preventDefault();
+                this.redo();
+            } else if(key === 'c') {
+                e.preventDefault();
+                this.copy();
+            } else if(key === 'x') {
+                e.preventDefault();
+                this.cut();
+            } else if(key === 'v') {
+                e.preventDefault();
+                this.paste();
+            }
         })
         document.addEventListener("mousemove", (e:MouseEvent)=>{
             let _eX = e.clientX - this.clientRect.x;
@@ -305,8 +422,8 @@ class Excel extends React.Component<any, any>  {
             let def = this.excelObject.setting_def;
             let _eX = e.clientX - this.clientRect.x;
             let _eY = e.clientY - this.clientRect.y;
-            if(def.columTitleDefWidth <= _eX && _eX <= 1000 && 0<= _eY && _eY <def.rowTitleHeight || 
-            0 <= _eX && _eX < def.columTitleDefWidth && def.rowTitleHeight < _eY && _eY <= 500 ) {
+            if(def.columTitleDefWidth <= _eX && _eX <= 1400 && 0<= _eY && _eY <def.rowTitleHeight || 
+            0 <= _eX && _eX < def.columTitleDefWidth && def.rowTitleHeight < _eY && _eY <= this.viewHeight ) {
                 return;
             }
             this.updateEditorDOM(_eX, _eY);
@@ -368,7 +485,108 @@ class Excel extends React.Component<any, any>  {
                 mouse_event_type:'init',
                 change_size_current_index:-1,
             })
-        }); 
+        });
+        // 右键上下文菜单
+        ctx.addEventListener('contextmenu', (e:MouseEvent)=> {
+            e.preventDefault();
+            let _eX = e.clientX - this.clientRect.x;
+            let _eY = e.clientY - this.clientRect.y;
+            this.openContextMenu(_eX, _eY);
+        });
+        // 点击任意处关闭菜单
+        document.addEventListener('mousedown', (e:MouseEvent)=> {
+            if(this.state.context_menu_display === 'block') {
+                let target = e.target as HTMLElement;
+                if(!target.closest || !target.closest('.context-menu')) {
+                    this.closeContextMenu();
+                }
+            }
+        });
+        // 滚轮滚动
+        ctx.addEventListener('wheel', (e:WheelEvent)=> {
+            e.preventDefault();
+            let vp = this.excelObject.viewport;
+            let def = this.excelObject.setting_def;
+            let setting = this.excelObject.setting_custome;
+            // shift+滚轮 或 deltaX 为横向滚动
+            if(e.shiftKey || Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
+                vp.scrollLeft = (vp.scrollLeft || 0) + (e.deltaX || e.deltaY);
+            } else {
+                vp.scrollTop = (vp.scrollTop || 0) + e.deltaY;
+            }
+            clampScroll(vp, setting, def);
+            // 滚动时收起编辑框(MVP)
+            if(this.state.editor_display !== 'none') {
+                this.setState({ editor_display: 'none' });
+        // 滚轮滚动
+        ctx.addEventListener('wheel', (e:WheelEvent)=> {
+            e.preventDefault();
+            let vp = this.excelObject.viewport;
+            let def = this.excelObject.setting_def;
+            let setting = this.excelObject.setting_custome;
+            if(e.shiftKey || Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
+                vp.scrollLeft = (vp.scrollLeft || 0) + (e.deltaX || e.deltaY);
+            } else {
+                vp.scrollTop = (vp.scrollTop || 0) + e.deltaY;
+            }
+            clampScroll(vp, setting, def);
+            if(this.state.editor_display !== 'none') {
+                this.setState({ editor_display: 'none' });
+            }
+            this.reDrawCanvas();
+            this.reDrawSelectArea();
+        });
+            }
+            this.reDrawCanvas();
+            this.reDrawSelectArea();
+        });
+    }
+
+    // 将画布坐标命中到行列下标
+    hitTestCell(_eX:number, _eY:number):{row:number, col:number} | null {
+        let def = this.excelObject.setting_def;
+        let setting = this.excelObject.setting_custome;
+        if(_eX < def.columTitleDefWidth || _eY < def.rowTitleHeight) return null;
+        let colums = setting.column;
+        let rows = setting.row;
+        let col = -1, row = -1;
+        let cl = def.columTitleDefWidth;
+        for(let c=0;c<colums.length;c++) {
+            if(_eX >= cl && _eX < cl + colums[c]) { col = c; break; }
+            cl += colums[c];
+        }
+        let ct = def.rowTitleHeight;
+        for(let r=0;r<rows.length;r++) {
+            if(_eY >= ct && _eY < ct + rows[r]) { row = r; break; }
+            ct += rows[r];
+        }
+        if(row === -1 || col === -1) return null;
+        return { row, col };
+    }
+
+    openContextMenu(_eX:number, _eY:number) {
+        let hit = this.hitTestCell(_eX, _eY);
+        if(!hit) { this.closeContextMenu(); return; }
+        // 若右键位置不在当前选区内，则把选区移到该单元格
+        const range = this.getSelectionRange();
+        const inSel = range && hit.row >= range.rowStart && hit.row <= range.rowEnd
+            && hit.col >= range.colStart && hit.col <= range.colEnd;
+        if(!inSel) {
+            this.setSelectionCell(hit.row, hit.col);
+        }
+        this.setState({
+            context_menu_display:'block',
+            context_menu_left:_eX,
+            context_menu_top:_eY,
+            context_menu_row:hit.row,
+            context_menu_col:hit.col,
+        });
+    }
+
+    closeContextMenu = () => {
+        if(this.state.context_menu_display !== 'none') {
+            this.setState({ context_menu_display:'none' });
+        }
     }
 
     dragChangeSize(e:any) {
@@ -428,7 +646,7 @@ class Excel extends React.Component<any, any>  {
                 setting.column[this.state.change_size_current_index]  = parseInt(Math.max(_eX - _left, 2) + '')
                 this.setState({
                     change_size_w:1,
-                    change_size_h:500,
+                    change_size_h:this.viewHeight,
                     change_size_l:_eX,
                     change_size_top:0,
                     change_size_title_l:-2,
@@ -448,7 +666,7 @@ class Excel extends React.Component<any, any>  {
                 let _height = Math.max(_eY - _top, 2);
                 this.setState({
                     change_size_h: 1,
-                    change_size_w: 1000,
+                    change_size_w: 1400,
                     change_size_l: _eX,
                     change_size_title_l:0,
                     change_size_title_t: -2 ,
@@ -489,7 +707,7 @@ class Excel extends React.Component<any, any>  {
             this.setState({
                 change_size_top: _eY,
                 change_size_h: 1,
-                change_size_w: 1000,
+                change_size_w: 1400,
                 change_size_l:_eX,
                 change_size_title_l:0,
                 change_size_title_t: -2 ,
@@ -530,7 +748,7 @@ class Excel extends React.Component<any, any>  {
     }
 
     clearFullRect() {
-        this.context.clearRect(0, 0,this.excelObject.info.scalingRatio * 1000, this.excelObject.info.scalingRatio* 500 );
+        this.context.clearRect(0, 0,this.excelObject.info.scalingRatio * 1400, this.excelObject.info.scalingRatio* this.viewHeight );
     }
 
     reDrawCanvas() {
@@ -593,7 +811,7 @@ class Excel extends React.Component<any, any>  {
         if(this.state.regional_sel_state === 0) {
             return;
         }
-        if(def.columTitleDefWidth <= left && left <= 1000 && 0<= top && top <def.rowTitleHeight ) {
+        if(def.columTitleDefWidth <= left && left <= 1400 && 0<= top && top <def.rowTitleHeight ) {
             let _cl = def.columTitleDefWidth;
             for(let col=0;col< cLen;col++) {
                 let _w = colums[col];
@@ -622,7 +840,7 @@ class Excel extends React.Component<any, any>  {
                 _cl += _w;
             
             }
-        }else if(0 <= left && left < def.columTitleDefWidth && def.rowTitleHeight < top && top <= 500){
+        }else if(0 <= left && left < def.columTitleDefWidth && def.rowTitleHeight < top && top <= this.viewHeight){
             let _cr = def.rowTitleHeight;
             for(let row =0;row< rLen;row++) {
                 let _h = rows[row];
@@ -648,7 +866,7 @@ class Excel extends React.Component<any, any>  {
                 _cr += _h;
             
             }
-        }else if(def.columTitleDefWidth<= left && left <= 1000 && def.rowTitleHeight < top && top <= 500){
+        }else if(def.columTitleDefWidth<= left && left <= 1400 && def.rowTitleHeight < top && top <= this.viewHeight){
             for(let col=0;col< rLen;col++) {
                 let height = rows[col] ;
                 currentTop = col > 0 ? setting.rowTops[col -1] : def.rowTitleHeight;
@@ -1123,7 +1341,7 @@ class Excel extends React.Component<any, any>  {
                 this.setState({
                     changeSizeState:'change_size_h',
                     change_size_h: 1,
-                    change_size_w: Math.min(this.excelObject.info.width  ,  1000),
+                    change_size_w: Math.min(this.excelObject.info.width  ,  1400),
                     currentLabel_val:_height,
                     currentLabel_top:  _top,
                     currentLabel_left: this.excelObject.setting_def.columTitleDefWidth,
@@ -1139,7 +1357,7 @@ class Excel extends React.Component<any, any>  {
                         change_size_current_index:index,
                         changeSizeState:'change_size_h',
                         change_size_h: 1,
-                        change_size_w:Math.min(this.excelObject.setting_def.columTitleDefWidth,  1000),
+                        change_size_w:Math.min(this.excelObject.setting_def.columTitleDefWidth,  1400),
                         currentLabel_val:_height,
                         currentLabel_top:  _top,
                         currentLabel_left: this.excelObject.setting_def.columTitleDefWidth,
@@ -1155,7 +1373,7 @@ class Excel extends React.Component<any, any>  {
             if(event.buttons === 1 && currentIndex > -1) {
                 this.setState({
                     changeSizeState:'change_size_w',
-                    change_size_h: Math.min(this.excelObject.info.height , 500),
+                    change_size_h: Math.min(this.excelObject.info.height , this.viewHeight),
                     change_size_w:1,
                     change_size_title_l: -2 ,
                     change_size_title_t:0,
@@ -1173,7 +1391,7 @@ class Excel extends React.Component<any, any>  {
                 if(index > -1) {
                     this.setState({
                         changeSizeState:'change_size_w',
-                        change_size_h: Math.min(this.excelObject.info.top , 500),
+                        change_size_h: Math.min(this.excelObject.info.top , this.viewHeight),
                         change_size_w:1,
                         change_size_top:0,
                         change_size_title_l:-2,
@@ -1194,8 +1412,8 @@ class Excel extends React.Component<any, any>  {
     
     updateEditorDOM(left:number,top:number, state ?:string) {
         let info = this.excelObject.info;
-        let width = Math.min(info.width, 1000);
-        let height = Math.min(info.height, 500);
+        let width = Math.min(info.width, 1400);
+        let height = Math.min(info.height, this.viewHeight);
         if(!(left > 0 && left < width && top > 0 &&top < height)) {
             console.info("请点击Excel区域");
             return;
@@ -1256,6 +1474,344 @@ class Excel extends React.Component<any, any>  {
         dom.innerText = "";
     }
 
+    // 保存到本地存储
+    saveData = () => {
+        const ok = saveToLocal(this.excelData, this.excelObject);
+        console.info(ok ? '已保存到本地' : '保存失败');
+    }
+
+    // 从本地存储加载
+    loadData = () => {
+        const ok = loadFromLocal(this.excelData, this.excelObject);
+        if(ok) {
+            this.reDrawCanvas();
+            this.forceUpdate();
+            console.info('已从本地加载');
+        } else {
+            console.info('没有可加载的本地数据');
+        }
+    }
+
+    // 导出为 JSON 文件
+    exportJSON = () => {
+        exportToFile(this.excelData, this.excelObject);
+    }
+
+    // 导出为 CSV 文件
+    exportCSV = () => {
+        exportToCSV(this.excelData);
+    }
+
+    // 触发文件选择进行导入
+    triggerImport = () => {
+        if(this.importInputRef && this.importInputRef.current) {
+            this.importInputRef.current.click();
+        }
+    }
+
+    // 处理文件导入
+    handleImportFile = (e:any) => {
+        const file = e.target.files && e.target.files[0];
+        if(!file) return;
+        importFromFile(file, this.excelData, this.excelObject)
+            .then((ok) => {
+                if(ok) {
+                    this.reDrawCanvas();
+                    this.forceUpdate();
+                    console.info('导入成功');
+                } else {
+                    console.info('导入失败：文件格式不正确');
+                }
+            })
+            .catch((err) => {
+                console.error('导入出错:', err);
+            });
+        // 重置 input，允许再次导入同一文件
+        e.target.value = '';
+    }
+
+    // 在修改前记录当前状态（快照）
+    recordHistory = () => {
+        this.history.record(this.excelData, this.excelObject.config.merge);
+    }
+
+    // 应用一个历史快照到当前数据（原地替换，保持引用）
+    applyHistorySnapshot = (snapshot:any) => {
+        this.excelData.length = 0;
+        snapshot.excelData.forEach((row:any) => this.excelData.push(row));
+        this.excelObject.config.merge = snapshot.merge;
+        this.reDrawCanvas();
+        this.reDrawSelectArea();
+        this.forceUpdate();
+    }
+
+    undo = () => {
+        const snapshot = this.history.undo(this.excelData, this.excelObject.config.merge);
+        if(snapshot) {
+            this.applyHistorySnapshot(snapshot);
+        } else {
+            console.info('没有可撤销的操作');
+        }
+    }
+
+    redo = () => {
+        const snapshot = this.history.redo(this.excelData, this.excelObject.config.merge);
+        if(snapshot) {
+            this.applyHistorySnapshot(snapshot);
+        } else {
+            console.info('没有可重做的操作');
+        }
+    }
+
+    // 获取当前选区的行列范围（闭区间）
+    getSelectionRange = () => {
+        let _start = this.state.regional_sel_start;
+        let _end = this.state.regional_sel_end;
+        if(!_start || !_end || _start[0] === -1 || _start[1] === -1) return null;
+        return {
+            rowStart: Math.min(_start[0], _end[0]),
+            rowEnd: Math.max(_start[0], _end[0]),
+            colStart: Math.min(_start[1], _end[1]),
+            colEnd: Math.max(_start[1], _end[1]),
+        };
+    }
+
+    copy = () => {
+        const range = this.getSelectionRange();
+        if(!range) { console.info('请先选择区域'); return; }
+        copyRegion(this.excelData, range.rowStart, range.rowEnd, range.colStart, range.colEnd, false);
+        console.info('已复制');
+    }
+
+    cut = () => {
+        const range = this.getSelectionRange();
+        if(!range) { console.info('请先选择区域'); return; }
+        copyRegion(this.excelData, range.rowStart, range.rowEnd, range.colStart, range.colEnd, true);
+        this.cutSourceRange = range;
+        console.info('已剪切');
+    }
+
+    paste = () => {
+        const clip = getClipboard();
+        if(!clip) { console.info('剪贴板为空'); return; }
+        const range = this.getSelectionRange();
+        if(!range) { console.info('请先选择粘贴位置'); return; }
+
+        this.recordHistory();
+
+        // 以选区左上角为粘贴起点
+        const result = pasteToRegion(this.excelData, range.rowStart, range.colStart, true);
+
+        // 剪切模式：清空源区域内容
+        if(clip.isCut) {
+            this.clearClipboardSource();
+        }
+
+        this.reDrawCanvas();
+        this.reDrawSelectArea();
+        this.forceUpdate();
+
+        if(result) {
+            console.info(`已粘贴 ${result.rows}×${result.cols}`);
+        }
+    }
+
+    // 剪切后清空源区域
+    clearClipboardSource = () => {
+        const r = this.cutSourceRange;
+        if(!r) return;
+        for(let j=r.rowStart; j<=r.rowEnd; j++) {
+            for(let i=r.colStart; i<=r.colEnd; i++) {
+                const item = this.excelData[j] && this.excelData[j][i];
+                if(item) {
+                    item[2] = '';
+                }
+            }
+        }
+        this.cutSourceRange = null;
+    }
+
+    // 键盘方向导航：移动或扩展选区
+    // dir: 'up' | 'down' | 'left' | 'right'；extend: 是否按住 Shift 扩展选区
+    moveSelection = (dir:string, extend:boolean = false) => {
+        let start = this.state.regional_sel_start;
+        let end = this.state.regional_sel_end;
+        if(!start || start[0] === -1 || start[1] === -1) {
+            // 无选区时，从左上角开始
+            this.setSelectionCell(0, 0);
+            return;
+        }
+
+        let rowMax = (this.excelObject.setting_custome.row.length || 1) - 1;
+        let colMax = (this.excelObject.setting_custome.column.length || 1) - 1;
+
+        // 扩展模式移动 end，否则移动整个选区（start=end）
+        let anchor = extend ? end : start;
+        let row = anchor[0];
+        let col = anchor[1];
+
+        switch(dir) {
+            case 'up':    row = Math.max(0, row - 1); break;
+            case 'down':  row = Math.min(rowMax, row + 1); break;
+            case 'left':  col = Math.max(0, col - 1); break;
+            case 'right': col = Math.min(colMax, col + 1); break;
+        }
+
+        if(extend) {
+            this.setState({ regional_sel_end:[row, col] });
+            this.reDrawCanvas();
+            this.reDrawSelectArea();
+        } else {
+            this.setSelectionCell(row, col);
+        }
+    }
+
+    // 将选区设为单个单元格并重绘
+    setSelectionCell = (row:number, col:number) => {
+        this.setState({
+            regional_sel_state: 2,
+            regional_sel_start:[row, col],
+            regional_sel_end:[row, col],
+            regional_sel_begin:[row, col],
+            editor_display:'none',
+        }, () => {
+            this.reDrawCanvas();
+            this.reDrawSelectArea();
+        });
+    }
+
+    // 提交当前编辑内容并移动到相邻单元格
+    commitEditAndMove = (dir:string) => {
+        // 提交编辑（复用 blur 逻辑）
+        if(this.editorRef.current) {
+            this.updateInputVal();
+        }
+        this.setState({ editor_display:'none' }, () => {
+            this.reDrawCanvas();
+            this.moveSelection(dir);
+        });
+    }
+
+    // 取消编辑，不保存
+    cancelEdit = () => {
+        this.setState({ editor_display:'none' }, () => {
+            this.reDrawCanvas();
+            this.reDrawSelectArea();
+        });
+    }
+
+    // 进入编辑当前选中的单元格
+    enterEditCurrentCell = () => {
+        let start = this.state.regional_sel_start;
+        if(!start || start[0] === -1) return;
+        this.setState({
+            editor_coordinate_x: start[1],
+            editor_coordinate_y: start[0],
+        }, () => {
+            this.updateEditorDOM2(start[1], start[0]);
+            if(this.editorRef.current) {
+                this.editorRef.current.setAttribute("contenteditable", "true");
+                this.editorRef.current.focus();
+            }
+        });
+    }
+
+    // 按单元格坐标定位并显示编辑器（键盘 Enter 触发）
+    updateEditorDOM2 = (col:number, row:number) => {
+        let def = this.excelObject.setting_def;
+        let setting = this.excelObject.setting_custome;
+        let cols = setting.columnLefts;
+        let rows = setting.rowTops;
+        let item = this.excelData[row] && this.excelData[row][col];
+        if(!item) return;
+        let x = item[0][0] || 1;
+        let y = item[0][1] || 1;
+        let _w = cols[col + x] - cols[col];
+        let _l = col > 0 ? cols[col-1] : def.columTitleDefWidth;
+        let _h = rows[row + y] - rows[row];
+        let _t = row > 0 ? rows[row-1] : def.rowTitleHeight;
+        this.setState({
+            editor_display:'block',
+            editor_width:_w,
+            editor_height:_h,
+            editor_top:_t,
+            editor_left:_l,
+        });
+    }
+
+    // 清空当前选区内容（Delete 键）
+    clearSelection = () => {
+        const range = this.getSelectionRange();
+        if(!range) return;
+        this.recordHistory();
+        for(let j=range.rowStart; j<=range.rowEnd; j++) {
+            for(let i=range.colStart; i<=range.colEnd; i++) {
+                const item = this.excelData[j] && this.excelData[j][i];
+                if(item) {
+                    item[2] = '';
+                }
+            }
+        }
+        this.reDrawCanvas();
+        this.reDrawSelectArea();
+        this.forceUpdate();
+    }
+
+    // ---- 右键菜单：插入/删除 行列 ----
+    // 菜单命中的目标行列（右键位置），无则回退到选区起点
+    getContextTarget = () => {
+        let row = this.state.context_menu_row;
+        let col = this.state.context_menu_col;
+        if(row < 0 || col < 0) {
+            const range = this.getSelectionRange();
+            if(range) { row = range.rowStart; col = range.colStart; }
+        }
+        return { row, col };
+    }
+
+    ctxInsertRow = (offset:number) => {
+        const { row } = this.getContextTarget();
+        if(row < 0) return;
+        this.recordHistory();
+        insertRow(this.excelData, this.excelObject, row + offset, excelItemModel);
+        this.afterStructureChange();
+    }
+
+    ctxDeleteRow = () => {
+        const { row } = this.getContextTarget();
+        if(row < 0) return;
+        this.recordHistory();
+        deleteRow(this.excelData, this.excelObject, row, excelItemModel);
+        this.afterStructureChange();
+    }
+
+    ctxInsertColumn = (offset:number) => {
+        const { col } = this.getContextTarget();
+        if(col < 0) return;
+        this.recordHistory();
+        insertColumn(this.excelData, this.excelObject, col + offset, excelItemModel);
+        this.afterStructureChange();
+    }
+
+    ctxDeleteColumn = () => {
+        const { col } = this.getContextTarget();
+        if(col < 0) return;
+        this.recordHistory();
+        deleteColumn(this.excelData, this.excelObject, col, excelItemModel);
+        this.afterStructureChange();
+    }
+
+    // 结构变更后：重算下标缓存 + 重绘 + 收起菜单
+    afterStructureChange = () => {
+        this.excelObject.setting_custome.columnLefts = [];
+        this.excelObject.setting_custome.rowTops = [];
+        this.closeContextMenu();
+        clampScroll(this.excelObject.viewport, this.excelObject.setting_custome, this.excelObject.setting_def);
+        this.reDrawCanvas();
+        this.reDrawSelectArea();
+        this.forceUpdate();
+    }
+
     changeMergeState = (state:string) => {
         if(state === 'merge') {
             this.merge()
@@ -1274,7 +1830,67 @@ class Excel extends React.Component<any, any>  {
         if(arr[0] === (_e[1] - _s[1] + 1)  && arr[1] === (_e[0] - _s[0] + 1) ) {
             return ;
         }
+        this.recordHistory();
         this.reDrawSelectArea('merge');
+
+        // 【新增】合并后验证数据一致性
+        if(process.env.NODE_ENV === 'development') {
+            this.validateMergeData();
+        }
+    }
+
+    // 【新增】验证合并数据一致性的辅助函数
+    validateMergeData() {
+        const errors:string[] = [];
+
+        // 检查每个 config.merge 配置
+        this.excelObject.config.merge.forEach((merge:any, idx:number) => {
+            const [rowStart, rowSpan, colStart, colSpan] = merge;
+
+            // 检查边界
+            if(rowStart < 0 || colStart < 0 || rowSpan < 0 || colSpan < 0) {
+                errors.push(`Merge ${idx}: 负数坐标或跨度 [${merge.join(',')}]`);
+                return;
+            }
+
+            // 检查主单元格是否存在
+            const masterCell = this.excelData[rowStart]?.[colStart];
+            if (!masterCell) {
+                errors.push(`Merge ${idx}: 主单元格 [${rowStart},${colStart}] 不存在`);
+                return;
+            }
+
+            // 检查主单元格的合并标记是否匹配
+            // 注意：item[0] 格式是 [colSpan, rowSpan]（列在前）
+            // 而 config.merge 格式是 [rowStart, rowSpan, colStart, colSpan]（行在前）
+            const [cellColSpan, cellRowSpan] = masterCell[0];
+            if (cellColSpan !== colSpan + 1 || cellRowSpan !== rowSpan + 1) {
+                errors.push(`Merge ${idx}: 跨度不匹配 - config:[r${rowSpan},c${colSpan}] cell:[c${cellColSpan},r${cellRowSpan}]`);
+            }
+
+            // 检查被合并的单元格是否正确标记为 [0,0]
+            for(let r = rowStart; r <= rowStart + rowSpan; r++) {
+                for(let c = colStart; c <= colStart + colSpan; c++) {
+                    if(r === rowStart && c === colStart) continue; // 跳过主单元格
+
+                    const cell = this.excelData[r]?.[c];
+                    if(!cell) {
+                        errors.push(`Merge ${idx}: 被合并单元格 [${r},${c}] 不存在`);
+                        continue;
+                    }
+
+                    if(cell[0][0] !== 0 || cell[0][1] !== 0) {
+                        errors.push(`Merge ${idx}: 被合并单元格 [${r},${c}] 标记错误 [${cell[0].join(',')}]`);
+                    }
+                }
+            }
+        });
+
+        if(errors.length > 0) {
+            console.warn('合并数据一致性检查发现问题:', errors);
+        }
+
+        return errors;
     }
 
     unMerge() {
@@ -1287,6 +1903,10 @@ class Excel extends React.Component<any, any>  {
         let col_end = Math.max(_start[1], _end[1]);
         let startItem = this.excelData[row_start][col_start];
         if(!startItem) return;
+
+        this.recordHistory();
+
+        // 清空单元格的合并标记
         for(let i=col_start;i<=col_end;i++) {
             for(let j=row_start;j<=row_end;j++) {
                 let item =  this.excelData[j] && this.excelData[j][i];
@@ -1295,6 +1915,24 @@ class Excel extends React.Component<any, any>  {
                 }
             }
         }
+
+        // 【修复】清理 config.merge 中的合并配置
+        // config.merge 格式：[row_start, row_span, col_start, col_span]
+        this.excelObject.config.merge = this.excelObject.config.merge.filter((mergeItem:any) => {
+            const [mRowStart, mRowSpan, mColStart, mColSpan] = mergeItem;
+            const mRowEnd = mRowStart + mRowSpan;
+            const mColEnd = mColStart + mColSpan;
+
+            // 检查合并区域是否与当前选择区域有交集
+            const hasOverlap = !(
+                row_end < mRowStart || row_start > mRowEnd ||
+                col_end < mColStart || col_start > mColEnd
+            );
+
+            // 保留没有交集的合并区域
+            return !hasOverlap;
+        });
+
         let def = this.excelObject.setting_def;
         let setting = this.excelObject.setting_custome;
         let cols = setting.columnLefts;
@@ -1302,7 +1940,7 @@ class Excel extends React.Component<any, any>  {
         let _l,_t,_w,_h = 0;
         _w = cols[col_start + 1] - cols[col_start];
         _l = col_start > 0 ?
-            cols[col_start-1] :  
+            cols[col_start-1] :
             def.columTitleDefWidth;
         _h = rows[row_start + 1] - rows[row_start];
         _t = row_start > 0 ?
@@ -1320,7 +1958,7 @@ class Excel extends React.Component<any, any>  {
         })
         this.reDrawCanvas();
         this.reDrawSelectArea();
-      
+
     }
 
 
@@ -1351,6 +1989,21 @@ class Excel extends React.Component<any, any>  {
             }
         }
         if([col_start, col_end, row_start, row_end].indexOf(-1) > -1) return;
+
+        // 检查是否会有实际变化，有则先记录历史
+        let willChange = false;
+        for(let j=row_start;j<=row_end && !willChange;j++) {
+            for(let i=col_start;i<=col_end;i++) {
+                if(this.excelData[j][i][3][param][key] !== val) {
+                    willChange = true;
+                    break;
+                }
+            }
+        }
+        if(willChange) {
+            this.recordHistory();
+        }
+
         for(let j=row_start;j<=row_end;j++) {
             for(let i=col_start;i<=col_end;i++) {
                 let item = this.excelData[j];
@@ -1449,8 +2102,14 @@ class Excel extends React.Component<any, any>  {
         })        
     }
 
-    updateInputVal() { 
-        this.excelData[this.state.editor_coordinate_y][this.state.editor_coordinate_x][2] = this.editorRef.current.innerHTML || ""; 
+    updateInputVal() {
+        let newVal = this.editorRef.current.innerHTML || "";
+        let oldVal = this.excelData[this.state.editor_coordinate_y][this.state.editor_coordinate_x][2];
+        // 值发生变化时记录历史（此时 excelData 仍是旧值）
+        if(newVal !== oldVal) {
+            this.recordHistory();
+        }
+        this.excelData[this.state.editor_coordinate_y][this.state.editor_coordinate_x][2] = newVal;
         this.onInput();
     }
 
@@ -1503,8 +2162,24 @@ class Excel extends React.Component<any, any>  {
                 imgs = { REQ_IMG }
                 changeStyle = { this.setStyle }
                 changeAttribute = { this.extendedAttribute }
-                changeMergeState = { this.changeMergeState }/>
-            
+                changeMergeState = { this.changeMergeState }
+                onUndo = { this.undo }
+                onRedo = { this.redo }
+                onSave = { this.saveData }
+                onLoad = { this.loadData }
+                onExportJSON = { this.exportJSON }
+                onExportCSV = { this.exportCSV }
+                onImport = { this.triggerImport }/>
+
+            {/* 隐藏的文件导入 input */}
+            <input
+                type="file"
+                accept=".json"
+                ref={this.importInputRef}
+                style={{ display: 'none' }}
+                onChange={this.handleImportFile}
+            />
+
             {/* 编辑栏 */}
             <SheetEditorBarComponent
                 ref = { this.inputRef }
@@ -1545,12 +2220,12 @@ class Excel extends React.Component<any, any>  {
            
                     <span className="editor_coordinate c-t" 
                         style={{
-                            width:Math.min(parseFloat(this.state.regional_sel[2]), 1000 -parseFloat(this.state.regional_sel[0]) ) || 0,
+                            width:Math.min(parseFloat(this.state.regional_sel[2]), 1400 -parseFloat(this.state.regional_sel[0]) ) || 0,
                             left:parseFloat(this.state.regional_sel[0]) ||0,
                             top:(parseFloat(this.excelObject.setting_def.rowTitleHeight + 0.5)||0)  -2}}></span>
                     <span className="editor_coordinate c-l" 
                         style={{
-                            height:Math.min(parseFloat(this.state.regional_sel[3]), 500 - parseFloat(this.state.regional_sel[1]))||0,
+                            height:Math.min(parseFloat(this.state.regional_sel[3]), this.viewHeight - parseFloat(this.state.regional_sel[1]))||0,
                             top:parseFloat(this.state.regional_sel[1])||0,
                             left:parseFloat(this.excelObject.setting_def.columTitleDefWidth ) -1 ||0}}></span>
                 </div>
@@ -1593,8 +2268,30 @@ class Excel extends React.Component<any, any>  {
 
                 {/* Excel画布 */}
                 <div className="content">
-                    <canvas id="canvas_excle" ref={(c) => {this.excelRef = c;this.context = c && c.getContext('2d')}} 
-                    width={ 1000} height={500} />
+                    <canvas id="canvas_excle" ref={(c) => {this.excelRef = c;this.context = c && c.getContext('2d')}}
+                    width={ 1400} height={800} />
+                </div>
+
+                {/* 右键上下文菜单 */}
+                <div className="context-menu"
+                    style={{
+                        display:this.state.context_menu_display,
+                        left:parseFloat(this.state.context_menu_left) || 0,
+                        top:parseFloat(this.state.context_menu_top) || 0,
+                    }}>
+                    <div className="menu-item" onClick={() => this.ctxInsertRow(0)}>在上方插入行</div>
+                    <div className="menu-item" onClick={() => this.ctxInsertRow(1)}>在下方插入行</div>
+                    <div className="menu-item" onClick={this.ctxDeleteRow}>删除整行</div>
+                    <div className="menu-sep"></div>
+                    <div className="menu-item" onClick={() => this.ctxInsertColumn(0)}>在左侧插入列</div>
+                    <div className="menu-item" onClick={() => this.ctxInsertColumn(1)}>在右侧插入列</div>
+                    <div className="menu-item" onClick={this.ctxDeleteColumn}>删除整列</div>
+                    <div className="menu-sep"></div>
+                    <div className="menu-item" onClick={() => { this.copy(); this.closeContextMenu(); }}>复制</div>
+                    <div className="menu-item" onClick={() => { this.cut(); this.closeContextMenu(); }}>剪切</div>
+                    <div className="menu-item" onClick={() => { this.paste(); this.closeContextMenu(); }}>粘贴</div>
+                    <div className="menu-sep"></div>
+                    <div className="menu-item" onClick={() => { this.clearSelection(); this.closeContextMenu(); }}>清除内容</div>
                 </div>
             </div>
         </div>

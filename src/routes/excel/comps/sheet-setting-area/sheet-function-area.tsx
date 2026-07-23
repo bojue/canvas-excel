@@ -30,6 +30,16 @@ class SheetSettingAreaComponent extends React.Component<any, any>  {
         this.props.changeMergeState(state);
     }
 
+    fileFun(action:string) {
+        switch(action) {
+            case 'save': this.props.onSave && this.props.onSave(); break;
+            case 'load': this.props.onLoad && this.props.onLoad(); break;
+            case 'exportJSON': this.props.onExportJSON && this.props.onExportJSON(); break;
+            case 'exportCSV': this.props.onExportCSV && this.props.onExportCSV(); break;
+            case 'import': this.props.onImport && this.props.onImport(); break;
+        }
+    }
+
     changeStyle(style:string, parames:string, val:string) {
         this.props.changeStyle(style, parames, val);
     }
@@ -45,6 +55,10 @@ class SheetSettingAreaComponent extends React.Component<any, any>  {
 
     render() {
         return  <div className="setting">
+        <span className="item item-history">
+            <span className="file-btn" onClick={() => this.props.onUndo && this.props.onUndo()} title="撤销 (Ctrl+Z)">撤销</span>
+            <span className="file-btn" onClick={() => this.props.onRedo && this.props.onRedo()} title="重做 (Ctrl+Y)">重做</span>
+        </span>
         <span className="item item-fz">
             <div className="f-family" style={{
                 fontFamily:this.props.family
@@ -166,6 +180,9 @@ class SheetSettingAreaComponent extends React.Component<any, any>  {
         <span className="item">
             <img onClick={this.mergeFun.bind(this, 'merge')} src={ this.props.imgs.Merge!.default} alt="" title="合并"/>
             <img onClick={this.mergeFun.bind(this, 'unmerge')} src={ this.props.imgs.UnMerge!.default} alt="" title="取消合并"/>
+        </span>
+        <span className="item item-file">
+            <span className="file-btn" onClick={this.fileFun.bind(this, 'exportCSV')} title="导出为 CSV">导出CSV</span>
         </span>
         <GitHubComponent/>
     </div>

@@ -85,7 +85,14 @@ let excelStateModel = {
     change_size_by_drag_throttling_params:[0,0],
 
     // merge状态
-    mergedBool:false
+    mergedBool:false,
+
+    // 右键上下文菜单
+    context_menu_display:'none', // 'block' | 'none'
+    context_menu_left:0,
+    context_menu_top:0,
+    context_menu_row:-1,  // 右键点击命中的行
+    context_menu_col:-1,  // 右键点击命中的列
 
 }
 

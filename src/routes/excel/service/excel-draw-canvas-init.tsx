@@ -2,7 +2,7 @@
 import { drawText} from './excel-draw-text';
 import { updateExcelDataByItem } from './excel-draw-item-text';
 
-let initExcelCanvas = function(context:any, excelObject:any, excelData:any, excelItemModel:any) {
+let initExcelCanvas = function(context:any, excelObject:any, excelData:any, excelItemModel:any, viewHeight:number = 500) {
     const ctx = context;
         ctx.beginPath();
     let def = excelObject.setting_def;
@@ -14,7 +14,7 @@ let initExcelCanvas = function(context:any, excelObject:any, excelData:any, exce
     let currentTop = def.rowTitleHeight;
     let currentLeft = def.columTitleDefWidth;
     let str = "";
-    for(let row = 0;row <rLen && currentTop <= 500;row++) {
+    for(let row = 0;row <rLen && currentTop <= viewHeight;row++) {
         if(!(excelData && excelData[row])) {
             excelData[row] = [];
         }
@@ -22,7 +22,7 @@ let initExcelCanvas = function(context:any, excelObject:any, excelData:any, exce
         ctx.lineWidth = 1;
         ctx.strokeStyle = "#ccc";
         currentLeft = def.columTitleDefWidth;
-        for(let col=0;col< cLen && currentLeft <= 1000;col++) {
+        for(let col=0;col< cLen && currentLeft <= 1400;col++) {
             if(excelData &&excelData[row] && excelData[row][col]){
                 str = excelData &&excelData[row] && excelData[row][col] &&  excelData[row][col][2];
             }else {

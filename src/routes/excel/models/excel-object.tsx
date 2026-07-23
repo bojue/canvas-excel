@@ -9,6 +9,12 @@ let excelObjectModel = {
     config: {
         merge:[]
     },
+    viewport: {
+        scrollLeft: 0,
+        scrollTop: 0,
+        freezeRows: 1,
+        freezeCols: 1
+    },
     // 选择的区域
     selection_board: {
         width:0,
